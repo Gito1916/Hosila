@@ -14,6 +14,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 // ── HTTP Client ──────────────────────────────────────────────
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
+    if (!supabase) throw new Error('Supabase client not initialized');
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) {
         throw new Error('Not authenticated');

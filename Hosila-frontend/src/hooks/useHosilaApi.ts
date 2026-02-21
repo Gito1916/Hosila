@@ -10,7 +10,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { taxApi, billingApi, reportsApi, analyticsApi, type TaxSettings, type Invoice, type DashboardKPIs } from '@/lib/apiClient';
+import { taxApi, billingApi, reportsApi, analyticsApi, type TaxSettings, type DashboardKPIs } from '@/lib/apiClient';
 
 // ── Tax Engine ───────────────────────────────────────
 

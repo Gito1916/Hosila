@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/authStore';
 import { updateOrderStatus } from '@/db/services';
-import type { ServiceOrderStatus, Service } from '@/types';
+import type { ServiceOrderStatus } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import {
     Clock,

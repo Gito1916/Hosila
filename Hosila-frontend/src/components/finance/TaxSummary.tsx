@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays } from 'date-fns';
-import { Calendar, Receipt, TrendingUp, Filter, DollarSign, Percent, AlertTriangle } from 'lucide-react';
-import { getHotel } from '@/db/settings';
+import { Calendar, Receipt, TrendingUp, Filter, DollarSign, Percent } from 'lucide-react';
+// import { getHotel } from '@/db/settings';
 import { requireSupabase, getHotelId } from '@/lib/api';
 import { useTaxSettings } from '@/hooks/useHosilaApi';
 
@@ -13,14 +13,14 @@ export function TaxSummary() {
     const [customStartDate, setCustomStartDate] = useState(format(subDays(new Date(), 30), 'yyyy-MM-dd'));
     const [customEndDate, setCustomEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
-    // Get hotel settings (fallback for display) & backend tax settings
-    const { data: hotel } = useQuery({ queryKey: ['hotel'], queryFn: getHotel });
+    // Get backend tax settings
+    // const { data: hotel } = useQuery({ queryKey: ['hotel'], queryFn: getHotel });
     const { data: taxSettingsData } = useTaxSettings();
     const settings = taxSettingsData?.settings ?? [];
 
     // Find per-department settings from the API
     const accSettings = settings.find(s => s.department === 'accommodation') ?? settings.find(s => s.department === 'all');
-    const restSettings = settings.find(s => s.department === 'restaurant') ?? settings.find(s => s.department === 'all');
+    // restSettings available for future per-department display
 
     // Calculate date range based on filter
     const dateRange = useMemo(() => {
