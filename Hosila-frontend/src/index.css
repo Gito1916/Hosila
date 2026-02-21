@@ -1,0 +1,527 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Animations for PWA components */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  60% {
+    transform: translateX(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out forwards;
+}
+
+/* Base styles */
+body {
+  @apply bg-slate-900 text-slate-100 antialiased;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-500;
+}
+
+/* Room status badges */
+@layer components {
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-available {
+    @apply bg-status-available/20 text-status-available;
+  }
+
+  .badge-occupied {
+    @apply bg-status-occupied/20 text-status-occupied;
+  }
+
+  .badge-short-rest {
+    @apply bg-status-shortRest/20 text-status-shortRest;
+  }
+
+  .badge-dirty {
+    @apply bg-status-dirty/20 text-status-dirty;
+  }
+
+  .badge-maintenance {
+    @apply bg-status-maintenance/20 text-status-maintenance;
+  }
+
+  /* Button styles */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-700 text-slate-100 hover:bg-slate-600 focus:ring-slate-500;
+  }
+
+  .btn-success {
+    @apply bg-success text-white hover:bg-green-600 focus:ring-success;
+  }
+
+  .btn-danger {
+    @apply bg-error text-white hover:bg-red-600 focus:ring-error;
+  }
+
+  .btn-warning {
+    @apply bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-500;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-slate-300 hover:bg-slate-800 focus:ring-slate-500;
+  }
+
+  /* Input styles */
+  .input {
+    @apply w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all;
+  }
+
+  .input-error {
+    @apply border-error focus:ring-error;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-slate-300 mb-1;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-slate-800 rounded-xl border border-slate-700 overflow-hidden;
+  }
+
+  .card-header {
+    @apply px-4 py-3 border-b border-slate-700;
+  }
+
+  .card-body {
+    @apply p-4;
+  }
+}
+
+/* ========================================
+   LIGHT MODE THEME OVERRIDES
+   ======================================== */
+
+/* Light mode base */
+.light-mode body,
+html.light-mode body {
+  @apply bg-slate-50 text-slate-800;
+  /* Warmer/softer gray than gray-50 */
+}
+
+/* Light mode scrollbar */
+.light-mode ::-webkit-scrollbar-track {
+  @apply bg-slate-100;
+}
+
+.light-mode ::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+}
+
+/* Light mode components */
+.light-mode .card {
+  @apply bg-white border-slate-100 shadow-premium;
+  /* Premium diffuse shadow instead of flat shadow-sm */
+}
+
+.light-mode .card-header {
+  @apply border-slate-100 bg-white/50 backdrop-blur-sm;
+}
+
+.light-mode .input {
+  @apply bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 shadow-sm transition-all duration-200;
+}
+
+.light-mode .label {
+  @apply text-slate-600 font-semibold;
+}
+
+.light-mode .btn-secondary {
+  @apply bg-white border border-slate-200 text-slate-700 shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900;
+}
+
+.light-mode .btn-ghost {
+  @apply text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+}
+
+/* Light mode sidebar & Nav */
+.light-mode aside,
+.light-mode nav {
+  @apply bg-white/80 border-slate-200 backdrop-blur-md shadow-premium-r;
+}
+
+/* Light mode header */
+.light-mode header {
+  @apply bg-white/80 border-b border-slate-200 backdrop-blur-md shadow-premium-sm;
+  z-index: 40;
+  /* Ensure glass effect sits on top */
+}
+
+/* Light mode text colors - Refined for better contrast and softer blacks */
+.light-mode .text-white {
+  color: #1e293b !important;
+  /* slate-800 - dark charcoal, not pure black */
+}
+
+.light-mode .text-slate-100 {
+  color: #334155 !important;
+  /* slate-700 */
+}
+
+.light-mode .text-slate-200 {
+  /* Added for subtle text */
+  color: #475569 !important;
+  /* slate-600 */
+}
+
+.light-mode .text-slate-300 {
+  color: #64748b !important;
+  /* slate-500 */
+}
+
+.light-mode .text-slate-400 {
+  color: #64748b !important;
+  /* slate-500 - making lighter text more visible */
+}
+
+.light-mode .text-slate-500 {
+  color: #475569 !important;
+  /* slate-600 - ensuring better readability */
+}
+
+/* Light mode backgrounds */
+.light-mode .bg-slate-900 {
+  background-color: #f8fafc !important;
+  /* slate-50 - Main background */
+}
+
+.light-mode .bg-slate-800,
+.light-mode .bg-slate-800\/50 {
+  background-color: #ffffff !important;
+  /* white - Card background & Active Calendar Days */
+}
+
+.light-mode .bg-slate-800\/30 {
+  background-color: #f8fafc !important;
+  /* slate-50 - Inactive Calendar Days */
+}
+
+.light-mode .bg-slate-700,
+.light-mode .bg-slate-700\/50 {
+  background-color: #ffffff !important;
+  /* white - Interactive Card background */
+  border: 1px solid #e2e8f0 !important;
+  /* slate-200 */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Light mode borders */
+.light-mode .border-slate-700 {
+  border-color: #e2e8f0 !important;
+  /* slate-200 - Subtle border */
+}
+
+.light-mode .border-slate-600 {
+  border-color: #cbd5e1 !important;
+  /* slate-300 - Slightly stronger border */
+}
+
+/* Light mode hover states */
+.light-mode .hover\:bg-slate-700:hover {
+  background-color: #e2e8f0 !important;
+  /* slate-200 - darker hover */
+}
+
+.light-mode .hover\:bg-slate-800:hover {
+  background-color: #f8fafc !important;
+  /* slate-50 - subtle hover */
+}
+
+/* Light mode dividers */
+.light-mode .divide-slate-700> :not([hidden])~ :not([hidden]) {
+  border-color: #e2e8f0 !important;
+  /* slate-200 */
+}
+
+/* Badge Tweaks for Light Mode to prevent washed out look */
+.light-mode .badge-available {
+  @apply bg-green-50 text-green-700 border border-green-200;
+}
+
+.light-mode .badge-occupied {
+  @apply bg-red-50 text-red-700 border border-red-200;
+}
+
+.light-mode .badge-short-rest {
+  @apply bg-blue-50 text-blue-700 border border-blue-200;
+}
+
+.light-mode .badge-dirty {
+  @apply bg-amber-50 text-amber-700 border border-amber-200;
+}
+
+.light-mode .badge-maintenance {
+  @apply bg-gray-100 text-gray-700 border border-gray-200;
+}
+
+/* Light mode finance dashboard */
+.light-mode .finance-card {
+  @apply bg-white border-slate-200;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.light-mode .finance-card:hover {
+  @apply border-slate-300;
+}
+
+.light-mode .gauge-value-text {
+  fill: #1e293b !important;
+}
+
+.light-mode .gauge-label-text {
+  fill: #64748b !important;
+}
+
+/* Recharts light mode */
+.light-mode .chart-grid line {
+  stroke: #e2e8f0 !important;
+}
+
+.light-mode .chart-axis text {
+  fill: #64748b !important;
+}
+
+.light-mode .recharts-cartesian-grid line {
+  stroke: #e2e8f0 !important;
+}
+
+.light-mode .recharts-text {
+  fill: #64748b !important;
+}
+
+/* Expense progress bars bg */
+.light-mode .bg-slate-700 {
+  background-color: #e2e8f0 !important;
+}
+
+/* ========================================
+   MOBILE RESPONSIVE UTILITIES
+   ======================================== */
+
+/* Base responsive font sizing */
+html {
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+
+  /* Touch-friendly button sizing */
+  .btn {
+    @apply min-h-[44px] px-3 py-2.5 text-sm;
+  }
+
+  .btn-sm {
+    @apply min-h-[36px] px-2.5 py-2;
+  }
+
+  /* Larger touch targets for inputs */
+  .input {
+    @apply min-h-[44px] text-base;
+  }
+
+  /* Mobile-friendly card padding */
+  .card {
+    @apply rounded-lg;
+  }
+
+  .card-body {
+    @apply p-3;
+  }
+
+  .card-header {
+    @apply px-3 py-2;
+  }
+
+  /* Scale down icons in compact views */
+  .mobile-icon {
+    @apply !w-4 !h-4;
+  }
+
+  /* Compact modals */
+  .modal-content {
+    @apply max-h-[85vh] rounded-lg mx-2;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+
+  .btn {
+    @apply px-2.5 text-xs;
+  }
+
+  /* Stack button text on very small screens */
+  .btn-icon-text {
+    @apply flex-col gap-0.5;
+  }
+
+  .btn-icon-text svg {
+    @apply mr-0;
+  }
+}
+
+/* Touch-optimized spacing for mobile */
+@media (max-width: 768px) {
+
+  /* Better spacing for room grid */
+  .room-grid {
+    @apply gap-2;
+  }
+
+  /* Compact table cells */
+  .compact-table td,
+  .compact-table th {
+    @apply px-2 py-1.5 text-xs;
+  }
+
+  /* Sidebar mobile adjustments */
+  .mobile-nav-item {
+    @apply py-3 px-4;
+  }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* Responsive text utilities */
+.text-responsive-xl {
+  @apply text-lg sm:text-xl lg:text-2xl;
+}
+
+.text-responsive-lg {
+  @apply text-base sm:text-lg lg:text-xl;
+}
+
+.text-responsive-base {
+  @apply text-sm sm:text-base;
+}
+
+.text-responsive-sm {
+  @apply text-xs sm:text-sm;
+}
+
+/* Mobile-optimized grid utilities */
+.mobile-cols-1 {
+  @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+.mobile-cols-2 {
+  @apply grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6;
+}
+
+/* Hide on mobile */
+.hide-mobile {
+  @apply hidden sm:block;
+}
+
+.show-mobile {
+  @apply block sm:hidden;
+}
+
+/* Responsive icon sizing */
+.icon-responsive {
+  @apply w-4 h-4 sm:w-5 sm:h-5;
+}
+
+.icon-responsive-lg {
+  @apply w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8;
+}
+
+/* Prevent text overflow on mobile */
+.mobile-truncate {
+  @apply truncate max-w-full;
+}

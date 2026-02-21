@@ -1,0 +1,56 @@
+# ── Dependencies ──
+node_modules/
+__pycache__/
+*.pyc
+.mypy_cache/
+.pytest_cache/
+*.egg-info/
+venv/
+.venv/
+
+# ── Environment (NEVER commit secrets) ──
+.env
+.env.local
+.env.*.local
+
+# ── Build Artifacts ──
+dist/
+build/
+release/
+*.tsbuildinfo
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── Old root-level files (to be cleaned up) ──
+/src/
+/public/
+/hosila-api/
+/electron/
+/supabase/
+/index.html
+/package.json
+/package-lock.json
+/vite.config.ts
+/tsconfig.json
+/tsconfig.app.json
+/postcss.config.js
+/tailwind.config.js
+/electron-builder.yml
+/migrate-*.mjs
+/migrate-*.txt
+/build-*.txt
+/ARCHITECTURE.md
+/SYSTEM_PROMPT_V2.md
+/*.png
+
+# ── Agent ──
+.agent/
+.gemini/
