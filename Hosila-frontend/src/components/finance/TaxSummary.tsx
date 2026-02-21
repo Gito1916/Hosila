@@ -1,58 +1,47 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays } from 'date-fns';
-import { Calendar, Receipt, TrendingUp, Filter, DollarSign, Percent } from 'lucide-react';
-// import { getHotel } from '@/db/settings';
+import { format } from 'date-fns';
+import {
+    Receipt,
+    TrendingUp,
+    DollarSign,
+    Percent,
+    Download,
+    CheckCircle,
+    Loader2,
+    FileText,
+} from 'lucide-react';
 import { requireSupabase, getHotelId } from '@/lib/api';
-import { useTaxSettings } from '@/hooks/useHosilaApi';
+import { useTaxSettings, useTaxRemittanceReport, useMarkRemitted, useReportDownload } from '@/hooks/useHosilaApi';
+import { toast } from '@/lib/errorMessages';
 
-type DateFilter = 'today' | 'week' | 'month' | 'custom';
+interface TaxSummaryProps {
+    startDate: Date;
+    endDate: Date;
+}
 
-export function TaxSummary() {
-    const [dateFilter, setDateFilter] = useState<DateFilter>('month');
-    const [customStartDate, setCustomStartDate] = useState(format(subDays(new Date(), 30), 'yyyy-MM-dd'));
-    const [customEndDate, setCustomEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-
-    // Get backend tax settings
-    // const { data: hotel } = useQuery({ queryKey: ['hotel'], queryFn: getHotel });
+export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
+    // ── Backend tax settings ─────────────────────────────────
     const { data: taxSettingsData } = useTaxSettings();
     const settings = taxSettingsData?.settings ?? [];
-
-    // Find per-department settings from the API
     const accSettings = settings.find(s => s.department === 'accommodation') ?? settings.find(s => s.department === 'all');
-    // restSettings available for future per-department display
 
-    // Calculate date range based on filter
-    const dateRange = useMemo(() => {
-        const now = new Date();
-        switch (dateFilter) {
-            case 'today':
-                return { start: startOfDay(now), end: endOfDay(now) };
-            case 'week':
-                return { start: startOfWeek(now, { weekStartsOn: 1 }), end: endOfWeek(now, { weekStartsOn: 1 }) };
-            case 'month':
-                return { start: startOfMonth(now), end: endOfMonth(now) };
-            case 'custom':
-                return {
-                    start: startOfDay(new Date(customStartDate)),
-                    end: endOfDay(new Date(customEndDate)),
-                };
-        }
-    }, [dateFilter, customStartDate, customEndDate]);
-
-    // Fetch charges with v2 tax breakdown columns
+    // ── Charge data from Supabase ────────────────────────────
     const { data: charges } = useQuery({
-        queryKey: ['charges', dateRange], queryFn: async () => {
-            const all = await (async () => { const sb = requireSupabase(); const hotelId = await getHotelId(); const { data } = await sb.from('charges').select('*').eq('hotel_id', hotelId); return data ?? []; })();
-            return all.filter((c: any) => {
+        queryKey: ['charges', startDate.toISOString(), endDate.toISOString()],
+        queryFn: async () => {
+            const sb = requireSupabase();
+            const hotelId = await getHotelId();
+            const { data } = await sb.from('charges').select('*').eq('hotel_id', hotelId);
+            return (data ?? []).filter((c: any) => {
                 const d = new Date(c.charge_date);
-                return d >= dateRange.start && d <= dateRange.end &&
+                return d >= startDate && d <= endDate &&
                     (c.status === 'active' || c.status === 'partially_refunded');
             });
-        }, enabled: !!dateRange
+        },
     });
 
-    // ═══ v2 Tax Summary — uses backfilled SC / VAT / TDL columns ═══
+    // ── Tax summary calculations ─────────────────────────────
     const taxSummary = useMemo(() => {
         const all = charges ?? [];
 
@@ -85,64 +74,62 @@ export function TaxSummary() {
         return { accommodation, restaurant, otherIncome, totalSC, totalVAT, totalTDL, totalTax };
     }, [charges]);
 
+    // ── Remittance data ──────────────────────────────────────
+    const startStr = format(startDate, 'yyyy-MM-dd');
+    const endStr = format(endDate, 'yyyy-MM-dd');
+
+    const { data: remittanceData, isLoading: remittanceLoading } = useTaxRemittanceReport(startStr, endStr) as {
+        data: { remittances?: Array<{ tax_type: string; status: string; amount: number }> } | undefined;
+        isLoading: boolean;
+    };
+    const markRemitted = useMarkRemitted();
+    const downloadMutation = useReportDownload();
+
+    const [remitNotes, setRemitNotes] = useState('');
+
+    const handleMarkRemitted = async (taxType: string) => {
+        try {
+            await markRemitted.mutateAsync({
+                taxType,
+                periodStart: startStr,
+                periodEnd: endStr,
+                notes: remitNotes || undefined,
+            });
+            toast.success(`${taxType.toUpperCase()} marked as remitted`);
+            setRemitNotes('');
+        } catch (err) {
+            toast.error('Failed to mark as remitted', err);
+        }
+    };
+
+    const handleExport = async (fmt: 'pdf' | 'excel') => {
+        try {
+            await downloadMutation.mutateAsync({
+                type: 'tax-remittance',
+                start: startStr,
+                end: endStr,
+                format: fmt,
+            });
+            toast.success(`Report downloaded as ${fmt.toUpperCase()}`);
+        } catch (err) {
+            toast.error('Failed to download report', err);
+        }
+    };
+
     const f = (n: number) => `₦${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     return (
         <div className="space-y-6">
-            {/* Header with Date Filters */}
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            {/* Header */}
+            <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Receipt size={24} className="text-primary-400" />
                     <h2 className="text-xl font-bold text-white">Tax Summary</h2>
                 </div>
-
-                <div className="flex items-center gap-2">
-                    <Filter size={16} className="text-slate-400" />
-                    <div className="flex rounded-lg overflow-hidden border border-slate-700">
-                        {(['today', 'week', 'month', 'custom'] as DateFilter[]).map((filter) => (
-                            <button
-                                key={filter}
-                                onClick={() => setDateFilter(filter)}
-                                className={`px-3 py-1.5 text-sm font-medium transition-colors ${dateFilter === filter
-                                    ? 'bg-primary-500 text-white'
-                                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                                    }`}
-                            >
-                                {filter === 'today' ? 'Today' :
-                                    filter === 'week' ? 'This Week' :
-                                        filter === 'month' ? 'This Month' : 'Custom'}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+                <p className="text-sm text-slate-400">
+                    {format(startDate, 'MMM d, yyyy')} — {format(endDate, 'MMM d, yyyy')}
+                </p>
             </div>
-
-            {/* Custom Date Range */}
-            {dateFilter === 'custom' && (
-                <div className="flex items-center gap-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-                    <Calendar size={18} className="text-slate-400" />
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="date"
-                            value={customStartDate}
-                            onChange={(e) => setCustomStartDate(e.target.value)}
-                            className="input py-1.5"
-                        />
-                        <span className="text-slate-400">to</span>
-                        <input
-                            type="date"
-                            value={customEndDate}
-                            onChange={(e) => setCustomEndDate(e.target.value)}
-                            className="input py-1.5"
-                        />
-                    </div>
-                </div>
-            )}
-
-            {/* Date Range Label */}
-            <p className="text-sm text-slate-400">
-                Showing data from {format(dateRange.start, 'MMM d, yyyy')} to {format(dateRange.end, 'MMM d, yyyy')}
-            </p>
 
             {/* ═══ Top KPI Cards — SC / VAT / TDL / Total ═══ */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -228,11 +215,114 @@ export function TaxSummary() {
                 </div>
             </div>
 
+            {/* ═══ Tax Remittance Section ═══ */}
+            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 space-y-5">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <FileText size={20} className="text-emerald-400" />
+                        <h3 className="text-lg font-semibold text-white">Tax Remittance</h3>
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => handleExport('excel')}
+                            disabled={downloadMutation.isPending}
+                            className="btn btn-secondary text-sm"
+                        >
+                            {downloadMutation.isPending ? (
+                                <Loader2 size={14} className="mr-1.5 animate-spin" />
+                            ) : (
+                                <Download size={14} className="mr-1.5" />
+                            )}
+                            Excel
+                        </button>
+                        <button
+                            onClick={() => handleExport('pdf')}
+                            disabled={downloadMutation.isPending}
+                            className="btn btn-secondary text-sm"
+                        >
+                            {downloadMutation.isPending ? (
+                                <Loader2 size={14} className="mr-1.5 animate-spin" />
+                            ) : (
+                                <Download size={14} className="mr-1.5" />
+                            )}
+                            PDF
+                        </button>
+                    </div>
+                </div>
+
+                {remittanceLoading ? (
+                    <div className="text-center py-6">
+                        <Loader2 className="animate-spin mx-auto text-slate-400" size={24} />
+                        <p className="text-slate-500 text-sm mt-2">Loading remittance data...</p>
+                    </div>
+                ) : (
+                    <>
+                        {/* Remittance status cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {[
+                                { type: 'vat', label: 'VAT', amount: taxSummary.totalVAT, color: 'green' },
+                                { type: 'tdl', label: 'TDL', amount: taxSummary.totalTDL, color: 'amber' },
+                                { type: 'service_charge', label: 'Service Charge', amount: taxSummary.totalSC, color: 'blue' },
+                            ].map((tax) => {
+                                const remitted = remittanceData?.remittances?.find(
+                                    (r: any) => r.tax_type === tax.type && r.status === 'remitted',
+                                );
+                                return (
+                                    <div
+                                        key={tax.type}
+                                        className={`p-4 rounded-lg border ${remitted
+                                            ? 'bg-emerald-500/10 border-emerald-500/30'
+                                            : 'bg-slate-700/30 border-slate-700'
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-sm font-medium text-slate-300">{tax.label}</span>
+                                            {remitted && (
+                                                <span className="flex items-center gap-1 text-xs text-emerald-400">
+                                                    <CheckCircle size={12} />
+                                                    Remitted
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-lg font-bold text-white mb-3">{f(tax.amount)}</p>
+                                        {!remitted && tax.amount > 0 && (
+                                            <button
+                                                onClick={() => handleMarkRemitted(tax.type)}
+                                                disabled={markRemitted.isPending}
+                                                className="btn btn-primary text-xs w-full"
+                                            >
+                                                {markRemitted.isPending ? (
+                                                    <Loader2 size={12} className="mr-1 animate-spin" />
+                                                ) : (
+                                                    <CheckCircle size={12} className="mr-1" />
+                                                )}
+                                                Mark as Remitted
+                                            </button>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Optional notes for remittance */}
+                        <div className="flex items-center gap-3">
+                            <input
+                                type="text"
+                                value={remitNotes}
+                                onChange={(e) => setRemitNotes(e.target.value)}
+                                placeholder="Add notes (e.g. reference number, receipt ID)"
+                                className="input flex-1 text-sm"
+                            />
+                        </div>
+                    </>
+                )}
+            </div>
+
             {/* Info Note */}
             <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                 <p className="text-sm text-blue-300">
-                    <strong>Note:</strong> Tax breakdown now shows Service Charge (SC), VAT, and Tourism Development Levy (TDL) separately.
-                    Rates are configured per-department in the Hosila API.
+                    <strong>Note:</strong> Tax breakdown shows Service Charge (SC), VAT, and Tourism Development Levy (TDL) separately.
+                    Rates are configured per-department in Settings → Finance.
                     {accSettings && <> VAT: {accSettings.vat_rate}%, SC: {accSettings.service_charge_rate}%, TDL: {accSettings.tdl_enabled ? `${accSettings.tdl_rate}%` : 'Disabled'}.</>}
                 </p>
             </div>

@@ -1,114 +1,265 @@
 import { useState, useEffect } from 'react';
 import { getHotelSettings, updateHotelSettings } from '@/db/settings';
 import { toast } from '@/lib/errorMessages';
-import type { HotelSettings, ServiceChargeConfig } from '@/types';
-import { v4 as uuidv4 } from 'uuid';
+import type { HotelSettings } from '@/types';
+import { useTaxSettings, useUpdateTaxSettings } from '@/hooks/useHosilaApi';
+import type { TaxSettings } from '@/lib/apiClient';
 import {
     Save,
     Loader2,
-    Plus,
-    Trash2,
     ToggleLeft,
     ToggleRight,
     Percent,
-    DollarSign,
     Globe,
     Clock,
+    Building2,
+    UtensilsCrossed,
+    Boxes,
+    Info,
 } from 'lucide-react';
 
+// ── Department display info ──────────────────────────────────
+const DEPARTMENTS: { key: string; label: string; icon: typeof Building2; color: string }[] = [
+    { key: 'accommodation', label: 'Accommodation', icon: Building2, color: 'emerald' },
+    { key: 'restaurant', label: 'Restaurant', icon: UtensilsCrossed, color: 'cyan' },
+    { key: 'other_services', label: 'Other Services', icon: Boxes, color: 'purple' },
+];
+
+const CALC_BASE_OPTIONS = [
+    { value: 'base_only', label: 'Base amount only' },
+    { value: 'base_plus_sc', label: 'Base + Service Charge' },
+];
+
+// ── Department Card ──────────────────────────────────────────
+function DepartmentTaxCard({
+    dept,
+    settings,
+    onChange,
+    onSave,
+    isSaving,
+}: {
+    dept: typeof DEPARTMENTS[number];
+    settings: TaxSettings | null;
+    onChange: (field: string, value: number | boolean | string) => void;
+    onSave: () => void;
+    isSaving: boolean;
+}) {
+    const Icon = dept.icon;
+    const colorMap: Record<string, string> = {
+        emerald: 'bg-emerald-500/20 text-emerald-400',
+        cyan: 'bg-cyan-500/20 text-cyan-400',
+        purple: 'bg-purple-500/20 text-purple-400',
+    };
+    const accent = colorMap[dept.color] ?? 'bg-slate-500/20 text-slate-400';
+
+    return (
+        <div className="card p-6 space-y-5">
+            {/* Header */}
+            <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${accent}`}>
+                    <Icon size={20} />
+                </div>
+                <div>
+                    <h3 className="text-lg font-semibold text-white">{dept.label}</h3>
+                    <p className="text-sm text-slate-400">Tax configuration for {dept.label.toLowerCase()}</p>
+                </div>
+            </div>
+
+            {/* Tax Rows */}
+            <div className="space-y-4">
+                {/* Service Charge */}
+                <TaxRow
+                    label="Service Charge"
+                    rate={settings?.service_charge_rate ?? 10}
+                    enabled={settings?.service_charge_enabled ?? true}
+                    onRateChange={(v) => onChange('service_charge_rate', v)}
+                    onToggle={() => onChange('service_charge_enabled', !(settings?.service_charge_enabled ?? true))}
+                />
+
+                {/* VAT */}
+                <TaxRow
+                    label="VAT"
+                    rate={settings?.vat_rate ?? 7.5}
+                    enabled={settings?.vat_enabled ?? true}
+                    onRateChange={(v) => onChange('vat_rate', v)}
+                    onToggle={() => onChange('vat_enabled', !(settings?.vat_enabled ?? true))}
+                />
+
+                {/* TDL */}
+                <TaxRow
+                    label="TDL (Tourism Dev. Levy)"
+                    rate={settings?.tdl_rate ?? 5}
+                    enabled={settings?.tdl_enabled ?? true}
+                    onRateChange={(v) => onChange('tdl_rate', v)}
+                    onToggle={() => onChange('tdl_enabled', !(settings?.tdl_enabled ?? true))}
+                />
+            </div>
+
+            {/* Calculation Base */}
+            <div className="space-y-3 pt-2 border-t border-slate-700">
+                <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <Info size={14} />
+                    <span>Choose how VAT and TDL are calculated</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label className="label text-xs">VAT calculated on</label>
+                        <select
+                            value={settings?.vat_calculation_base ?? 'base_plus_sc'}
+                            onChange={(e) => onChange('vat_calculation_base', e.target.value)}
+                            className="input text-sm"
+                        >
+                            {CALC_BASE_OPTIONS.map(o => (
+                                <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="label text-xs">TDL calculated on</label>
+                        <select
+                            value={settings?.tdl_calculation_base ?? 'base_plus_sc'}
+                            onChange={(e) => onChange('tdl_calculation_base', e.target.value)}
+                            className="input text-sm"
+                        >
+                            {CALC_BASE_OPTIONS.map(o => (
+                                <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            {/* Save */}
+            <button onClick={onSave} disabled={isSaving} className="btn btn-primary w-full sm:w-auto">
+                {isSaving ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Save size={16} className="mr-2" />}
+                Save {dept.label}
+            </button>
+        </div>
+    );
+}
+
+// ── Tax Row (rate + toggle) ──────────────────────────────────
+function TaxRow({
+    label,
+    rate,
+    enabled,
+    onRateChange,
+    onToggle,
+}: {
+    label: string;
+    rate: number;
+    enabled: boolean;
+    onRateChange: (v: number) => void;
+    onToggle: () => void;
+}) {
+    return (
+        <div className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${enabled ? 'bg-slate-700/40' : 'bg-slate-800/40 opacity-60'}`}>
+            <button
+                onClick={onToggle}
+                className={`flex-shrink-0 transition-colors ${enabled ? 'text-primary-400' : 'text-slate-500'}`}
+                title={enabled ? 'Disable' : 'Enable'}
+            >
+                {enabled ? <ToggleRight size={22} /> : <ToggleLeft size={22} />}
+            </button>
+
+            <span className="text-sm text-slate-300 min-w-[140px]">{label}</span>
+
+            <div className="relative w-24">
+                <input
+                    type="number"
+                    value={rate}
+                    onChange={(e) => onRateChange(Number(e.target.value))}
+                    className="input text-sm pr-7"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    disabled={!enabled}
+                />
+                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">%</span>
+            </div>
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAIN COMPONENT
+// ═══════════════════════════════════════════════════════════════
 export function TaxSettingsPanel() {
-    const [isLoading, setIsLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState(false);
-    const [settings, setSettings] = useState<HotelSettings | null>(null);
-    const [serviceChargesEnabled, setServiceChargesEnabled] = useState(false);
-    const [showAddCharge, setShowAddCharge] = useState(false);
-    const [newCharge, setNewCharge] = useState<Partial<ServiceChargeConfig>>({
-        name: '',
-        type: 'mandatory',
-        rate_type: 'percentage',
-        rate: 5,
-        applies_to: ['rooms', 'restaurant'],
-        is_taxable: true,
-        is_active: true,
-    });
+    // ── Local settings (currency, late checkout) ─────────────
+    const [isLoadingLocal, setIsLoadingLocal] = useState(true);
+    const [isSavingLocal, setIsSavingLocal] = useState(false);
+    const [localSettings, setLocalSettings] = useState<HotelSettings | null>(null);
 
     useEffect(() => {
         async function load() {
-            const settingsData = await getHotelSettings();
-            setSettings(settingsData ?? null);
-            // Check if service charges are enabled (at least one exists)
-            setServiceChargesEnabled((settingsData?.service_charges?.length ?? 0) > 0);
-            setIsLoading(false);
+            const data = await getHotelSettings();
+            setLocalSettings(data ?? null);
+            setIsLoadingLocal(false);
         }
         load();
     }, []);
 
-    const handleSave = async () => {
-        if (!settings) return;
-        setIsSaving(true);
+    const handleSaveLocal = async () => {
+        if (!localSettings) return;
+        setIsSavingLocal(true);
         try {
-            await updateHotelSettings(settings);
+            await updateHotelSettings(localSettings);
             toast.success('Settings saved');
         } catch (err) {
             toast.error('Failed to save settings', err);
         } finally {
-            setIsSaving(false);
+            setIsSavingLocal(false);
         }
     };
 
-    const handleAddCharge = () => {
-        if (!settings || !newCharge.name) return;
+    // ── Backend tax settings ─────────────────────────────────
+    const { data: taxData, isLoading: isLoadingTax } = useTaxSettings();
+    const updateMutation = useUpdateTaxSettings();
 
-        const charge: ServiceChargeConfig = {
-            id: uuidv4(),
-            name: newCharge.name || 'New Charge',
-            type: newCharge.type || 'mandatory',
-            rate_type: newCharge.rate_type || 'percentage',
-            rate: newCharge.rate || 5,
-            applies_to: newCharge.applies_to || ['rooms', 'restaurant'],
-            is_taxable: newCharge.is_taxable ?? true,
-            is_active: true,
-        };
+    // Local draft state for each department
+    const [drafts, setDrafts] = useState<Record<string, Partial<TaxSettings>>>({});
 
-        setSettings({
-            ...settings,
-            service_charges: [...(settings.service_charges || []), charge],
-        });
+    // Populate drafts when data loads
+    useEffect(() => {
+        if (taxData?.settings) {
+            const map: Record<string, Partial<TaxSettings>> = {};
+            for (const s of taxData.settings) {
+                map[s.department] = { ...s };
+            }
+            setDrafts(map);
+        }
+    }, [taxData]);
 
-        setNewCharge({
-            name: '',
-            type: 'mandatory',
-            rate_type: 'percentage',
-            rate: 5,
-            applies_to: ['rooms', 'restaurant'],
-            is_taxable: true,
-            is_active: true,
-        });
-        setShowAddCharge(false);
+    const getDeptSettings = (dept: string): TaxSettings | null => {
+        const draft = drafts[dept];
+        if (!draft) return null;
+        return draft as TaxSettings;
     };
 
-    const handleRemoveCharge = (id: string) => {
-        if (!settings) return;
-        setSettings({
-            ...settings,
-            service_charges: settings.service_charges?.filter(c => c.id !== id) || [],
-        });
+    const handleFieldChange = (dept: string, field: string, value: number | boolean | string) => {
+        setDrafts(prev => ({
+            ...prev,
+            [dept]: { ...(prev[dept] || {}), [field]: value },
+        }));
     };
 
-    const handleToggleChargeActive = (id: string) => {
-        if (!settings) return;
-        setSettings({
-            ...settings,
-            service_charges: settings.service_charges?.map(c =>
-                c.id === id ? { ...c, is_active: !c.is_active } : c
-            ) || [],
-        });
+    const handleSaveDept = async (dept: string) => {
+        const data = drafts[dept];
+        if (!data) return;
+        try {
+            await updateMutation.mutateAsync({ department: dept, data });
+            toast.success(`${dept} tax settings saved`);
+        } catch (err) {
+            toast.error('Failed to save tax settings', err);
+        }
     };
 
-    if (isLoading) {
+    // ── Loading ──────────────────────────────────────────────
+    if (isLoadingLocal || isLoadingTax) {
         return (
             <div className="card p-8 text-center">
                 <Loader2 className="animate-spin mx-auto text-primary-400" size={32} />
+                <p className="text-slate-400 mt-3 text-sm">Loading tax settings...</p>
             </div>
         );
     }
@@ -130,8 +281,8 @@ export function TaxSettingsPanel() {
                 <div>
                     <label className="label">Currency</label>
                     <select
-                        value={settings?.currency ?? 'NGN'}
-                        onChange={(e) => setSettings(s => s ? { ...s, currency: e.target.value } : null)}
+                        value={localSettings?.currency ?? 'NGN'}
+                        onChange={(e) => setLocalSettings(s => s ? { ...s, currency: e.target.value } : null)}
                         className="input w-64"
                     >
                         <option value="NGN">Nigerian Naira (₦)</option>
@@ -141,7 +292,7 @@ export function TaxSettingsPanel() {
                     </select>
                 </div>
 
-                <button onClick={handleSave} disabled={isSaving} className="btn btn-primary">
+                <button onClick={handleSaveLocal} disabled={isSavingLocal} className="btn btn-primary">
                     <Save size={16} className="mr-2" />
                     Save Currency
                 </button>
@@ -161,26 +312,26 @@ export function TaxSettingsPanel() {
                     </div>
 
                     <button
-                        onClick={() => setSettings(s => s ? { ...s, auto_late_checkout_enabled: !s.auto_late_checkout_enabled } : null)}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${settings?.auto_late_checkout_enabled
+                        onClick={() => setLocalSettings(s => s ? { ...s, auto_late_checkout_enabled: !s.auto_late_checkout_enabled } : null)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${localSettings?.auto_late_checkout_enabled
                             ? 'bg-primary-500/20 text-primary-400'
                             : 'bg-slate-700 text-slate-400'
                             }`}
                     >
-                        {settings?.auto_late_checkout_enabled ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
-                        {settings?.auto_late_checkout_enabled ? 'Enabled' : 'Disabled'}
+                        {localSettings?.auto_late_checkout_enabled ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
+                        {localSettings?.auto_late_checkout_enabled ? 'Enabled' : 'Disabled'}
                     </button>
                 </div>
 
-                {settings?.auto_late_checkout_enabled && (
+                {localSettings?.auto_late_checkout_enabled && (
                     <div className="flex items-center gap-3 pl-12">
                         <label className="text-sm text-slate-300">Fee per hour:</label>
                         <div className="relative w-40">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
                             <input
                                 type="number"
-                                value={settings?.late_checkout_fee ?? 0}
-                                onChange={(e) => setSettings(s => s ? { ...s, late_checkout_fee: Number(e.target.value) } : null)}
+                                value={localSettings?.late_checkout_fee ?? 0}
+                                onChange={(e) => setLocalSettings(s => s ? { ...s, late_checkout_fee: Number(e.target.value) } : null)}
                                 className="input pl-8"
                                 min="0"
                             />
@@ -188,283 +339,33 @@ export function TaxSettingsPanel() {
                     </div>
                 )}
 
-                <button onClick={handleSave} disabled={isSaving} className="btn btn-primary">
+                <button onClick={handleSaveLocal} disabled={isSavingLocal} className="btn btn-primary">
                     <Save size={16} className="mr-2" />
                     Save Late Checkout Settings
                 </button>
             </div>
 
-            {/* Tax Rates Section */}
-            <div className="card p-6 space-y-4">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-primary-500/20 rounded-lg flex items-center justify-center">
-                        <Percent size={20} className="text-primary-400" />
-                    </div>
+            {/* Per-Department Tax Settings (from Backend API) */}
+            <div className="space-y-2">
+                <div className="flex items-center gap-3 px-1">
+                    <Percent size={20} className="text-primary-400" />
                     <div>
-                        <h3 className="text-lg font-semibold text-white">Tax Rates</h3>
-                        <p className="text-sm text-slate-400">Configure tax rates for different services</p>
+                        <h3 className="text-lg font-semibold text-white">Tax Rates by Department</h3>
+                        <p className="text-sm text-slate-400">Configure Service Charge, VAT, and TDL per department</p>
                     </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="label">Default Tax Rate (%)</label>
-                        <input
-                            type="number"
-                            value={settings?.tax_rate ?? 7.5}
-                            onChange={(e) => setSettings(s => s ? { ...s, tax_rate: Number(e.target.value) } : null)}
-                            className="input"
-                            min="0"
-                            max="100"
-                            step="0.5"
-                        />
-                        <p className="text-xs text-slate-500 mt-1">Fallback rate if specific rates not set</p>
-                    </div>
-                    <div>
-                        <label className="label">Accommodation Tax (%)</label>
-                        <input
-                            type="number"
-                            value={settings?.accommodation_tax_rate ?? settings?.tax_rate ?? 7.5}
-                            onChange={(e) => setSettings(s => s ? { ...s, accommodation_tax_rate: Number(e.target.value) } : null)}
-                            className="input"
-                            min="0"
-                            max="100"
-                            step="0.5"
-                        />
-                        <p className="text-xs text-slate-500 mt-1">Applied to room charges</p>
-                    </div>
-                    <div>
-                        <label className="label">Restaurant Tax (%)</label>
-                        <input
-                            type="number"
-                            value={settings?.services_tax_rate ?? settings?.tax_rate ?? 7.5}
-                            onChange={(e) => setSettings(s => s ? { ...s, services_tax_rate: Number(e.target.value) } : null)}
-                            className="input"
-                            min="0"
-                            max="100"
-                            step="0.5"
-                        />
-                        <p className="text-xs text-slate-500 mt-1">Applied to food & beverage</p>
-                    </div>
-                </div>
-
-                <button onClick={handleSave} disabled={isSaving} className="btn btn-primary">
-                    <Save size={16} className="mr-2" />
-                    Save Tax Rates
-                </button>
             </div>
 
-            {/* Service Charges Section */}
-            <div className="card p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
-                            <DollarSign size={20} className="text-amber-400" />
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-semibold text-white">Service Charges</h3>
-                            <p className="text-sm text-slate-400">Optional charges added to bills</p>
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={() => {
-                            setServiceChargesEnabled(!serviceChargesEnabled);
-                            if (serviceChargesEnabled) {
-                                // Disable all charges when toggling off
-                                setSettings(s => s ? { ...s, service_charges: [] } : null);
-                            }
-                        }}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${serviceChargesEnabled
-                            ? 'bg-primary-500/20 text-primary-400'
-                            : 'bg-slate-700 text-slate-400'
-                            }`}
-                    >
-                        {serviceChargesEnabled ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
-                        {serviceChargesEnabled ? 'Enabled' : 'Disabled'}
-                    </button>
-                </div>
-
-                {serviceChargesEnabled && (
-                    <>
-                        {/* Existing Charges List */}
-                        {(settings?.service_charges?.length ?? 0) > 0 && (
-                            <div className="space-y-2">
-                                {settings?.service_charges?.map((charge) => (
-                                    <div
-                                        key={charge.id}
-                                        className={`p-4 rounded-lg border ${charge.is_active
-                                            ? 'bg-slate-700/50 border-slate-600'
-                                            : 'bg-slate-800/50 border-slate-700 opacity-60'
-                                            }`}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <h4 className="font-medium text-white">{charge.name}</h4>
-                                                <p className="text-sm text-slate-400">
-                                                    {charge.rate_type === 'percentage' ? `${charge.rate}%` : `₦${charge.rate.toLocaleString()}`}
-                                                    {' • '}
-                                                    {charge.type === 'mandatory' ? 'Mandatory' : 'Optional'}
-                                                    {' • '}
-                                                    {charge.applies_to.join(', ')}
-                                                    {charge.is_taxable && ' • Taxable'}
-                                                </p>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => handleToggleChargeActive(charge.id)}
-                                                    className={`p-2 rounded-lg transition-colors ${charge.is_active
-                                                        ? 'text-primary-400 hover:bg-primary-500/20'
-                                                        : 'text-slate-400 hover:bg-slate-600'
-                                                        }`}
-                                                    title={charge.is_active ? 'Disable' : 'Enable'}
-                                                >
-                                                    {charge.is_active ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
-                                                </button>
-                                                <button
-                                                    onClick={() => handleRemoveCharge(charge.id)}
-                                                    className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                                                    title="Remove"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Add New Charge Form */}
-                        {showAddCharge ? (
-                            <div className="p-4 bg-slate-700/30 rounded-lg border border-slate-600 space-y-4">
-                                <h4 className="font-medium text-white">Add Service Charge</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="label">Name</label>
-                                        <input
-                                            type="text"
-                                            value={newCharge.name}
-                                            onChange={(e) => setNewCharge({ ...newCharge, name: e.target.value })}
-                                            placeholder="e.g., Accommodation Service Charge"
-                                            className="input"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="label">Rate</label>
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="number"
-                                                value={newCharge.rate}
-                                                onChange={(e) => setNewCharge({ ...newCharge, rate: Number(e.target.value) })}
-                                                className="input flex-1"
-                                                min="0"
-                                            />
-                                            <select
-                                                value={newCharge.rate_type}
-                                                onChange={(e) => setNewCharge({ ...newCharge, rate_type: e.target.value as 'percentage' | 'flat' })}
-                                                className="input w-24"
-                                            >
-                                                <option value="percentage">%</option>
-                                                <option value="flat">₦</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="label">Type</label>
-                                        <select
-                                            value={newCharge.type}
-                                            onChange={(e) => setNewCharge({ ...newCharge, type: e.target.value as 'mandatory' | 'optional' })}
-                                            className="input"
-                                        >
-                                            <option value="mandatory">Mandatory</option>
-                                            <option value="optional">Optional</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="label">Applies To</label>
-                                        <div className="flex gap-4 pt-2">
-                                            <label className="flex items-center gap-2 text-sm text-slate-300">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={newCharge.applies_to?.includes('rooms')}
-                                                    onChange={(e) => {
-                                                        const applies = newCharge.applies_to || [];
-                                                        setNewCharge({
-                                                            ...newCharge,
-                                                            applies_to: e.target.checked
-                                                                ? [...applies, 'rooms']
-                                                                : applies.filter(a => a !== 'rooms'),
-                                                        });
-                                                    }}
-                                                    className="accent-primary-500"
-                                                />
-                                                Rooms
-                                            </label>
-                                            <label className="flex items-center gap-2 text-sm text-slate-300">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={newCharge.applies_to?.includes('restaurant')}
-                                                    onChange={(e) => {
-                                                        const applies = newCharge.applies_to || [];
-                                                        setNewCharge({
-                                                            ...newCharge,
-                                                            applies_to: e.target.checked
-                                                                ? [...applies, 'restaurant']
-                                                                : applies.filter(a => a !== 'restaurant'),
-                                                        });
-                                                    }}
-                                                    className="accent-primary-500"
-                                                />
-                                                Restaurant
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <label className="flex items-center gap-2 text-sm text-slate-300">
-                                    <input
-                                        type="checkbox"
-                                        checked={newCharge.is_taxable}
-                                        onChange={(e) => setNewCharge({ ...newCharge, is_taxable: e.target.checked })}
-                                        className="accent-primary-500"
-                                    />
-                                    This charge is taxable
-                                </label>
-                                <div className="flex gap-2">
-                                    <button onClick={handleAddCharge} className="btn btn-primary">
-                                        <Plus size={16} className="mr-2" />
-                                        Add Charge
-                                    </button>
-                                    <button onClick={() => setShowAddCharge(false)} className="btn btn-secondary">
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            <button
-                                onClick={() => setShowAddCharge(true)}
-                                className="btn btn-secondary"
-                            >
-                                <Plus size={16} className="mr-2" />
-                                Add Service Charge
-                            </button>
-                        )}
-
-                        <button onClick={handleSave} disabled={isSaving} className="btn btn-primary">
-                            <Save size={16} className="mr-2" />
-                            Save Service Charges
-                        </button>
-                    </>
-                )}
-
-                {!serviceChargesEnabled && (
-                    <p className="text-sm text-slate-500 italic">
-                        Service charges are currently disabled. Enable them to add and configure service charges.
-                    </p>
-                )}
-            </div>
+            {DEPARTMENTS.map(dept => (
+                <DepartmentTaxCard
+                    key={dept.key}
+                    dept={dept}
+                    settings={getDeptSettings(dept.key)}
+                    onChange={(field, value) => handleFieldChange(dept.key, field, value)}
+                    onSave={() => handleSaveDept(dept.key)}
+                    isSaving={updateMutation.isPending}
+                />
+            ))}
         </div>
     );
 }

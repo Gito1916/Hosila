@@ -21,6 +21,7 @@ import { getAllPayments } from '@/db/bookings';
 import { getAllCharges } from '@/db/accounting';
 import { requireSupabase, getHotelId } from '@/lib/api';
 import { useExpenses } from '@/hooks/useSupabaseData';
+import { useDashboardKPIs } from '@/hooks/useHosilaApi';
 import type { ExpenseCategory } from '@/types';
 
 // ─── Types ───────────────────────────────────────────────────────────
@@ -281,6 +282,11 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 export function FinanceDashboard({ dateFilter = 'daily', onNavigate, onAddExpense }: FinanceDashboardProps) {
     const { start, end, label } = getDateRange(dateFilter);
 
+    // ── Backend KPIs (supplementary) ─────────────────────────────────
+    const startStr = format(start, 'yyyy-MM-dd');
+    const endStr = format(end, 'yyyy-MM-dd');
+    const { data: backendKPIs } = useDashboardKPIs(startStr, endStr);
+
     // ── Data fetching ────────────────────────────────────────────────
     const { data: expenses } = useQuery({ queryKey: ['expenses'], queryFn: getAllExpenses });
     const { data: payments } = useQuery({ queryKey: ['payments'], queryFn: getAllPayments });
@@ -486,8 +492,12 @@ export function FinanceDashboard({ dateFilter = 'daily', onNavigate, onAddExpens
                 />
                 <KpiCard
                     label={`${label} Tax`}
-                    value={fmt(totalTaxCollected)}
-                    trendLabel="Collected"
+                    value={fmt(
+                        backendKPIs
+                            ? (backendKPIs.total_vat_collected + backendKPIs.total_tdl_collected + backendKPIs.total_service_charge)
+                            : totalTaxCollected
+                    )}
+                    trendLabel={backendKPIs ? `VAT ${fmt(backendKPIs.total_vat_collected)} · TDL ${fmt(backendKPIs.total_tdl_collected)}` : 'Collected'}
                     icon={Scale}
                     accentColor="#f59e0b"
                 />

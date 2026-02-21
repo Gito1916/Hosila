@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, subDays } from 'date-fns';
 import { FinanceDashboard, FinanceExport, ExpenseList, ExpenseForm, TaxSummary } from '@/components/finance';
 import { TransactionsList } from '@/components/finance/TransactionsList';
 import { IncomeTab } from '@/components/finance/IncomeTab';
@@ -13,7 +14,26 @@ import {
 } from 'lucide-react';
 
 type FinanceTab = 'overview' | 'income' | 'expenses' | 'transactions' | 'tax';
-type DateFilter = 'daily' | 'weekly' | 'monthly' | 'yearly';
+type DateFilter = 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom';
+
+function getDateRange(filter: DateFilter, customStart?: string, customEnd?: string) {
+    const now = new Date();
+    switch (filter) {
+        case 'daily':
+            return { start: startOfDay(now), end: endOfDay(now) };
+        case 'weekly':
+            return { start: startOfWeek(now, { weekStartsOn: 1 }), end: endOfWeek(now, { weekStartsOn: 1 }) };
+        case 'monthly':
+            return { start: startOfMonth(now), end: endOfMonth(now) };
+        case 'yearly':
+            return { start: startOfYear(now), end: endOfDay(now) };
+        case 'custom':
+            return {
+                start: customStart ? startOfDay(new Date(customStart)) : startOfDay(subDays(now, 30)),
+                end: customEnd ? endOfDay(new Date(customEnd)) : endOfDay(now),
+            };
+    }
+}
 
 export function FinancePage() {
     const [activeTab, setActiveTab] = useState<FinanceTab>('overview');
@@ -22,11 +42,21 @@ export function FinancePage() {
     const [showExportModal, setShowExportModal] = useState(false);
     const [incomeSection, setIncomeSection] = useState<'accommodation' | 'restaurant' | 'other'>('accommodation');
 
+    // Custom date range state
+    const [customStart, setCustomStart] = useState(format(subDays(new Date(), 30), 'yyyy-MM-dd'));
+    const [customEnd, setCustomEnd] = useState(format(new Date(), 'yyyy-MM-dd'));
+
+    const dateRange = useMemo(
+        () => getDateRange(dateFilter, customStart, customEnd),
+        [dateFilter, customStart, customEnd],
+    );
+
     const filterLabels: Record<DateFilter, string> = {
         daily: 'Daily',
         weekly: 'Weekly',
         monthly: 'Monthly',
         yearly: 'Yearly',
+        custom: 'Custom',
     };
 
     const tabs: { key: FinanceTab; label: string; icon: typeof BarChart3 }[] = [
@@ -94,10 +124,35 @@ export function FinancePage() {
                 </div>
             </div>
 
+            {/* Custom Date Range Picker (shared across all tabs) */}
+            {dateFilter === 'custom' && (
+                <div className="flex items-center gap-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+                    <Calendar size={18} className="text-slate-400" />
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="date"
+                            value={customStart}
+                            onChange={(e) => setCustomStart(e.target.value)}
+                            className="input py-1.5"
+                        />
+                        <span className="text-slate-400">to</span>
+                        <input
+                            type="date"
+                            value={customEnd}
+                            onChange={(e) => setCustomEnd(e.target.value)}
+                            className="input py-1.5"
+                        />
+                    </div>
+                    <span className="text-sm text-slate-500">
+                        {format(dateRange.start, 'MMM d, yyyy')} — {format(dateRange.end, 'MMM d, yyyy')}
+                    </span>
+                </div>
+            )}
+
             {/* Tab Content */}
             {activeTab === 'overview' && (
                 <FinanceDashboard
-                    dateFilter={dateFilter}
+                    dateFilter={dateFilter === 'custom' ? 'daily' : dateFilter}
                     onNavigate={(target, section) => {
                         setActiveTab(target);
                         if (section && (section === 'accommodation' || section === 'restaurant' || section === 'other')) {
@@ -109,7 +164,7 @@ export function FinancePage() {
             )}
 
             {activeTab === 'income' && (
-                <IncomeTab dateFilter={dateFilter} activeSection={incomeSection} onSectionChange={setIncomeSection} />
+                <IncomeTab dateFilter={dateFilter === 'custom' ? 'daily' : dateFilter} activeSection={incomeSection} onSectionChange={setIncomeSection} />
             )}
 
             {activeTab === 'expenses' && (
@@ -132,11 +187,14 @@ export function FinancePage() {
             )}
 
             {activeTab === 'transactions' && (
-                <TransactionsList dateFilter={dateFilter} />
+                <TransactionsList dateFilter={dateFilter === 'custom' ? 'daily' : dateFilter} />
             )}
 
             {activeTab === 'tax' && (
-                <TaxSummary />
+                <TaxSummary
+                    startDate={dateRange.start}
+                    endDate={dateRange.end}
+                />
             )}
 
             {/* Expense Form Modal */}
