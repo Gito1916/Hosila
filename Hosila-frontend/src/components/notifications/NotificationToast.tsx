@@ -126,14 +126,14 @@ export function NotificationToast() {
                     onClick={() => handleClick(toast.notification)}
                     className={`
                         pointer-events-auto cursor-pointer
-                        bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 border-l-4 ${getBorderColor(toast.notification.type)}
+                        bg-slate-800 border border-slate-700 border-l-4 ${getBorderColor(toast.notification.type)}
                         rounded-lg shadow-2xl p-3
                         transition-all duration-300 ease-out
                         ${toast.isExiting
                             ? 'opacity-0 translate-x-full'
                             : 'opacity-100 translate-x-0 animate-slide-in-right'
                         }
-                        hover:bg-slate-50 dark:hover:bg-slate-750 hover:border-slate-300 dark:hover:border-slate-600
+                        hover:bg-slate-750 hover:border-slate-600
                     `}
                 >
                     <div className="flex items-start gap-3">
@@ -141,10 +141,10 @@ export function NotificationToast() {
                             {getIcon(toast.notification.type)}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-slate-900 dark:text-white leading-tight">
+                            <p className="text-sm font-semibold text-white leading-tight">
                                 {toast.notification.title}
                             </p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">
+                            <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">
                                 {toast.notification.message}
                             </p>
                         </div>

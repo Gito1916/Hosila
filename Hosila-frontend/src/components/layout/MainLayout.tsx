@@ -17,7 +17,7 @@ export function MainLayout() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-slate-100 dark:bg-slate-900">
+        <div className="min-h-screen bg-slate-900">
             {/* Offline indicator */}
             <OfflineIndicator />
 

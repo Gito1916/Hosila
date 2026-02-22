@@ -55,15 +55,15 @@ function DepartmentTaxCard({
     const accent = colorMap[dept.color] ?? 'bg-slate-500/20 text-slate-400';
 
     return (
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 space-y-5">
+        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 space-y-5">
             {/* Header */}
             <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${accent}`}>
                     <Icon size={20} />
                 </div>
                 <div>
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{dept.label}</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Tax configuration for {dept.label.toLowerCase()}</p>
+                    <h3 className="text-lg font-semibold text-white">{dept.label}</h3>
+                    <p className="text-sm text-slate-400">Tax configuration for {dept.label.toLowerCase()}</p>
                 </div>
             </div>
 
@@ -98,7 +98,7 @@ function DepartmentTaxCard({
             </div>
 
             {/* Calculation Base */}
-            <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-700">
+            <div className="space-y-3 pt-2 border-t border-slate-700">
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                     <Info size={14} />
                     <span>Choose how VAT and {tdlName} are calculated</span>
@@ -155,7 +155,7 @@ function TaxRow({
     onToggle: () => void;
 }) {
     return (
-        <div className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${enabled ? 'bg-slate-50 dark:bg-slate-700/40' : 'bg-slate-100 dark:bg-slate-800/40 opacity-60'}`}>
+        <div className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${enabled ? 'bg-slate-700/40' : 'bg-slate-800/40 opacity-60'}`}>
             <button
                 onClick={onToggle}
                 className={`flex-shrink-0 transition-colors ${enabled ? 'text-primary-400' : 'text-slate-500'}`}
@@ -269,7 +269,7 @@ export function TaxSettingsPanel() {
     return (
         <div className="space-y-6">
             {/* Currency Settings */}
-            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 space-y-4">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 space-y-4">
                 <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
                         <Globe size={20} className="text-blue-400" />
@@ -315,7 +315,7 @@ export function TaxSettingsPanel() {
             </div>
 
             {/* Late Checkout Fee */}
-            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 space-y-4">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 space-y-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
@@ -331,7 +331,7 @@ export function TaxSettingsPanel() {
                         onClick={() => setLocalSettings(s => s ? { ...s, auto_late_checkout_enabled: !s.auto_late_checkout_enabled } : null)}
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${localSettings?.auto_late_checkout_enabled
                             ? 'bg-primary-500/20 text-primary-400'
-                            : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                            : 'bg-slate-700 text-slate-400'
                             }`}
                     >
                         {localSettings?.auto_late_checkout_enabled ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
@@ -341,7 +341,7 @@ export function TaxSettingsPanel() {
 
                 {localSettings?.auto_late_checkout_enabled && (
                     <div className="flex items-center gap-3 pl-12">
-                        <label className="text-sm text-slate-600 dark:text-slate-300">Fee per hour:</label>
+                        <label className="text-sm text-slate-300">Fee per hour:</label>
                         <div className="relative w-40">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
                             <input

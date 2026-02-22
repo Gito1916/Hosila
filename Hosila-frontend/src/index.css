@@ -176,7 +176,7 @@ body {
 /* Light mode base */
 .light-mode body,
 html.light-mode body {
-  background-color: #F2FFFC !important;
+  background-color: #f6fffd !important;
   @apply text-slate-800;
 }
 
@@ -262,8 +262,8 @@ html.light-mode body {
 
 /* Light mode backgrounds */
 .light-mode .bg-slate-900 {
-  background-color: #f8fafc !important;
-  /* slate-50 - Main background */
+  background-color: #f6fffd !important;
+  /* Brand off-white - Main background */
 }
 
 .light-mode .bg-slate-800,
@@ -273,8 +273,8 @@ html.light-mode body {
 }
 
 .light-mode .bg-slate-800\/30 {
-  background-color: #f8fafc !important;
-  /* slate-50 - Inactive Calendar Days */
+  background-color: #f6fffd !important;
+  /* Brand off-white - Inactive Calendar Days */
 }
 
 .light-mode .bg-slate-700,

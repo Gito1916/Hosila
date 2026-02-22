@@ -52,7 +52,7 @@ export default {
                 warning: '#F59E0B',
                 info: '#3B82F6',
                 // Hosila special
-                'hosila-offwhite': '#F2FFFC',
+                'hosila-offwhite': '#f6fffd',
             },
             fontFamily: {
                 sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
