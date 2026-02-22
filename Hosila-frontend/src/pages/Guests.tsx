@@ -32,12 +32,6 @@ export function GuestsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-white">Guests</h2>
-                    <p className="text-slate-400">In-house guests, directory, and history</p>
-                </div>
-            </div>
 
             {/* Tab Navigation */}
             <div className="flex gap-1 bg-slate-800 p-1 rounded-lg w-fit">

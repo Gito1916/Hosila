@@ -28,9 +28,12 @@ interface AuthState {
     cloudError: string | null;
     pendingConfirmation: boolean;
 
+    // Hotel context (single hotel)
+    activeHotelName: string | null;
+
     // Actions
     login: (username: string, password: string) => Promise<boolean>;
-    logout: () => void;
+    logout: () => Promise<void>;
     checkSession: () => Promise<void>;
 
     // Cloud actions
@@ -58,6 +61,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             isLoading: false,
             error: null,
+            activeHotelName: null,
 
             // Cloud state
             cloudAccount: null,
@@ -109,6 +113,23 @@ export const useAuthStore = create<AuthState>()(
 
                     set({ user: user as User, isAuthenticated: true, isLoading: false });
 
+                    // Fetch hotel name for display
+                    try {
+                        const hotelId = await getHotelId();
+                        if (hotelId && supabase) {
+                            const { data: hotel } = await supabase
+                                .from('hotels')
+                                .select('name')
+                                .eq('id', hotelId)
+                                .single();
+                            if (hotel) {
+                                set({ activeHotelName: hotel.name });
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Could not fetch hotel name:', e);
+                    }
+
                     // Check cloud session
                     if (isCloudAvailable() && navigator.onLine) {
                         get().checkCloudSession().catch(console.error);
@@ -157,9 +178,23 @@ export const useAuthStore = create<AuthState>()(
             },
 
             // =================================================================
-            // Logout
+            // Logout — with safe offline queue handling
             // =================================================================
-            logout: () => {
+            logout: async () => {
+                // Attempt to flush pending offline writes before logout
+                try {
+                    const { getPendingCount, flushQueue, clearQueue } = await import('@/lib/offlineQueue');
+                    const pending = await getPendingCount();
+                    if (pending > 0 && navigator.onLine) {
+                        // Try to flush while still online
+                        await flushQueue();
+                    }
+                    // Clear any remaining queue items
+                    await clearQueue();
+                } catch (e) {
+                    console.warn('Failed to flush offline queue on logout:', e);
+                }
+
                 if (supabase) {
                     supabase.auth.signOut().catch(console.error);
                 }
@@ -180,18 +215,29 @@ export const useAuthStore = create<AuthState>()(
                 const { user } = get();
 
                 if (user && supabase) {
-                    // Verify user still exists and is active in Supabase
-                    const { data: dbUser } = await supabase
-                        .from('users')
-                        .select('*')
-                        .eq('id', user.id)
-                        .single();
+                    try {
+                        // Verify user still exists and is active in Supabase
+                        const { data: dbUser, error } = await supabase
+                            .from('users')
+                            .select('*')
+                            .eq('id', user.id)
+                            .single();
 
-                    if (!dbUser || !dbUser.is_active) {
-                        set({ user: null, isAuthenticated: false, isLoading: false });
-                    } else {
-                        // Update stored user with latest data
-                        set({ user: dbUser as User, isLoading: false });
+                        if (error) {
+                            // Network error or Supabase unreachable — keep current session
+                            console.warn('Session check failed (network?):', error.message);
+                            set({ isLoading: false });
+                        } else if (!dbUser || !dbUser.is_active) {
+                            // User was explicitly deactivated or deleted
+                            set({ user: null, isAuthenticated: false, isLoading: false });
+                        } else {
+                            // Update stored user with latest data
+                            set({ user: dbUser as User, isLoading: false });
+                        }
+                    } catch (err) {
+                        // Network failure — silently keep current session
+                        console.warn('Session check error (offline?):', err);
+                        set({ isLoading: false });
                     }
                 } else {
                     set({ isLoading: false });
@@ -202,6 +248,8 @@ export const useAuthStore = create<AuthState>()(
                     get().checkCloudSession().catch(console.error);
                 }
             },
+
+
 
             // =================================================================
             // Cloud: Register a new Supabase account for this hotel

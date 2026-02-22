@@ -53,15 +53,15 @@ function DepartmentTaxCard({
     const accent = colorMap[dept.color] ?? 'bg-slate-500/20 text-slate-400';
 
     return (
-        <div className="card p-6 space-y-5">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 space-y-5">
             {/* Header */}
             <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${accent}`}>
                     <Icon size={20} />
                 </div>
                 <div>
-                    <h3 className="text-lg font-semibold text-white">{dept.label}</h3>
-                    <p className="text-sm text-slate-400">Tax configuration for {dept.label.toLowerCase()}</p>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{dept.label}</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Tax configuration for {dept.label.toLowerCase()}</p>
                 </div>
             </div>
 
@@ -153,7 +153,7 @@ function TaxRow({
     onToggle: () => void;
 }) {
     return (
-        <div className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${enabled ? 'bg-slate-700/40' : 'bg-slate-800/40 opacity-60'}`}>
+        <div className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${enabled ? 'bg-slate-50 dark:bg-slate-700/40' : 'bg-slate-100 dark:bg-slate-800/40 opacity-60'}`}>
             <button
                 onClick={onToggle}
                 className={`flex-shrink-0 transition-colors ${enabled ? 'text-primary-400' : 'text-slate-500'}`}
@@ -162,7 +162,7 @@ function TaxRow({
                 {enabled ? <ToggleRight size={22} /> : <ToggleLeft size={22} />}
             </button>
 
-            <span className="text-sm text-slate-300 min-w-[140px]">{label}</span>
+            <span className="text-sm text-slate-700 dark:text-slate-300 min-w-[140px]">{label}</span>
 
             <div className="relative w-24">
                 <input
@@ -267,14 +267,14 @@ export function TaxSettingsPanel() {
     return (
         <div className="space-y-6">
             {/* Currency Settings */}
-            <div className="card p-6 space-y-4">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 space-y-4">
                 <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
                         <Globe size={20} className="text-blue-400" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-semibold text-white">Currency</h3>
-                        <p className="text-sm text-slate-400">Select your hotel's operating currency</p>
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Currency</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Select your hotel's operating currency</p>
                     </div>
                 </div>
 
@@ -299,15 +299,15 @@ export function TaxSettingsPanel() {
             </div>
 
             {/* Late Checkout Fee */}
-            <div className="card p-6 space-y-4">
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 space-y-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
                             <Clock size={20} className="text-orange-400" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-semibold text-white">Auto Late Checkout Fee</h3>
-                            <p className="text-sm text-slate-400">Automatically apply fee when guests checkout late</p>
+                            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Auto Late Checkout Fee</h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Automatically apply fee when guests checkout late</p>
                         </div>
                     </div>
 
@@ -350,8 +350,8 @@ export function TaxSettingsPanel() {
                 <div className="flex items-center gap-3 px-1">
                     <Percent size={20} className="text-primary-400" />
                     <div>
-                        <h3 className="text-lg font-semibold text-white">Tax Rates by Department</h3>
-                        <p className="text-sm text-slate-400">Configure Service Charge, VAT, and TDL per department</p>
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Tax Rates by Department</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Configure Service Charge, VAT, and TDL per department</p>
                     </div>
                 </div>
             </div>

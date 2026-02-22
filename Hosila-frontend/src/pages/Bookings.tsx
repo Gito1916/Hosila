@@ -60,34 +60,26 @@ export function BookingsPage() {
 
     return (
         <div className="space-y-4">
-            {/* Header with Action Buttons */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h2 className="text-2xl font-bold text-white">Bookings</h2>
-                    <p className="text-slate-400">Manage rooms, availability, and reservations</p>
-                </div>
-
-                {/* Fixed Action Buttons */}
-                <div className="flex gap-2">
-                    <button
-                        onClick={handleCheckInClick}
-                        className="btn btn-primary flex items-center gap-2"
-                    >
-                        <LogIn size={18} />
-                        Check In
-                    </button>
-                    <button
-                        onClick={() => {
-                            setSelectedRoom(null);
-                            setSelectedDate(null);
-                            setShowReservationModal(true);
-                        }}
-                        className="btn btn-secondary flex items-center gap-2"
-                    >
-                        <CalendarPlus size={18} />
-                        Reserve
-                    </button>
-                </div>
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2">
+                <button
+                    onClick={handleCheckInClick}
+                    className="btn btn-primary flex items-center gap-2"
+                >
+                    <LogIn size={18} />
+                    Check In
+                </button>
+                <button
+                    onClick={() => {
+                        setSelectedRoom(null);
+                        setSelectedDate(null);
+                        setShowReservationModal(true);
+                    }}
+                    className="btn btn-secondary flex items-center gap-2"
+                >
+                    <CalendarPlus size={18} />
+                    Reserve
+                </button>
             </div>
 
             {/* Tab Navigation */}

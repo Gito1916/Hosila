@@ -306,7 +306,7 @@ export function AccountPanel() {
                     </div>
 
                     {/* Editable Fields */}
-                    <div className="bg-slate-700/30 rounded-lg p-4 space-y-3">
+                    <div className="space-y-3">
                         <EditableField field="name" label="Hotel Name" value={hotel?.name ?? ''} />
                         <EditableField field="address" label="Address" value={hotel?.address ?? ''} multiline />
                         <EditableField field="phone" label="Phone" value={hotel?.phone ?? ''} />

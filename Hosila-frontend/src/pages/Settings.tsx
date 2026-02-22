@@ -23,8 +23,8 @@ type SettingsTab = 'users' | 'system' | 'account' | 'rooms' | 'restaurant' | 'fi
 
 const tabs: { value: SettingsTab; label: string; icon: React.ReactNode }[] = [
     { value: 'users', label: 'Users', icon: <Users size={18} /> },
-    { value: 'system', label: 'System', icon: <Settings2 size={18} /> },
     { value: 'account', label: 'Account', icon: <User size={18} /> },
+    { value: 'system', label: 'System', icon: <Settings2 size={18} /> },
     { value: 'rooms', label: 'Rooms', icon: <DoorOpen size={18} /> },
     { value: 'restaurant', label: 'Restaurant', icon: <UtensilsCrossed size={18} /> },
     { value: 'finance', label: 'Finance', icon: <DollarSign size={18} /> },
@@ -51,20 +51,16 @@ export function SettingsPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h2 className="text-2xl font-bold text-white">Settings</h2>
-                <p className="text-slate-400">Manage users, system, account, rooms, services, and data</p>
-            </div>
 
             {/* Tabs */}
-            <div className="flex flex-wrap gap-2 border-b border-slate-700 pb-2">
+            <div className="flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-700 pb-2">
                 {tabs.map((tab) => (
                     <button
                         key={tab.value}
                         onClick={() => setActiveTab(tab.value)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${activeTab === tab.value
                             ? 'bg-primary-500 text-white'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
                             }`}
                     >
                         {tab.icon}

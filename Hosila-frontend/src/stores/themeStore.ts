@@ -12,7 +12,7 @@ interface ThemeState {
 export const useThemeStore = create<ThemeState>()(
     persist(
         (set, get) => ({
-            theme: 'dark', // Default to dark mode
+            theme: 'light', // Default to light mode
 
             toggleTheme: () => {
                 const newTheme = get().theme === 'dark' ? 'light' : 'dark';
@@ -26,7 +26,7 @@ export const useThemeStore = create<ThemeState>()(
             },
         }),
         {
-            name: 'hotelflow-theme',
+            name: 'hosila-theme',
             onRehydrateStorage: () => (state) => {
                 // Apply theme on app load
                 if (state) {
@@ -52,7 +52,7 @@ function applyTheme(theme: Theme) {
 
 // Initialize theme on module load
 if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem('hotelflow-theme');
+    const stored = localStorage.getItem('hosila-theme');
     if (stored) {
         try {
             const data = JSON.parse(stored);
@@ -60,8 +60,11 @@ if (typeof window !== 'undefined') {
                 applyTheme(data.state.theme);
             }
         } catch {
-            // Default to dark
-            applyTheme('dark');
+            // Default to light
+            applyTheme('light');
         }
+    } else {
+        // No stored preference — default to light
+        applyTheme('light');
     }
 }

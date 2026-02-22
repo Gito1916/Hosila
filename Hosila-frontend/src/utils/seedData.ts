@@ -51,6 +51,7 @@ export async function seedDatabase() {
     const { error: hotelError } = await sb.from('hotels').insert(hotel);
     if (hotelError) throw hotelError;
 
+
     // Create admin user
     const passwordHash = await bcrypt.hash('admin123', 10);
     const admin: Partial<User> = {
@@ -58,7 +59,7 @@ export async function seedDatabase() {
         hotel_id: hotelId,
         username: 'admin',
         password_hash: passwordHash,
-        name: 'Administrator',
+        name: 'Admin (Org)',
         role: 'admin',
         is_active: true,
         created_at: now,

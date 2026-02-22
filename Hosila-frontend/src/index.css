@@ -119,7 +119,7 @@ body {
   }
 
   .btn-primary {
-    @apply bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500;
+    @apply bg-primary-400 text-white hover:bg-primary-500 focus:ring-primary-400;
   }
 
   .btn-secondary {
@@ -176,8 +176,8 @@ body {
 /* Light mode base */
 .light-mode body,
 html.light-mode body {
-  @apply bg-slate-50 text-slate-800;
-  /* Warmer/softer gray than gray-50 */
+  background-color: #F2FFFC !important;
+  @apply text-slate-800;
 }
 
 /* Light mode scrollbar */

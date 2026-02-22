@@ -6,6 +6,8 @@
  */
 
 import { supabase } from './supabase';
+import { queueWrite, isNetworkError } from './offlineQueue';
+import { toast } from './errorMessages';
 import type {
     Hotel, Room, Guest, Reservation, Booking, Service, ServiceOrder,
     Payment, InventoryItem, InventoryMovement, Expense, User,
@@ -44,6 +46,9 @@ export function setHotelIdCache(id: string) {
 }
 
 // ============================================================================
+
+
+// ============================================================================
 // Generic CRUD helpers
 // ============================================================================
 
@@ -78,33 +83,83 @@ export async function fetchById<T>(table: string, id: string): Promise<T | null>
     return data as T;
 }
 
-// Insert a new record
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function insertRecord<T>(table: string, record: any): Promise<T> {
     const sb = requireSupabase();
     const hotelId = await getHotelId();
 
     const payload = { ...record, hotel_id: hotelId };
 
-    const { data, error } = await sb.from(table).insert(payload).select().single();
-    if (error) throw error;
-    return data as T;
+    try {
+        const { data, error } = await sb.from(table).insert(payload).select().single();
+        if (error) {
+            // Check if the Supabase error is actually a network issue
+            if (isNetworkError(error)) {
+                const tempId = record.id || (await import('uuid')).v4();
+                const queuePayload = { ...payload, id: tempId };
+                await queueWrite({ table, action: 'insert', data: queuePayload, tempId });
+                toast.info('Saved offline', 'Will sync when connection returns');
+                return queuePayload as T;
+            }
+            throw error;
+        }
+        return data as T;
+    } catch (err) {
+        if (isNetworkError(err)) {
+            const tempId = record.id || (await import('uuid')).v4();
+            const queuePayload = { ...payload, id: tempId };
+            await queueWrite({ table, action: 'insert', data: queuePayload, tempId });
+            toast.info('Saved offline', 'Will sync when connection returns');
+            return queuePayload as T;
+        }
+        throw err;
+    }
 }
 
-// Update an existing record
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function updateRecord<T>(table: string, id: string, updates: any): Promise<T> {
     const sb = requireSupabase();
-    const { data, error } = await sb.from(table).update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return data as T;
+
+    try {
+        const { data, error } = await sb.from(table).update(updates).eq('id', id).select().single();
+        if (error) {
+            if (isNetworkError(error)) {
+                await queueWrite({ table, action: 'update', data: updates, recordId: id });
+                toast.info('Update queued', 'Will sync when connection returns');
+                return { id, ...updates } as T;
+            }
+            throw error;
+        }
+        return data as T;
+    } catch (err) {
+        if (isNetworkError(err)) {
+            await queueWrite({ table, action: 'update', data: updates, recordId: id });
+            toast.info('Update queued', 'Will sync when connection returns');
+            return { id, ...updates } as T;
+        }
+        throw err;
+    }
 }
 
-// Delete a record
 export async function deleteRecord(table: string, id: string): Promise<void> {
     const sb = requireSupabase();
-    const { error } = await sb.from(table).delete().eq('id', id);
-    if (error) throw error;
+
+    try {
+        const { error } = await sb.from(table).delete().eq('id', id);
+        if (error) {
+            if (isNetworkError(error)) {
+                await queueWrite({ table, action: 'delete', data: {}, recordId: id });
+                toast.info('Delete queued', 'Will sync when connection returns');
+                return;
+            }
+            throw error;
+        }
+    } catch (err) {
+        if (isNetworkError(err)) {
+            await queueWrite({ table, action: 'delete', data: {}, recordId: id });
+            toast.info('Delete queued', 'Will sync when connection returns');
+            return;
+        }
+        throw err;
+    }
 }
 
 // ============================================================================

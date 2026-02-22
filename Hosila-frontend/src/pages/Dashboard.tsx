@@ -1,47 +1,40 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/stores/authStore';
 import { useReservations, useBookings } from '@/hooks/useSupabaseData';
 import {
     getTodayRevenue,
-    getMonthRevenue,
-    getOutstandingPayments,
     getOccupancyStats,
-    getTodayServiceRevenue,
-    getADR,
 } from '@/db/dashboard';
-import { KPICard, AlertsPanel, TodayActivity, QuickActions } from '@/components/dashboard';
-import { format, startOfDay, endOfDay } from 'date-fns';
+import { KPICard, TodayActivity } from '@/components/dashboard';
+import { startOfDay, endOfDay } from 'date-fns';
 import {
-    TrendingUp,
-    BedDouble,
     DollarSign,
-    Calendar,
     ArrowDownCircle,
     ArrowUpCircle,
-    CreditCard,
-    UtensilsCrossed,
-    AlertTriangle,
-    BarChart3,
+    Calendar,
+    Activity,
 } from 'lucide-react';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
-// Role-based dashboard sections
-type UserRole = 'admin' | 'manager' | 'front_desk' | 'accountant';
+const dummyChartData = [
+    { name: 'Mon', revenue: 4000 },
+    { name: 'Tue', revenue: 3000 },
+    { name: 'Wed', revenue: 2000 },
+    { name: 'Thu', revenue: 2780 },
+    { name: 'Fri', revenue: 1890 },
+    { name: 'Sat', revenue: 2390 },
+    { name: 'Sun', revenue: 3490 },
+];
 
 export function DashboardPage() {
     const navigate = useNavigate();
-    const user = useAuthStore((state) => state.user);
-    const userRole = (user?.role ?? 'front_desk') as UserRole;
 
     // Modal states removed - check-in now navigates to /bookings
 
     // Live data queries via React Query
     const { data: occupancy } = useQuery({ queryKey: ['dashboard', 'occupancy'], queryFn: getOccupancyStats });
     const { data: todayRevenue } = useQuery({ queryKey: ['dashboard', 'todayRevenue'], queryFn: getTodayRevenue });
-    const { data: monthRevenue } = useQuery({ queryKey: ['dashboard', 'monthRevenue'], queryFn: getMonthRevenue });
-    const { data: outstandingPayments } = useQuery({ queryKey: ['dashboard', 'outstanding'], queryFn: getOutstandingPayments });
-    const { data: serviceRevenue } = useQuery({ queryKey: ['dashboard', 'serviceRevenue'], queryFn: getTodayServiceRevenue });
-    const { data: adr } = useQuery({ queryKey: ['dashboard', 'adr'], queryFn: getADR });
+
 
     // Get arrivals and departures count
     const { data: allReservations } = useReservations();
@@ -71,196 +64,102 @@ export function DashboardPage() {
         }).length;
     })();
 
-    // Determine if user can see certain sections
-    const showManagerKPIs = ['admin', 'manager'].includes(userRole);
-    const showAccountantKPIs = ['admin', 'accountant', 'manager'].includes(userRole);
-    const showFrontDeskSection = ['admin', 'front_desk', 'manager'].includes(userRole);
+
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-white">Control Center</h2>
-                    <p className="text-slate-400">{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
-                </div>
-                <div className="text-right">
-                    <p className="text-sm text-slate-400">Logged in as</p>
-                    <p className="text-white font-medium capitalize">{userRole.replace('_', ' ')}</p>
-                </div>
-            </div>
-
-            {/* Quick Actions */}
-            <QuickActions
-                onNewCheckIn={() => navigate('/bookings')}
-                onNewReservation={() => navigate('/bookings')}
-                onOrderMeals={() => navigate('/restaurant')}
-            />
-
-            {/* Alerts Section */}
-            <div>
-                <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                    <AlertTriangle size={18} className="text-amber-400" />
-                    Alerts & Warnings
-                </h3>
-                <AlertsPanel
-                    onViewOverdue={() => navigate('/rooms')}
-                    onViewLowStock={() => navigate('/inventory')}
-                    onViewUnpaid={() => navigate('/rooms')}
-                />
+            {/* Action Bar */}
+            <div className="flex justify-end">
+                <button
+                    onClick={() => navigate('/bookings')}
+                    className="btn bg-primary-400 hover:bg-primary-500 text-white rounded-full px-6 shadow-sm shadow-primary-400/20 transition-all font-medium"
+                >
+                    + New Booking
+                </button>
             </div>
 
             {/* KPI Cards Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                {/* Front Desk KPIs - Always visible */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <KPICard
                     title="Occupancy"
                     value={`${occupancy?.occupancyRate ?? 0}%`}
-                    subtitle={`${occupancy?.occupied ?? 0} of ${occupancy?.total ?? 0} rooms`}
-                    icon={<TrendingUp className="text-primary-400" size={24} />}
-                    iconBg="bg-primary-500/20"
+                    subtitle="vs last week"
+                    icon={<Activity size={20} />}
+                    trend="up"
+                    trendValue="2.4%"
                 />
                 <KPICard
-                    title="Available"
-                    value={occupancy?.available ?? 0}
-                    subtitle="Ready for check-in"
-                    icon={<BedDouble className="text-green-400" size={24} />}
-                    iconBg="bg-green-500/20"
-                    onClick={() => navigate('/rooms?filter=available')}
+                    title="Revenue Today"
+                    value={`₦${(todayRevenue?.total ?? 0).toLocaleString()}`}
+                    subtitle="vs yesterday"
+                    icon={<DollarSign size={20} />}
+                    trend="up"
+                    trendValue="12.5%"
                 />
                 <KPICard
                     title="Arrivals"
                     value={arrivals ?? 0}
                     subtitle="Expected today"
-                    icon={<ArrowDownCircle className="text-green-400" size={24} />}
-                    iconBg="bg-green-500/20"
+                    icon={<ArrowDownCircle size={20} />}
                 />
                 <KPICard
                     title="Departures"
                     value={departures ?? 0}
                     subtitle="Checkout today"
-                    icon={<ArrowUpCircle className="text-blue-400" size={24} />}
-                    iconBg="bg-blue-500/20"
+                    icon={<ArrowUpCircle size={20} />}
                 />
-
-                {/* Accountant/Manager KPIs */}
-                {showAccountantKPIs && (
-                    <>
-                        <KPICard
-                            title="Today's Revenue"
-                            value={`₦${(todayRevenue?.total ?? 0).toLocaleString()}`}
-                            subtitle={`${todayRevenue?.transactionCount ?? 0} transactions`}
-                            icon={<DollarSign className="text-green-400" size={24} />}
-                            iconBg="bg-green-500/20"
-                        />
-                        <KPICard
-                            title="Outstanding"
-                            value={`₦${(outstandingPayments?.total ?? 0).toLocaleString()}`}
-                            subtitle={`${outstandingPayments?.count ?? 0} guests`}
-                            icon={<CreditCard className="text-amber-400" size={24} />}
-                            iconBg="bg-amber-500/20"
-                            alert={(outstandingPayments?.count ?? 0) > 0}
-                        />
-                    </>
-                )}
-
-                {/* Manager KPIs */}
-                {showManagerKPIs && (
-                    <>
-                        <KPICard
-                            title="Month Revenue"
-                            value={`₦${(monthRevenue ?? 0).toLocaleString()}`}
-                            subtitle={format(new Date(), 'MMMM yyyy')}
-                            icon={<BarChart3 className="text-purple-400" size={24} />}
-                            iconBg="bg-purple-500/20"
-                        />
-                        <KPICard
-                            title="ADR"
-                            value={`₦${(adr ?? 0).toLocaleString()}`}
-                            subtitle="Avg daily rate"
-                            icon={<TrendingUp className="text-cyan-400" size={24} />}
-                            iconBg="bg-cyan-500/20"
-                        />
-                        <KPICard
-                            title="Restaurant"
-                            value={`₦${(serviceRevenue?.total ?? 0).toLocaleString()}`}
-                            subtitle={`${serviceRevenue?.orderCount ?? 0} orders`}
-                            icon={<UtensilsCrossed className="text-orange-400" size={24} />}
-                            iconBg="bg-orange-500/20"
-                        />
-                    </>
-                )}
             </div>
 
-            {/* Room Status Quick View */}
-            {showFrontDeskSection && (
-                <div className="card">
-                    <div className="card-header flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-white">Room Status</h3>
-                        <button
-                            onClick={() => navigate('/rooms')}
-                            className="text-sm text-primary-400 hover:text-primary-300"
-                        >
-                            View All →
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Revenue Analytics Chart (Takes up 2/3 width on large screens) */}
+                <div className="lg:col-span-2 bg-slate-800 rounded-xl shadow-sm border border-slate-700 p-5">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-base font-semibold text-white">Revenue Analytics</h3>
+                        <select className="bg-slate-900 border border-slate-700 text-sm rounded-lg px-3 py-1.5 outline-none text-slate-300">
+                            <option>Last 7 Days</option>
+                            <option>This Month</option>
+                        </select>
+                    </div>
+                    <div className="h-[300px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={dummyChartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                                <Line type="monotone" dataKey="revenue" stroke="#21C29C" strokeWidth={3} dot={{ r: 4, fill: '#21C29C', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
+                                <CartesianGrid stroke="#e2e8f0" strokeDasharray="5 5" vertical={false} />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(value) => `₦${value / 1000}k`} dx={-10} />
+                                <Tooltip
+                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                    formatter={(value) => [`₦${value}`, 'Revenue']}
+                                />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* Today's Activity / Recent Activity */}
+                <div className="lg:col-span-1 bg-slate-800 rounded-xl shadow-sm border border-slate-700 p-0 overflow-hidden flex flex-col">
+                    <div className="p-5 border-b border-slate-700 flex items-center justify-between">
+                        <h3 className="text-base font-semibold text-white flex items-center gap-2">
+                            <Calendar size={18} className="text-primary-400" />
+                            Recent Activity
+                        </h3>
+                        <button className="text-sm font-medium text-primary-400 hover:text-primary-500 transition-colors">
+                            View all &rarr;
                         </button>
                     </div>
-                    <div className="card-body">
-                        <div className="grid grid-cols-5 gap-2">
-                            <StatusBox
-                                label="Available"
-                                count={occupancy?.available ?? 0}
-                                color="bg-green-500"
-                            />
-                            <StatusBox
-                                label="Occupied"
-                                count={occupancy?.occupied ?? 0}
-                                color="bg-red-500"
-                            />
-                            <StatusBox
-                                label="Dirty"
-                                count={occupancy?.dirty ?? 0}
-                                color="bg-yellow-500"
-                            />
-                            <StatusBox
-                                label="Maintenance"
-                                count={occupancy?.maintenance ?? 0}
-                                color="bg-slate-500"
-                            />
-                            <StatusBox
-                                label="Total"
-                                count={occupancy?.total ?? 0}
-                                color="bg-primary-500"
-                            />
-                        </div>
+                    <div className="flex-1 p-5 overflow-y-auto">
+                        <TodayActivity
+                            onCheckIn={(id) => navigate(`/reservations?checkin=${id}`)}
+                            onCheckOut={(id) => navigate(`/rooms?checkout=${id}`)}
+                        />
                     </div>
                 </div>
-            )}
+            </div>
 
-            {/* Today's Activity */}
-            {showFrontDeskSection && (
-                <div>
-                    <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                        <Calendar size={18} className="text-primary-400" />
-                        Today's Activity
-                    </h3>
-                    <TodayActivity
-                        onCheckIn={(id) => navigate(`/reservations?checkin=${id}`)}
-                        onCheckOut={(id) => navigate(`/rooms?checkout=${id}`)}
-                    />
-                </div>
-            )}
+
 
         </div>
     );
 }
 
-// Helper component for room status boxes
-function StatusBox({ label, count, color }: { label: string; count: number; color: string }) {
-    return (
-        <div className="text-center p-3 bg-slate-700/30 rounded-lg">
-            <div className={`w-4 h-4 ${color} rounded-full mx-auto mb-2`} />
-            <p className="text-2xl font-bold text-white">{count}</p>
-            <p className="text-xs text-slate-400">{label}</p>
-        </div>
-    );
-}
+

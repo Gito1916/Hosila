@@ -5,11 +5,7 @@ import { Header } from './Header';
 import { PWAPrompt } from './PWAPrompt';
 import { OfflineIndicator } from './OfflineIndicator';
 
-interface MainLayoutProps {
-    title?: string;
-}
-
-export function MainLayout({ title = 'Dashboard' }: MainLayoutProps) {
+export function MainLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const handleMenuClick = useCallback(() => {
@@ -30,7 +26,7 @@ export function MainLayout({ title = 'Dashboard' }: MainLayoutProps) {
 
             {/* Main content area - full width on mobile, offset on desktop */}
             <div className="lg:ml-64">
-                <Header title={title} onMenuClick={handleMenuClick} />
+                <Header onMenuClick={handleMenuClick} />
                 <main className="p-4 lg:p-6">
                     <Outlet />
                 </main>

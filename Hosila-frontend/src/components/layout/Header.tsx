@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useThemeStore } from '@/stores/themeStore';
+import { useAuthStore } from '@/stores/authStore';
 import { NotificationPanel } from './NotificationPanel';
 import { format } from 'date-fns';
 import { Menu, Sun, Moon, Cloud, CloudOff } from 'lucide-react';
 
 
 interface HeaderProps {
-    title: string;
     onMenuClick: () => void;
 }
 
-export function Header({ title, onMenuClick }: HeaderProps) {
+export function Header({ onMenuClick }: HeaderProps) {
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const { theme, toggleTheme } = useThemeStore();
+    const hotelName = useAuthStore((state) => state.activeHotelName);
 
     useEffect(() => {
         const handleOnline = () => setIsOnline(true);
@@ -27,7 +28,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
 
     return (
         <header className="h-16 bg-slate-800 light-mode:bg-white border-b border-slate-700 light-mode:border-slate-200 flex items-center justify-between px-4 lg:px-6">
-            {/* Left side - Menu button and title */}
+            {/* Left side - Menu button and hotel name */}
             <div className="flex items-center gap-3">
                 <button
                     onClick={onMenuClick}
@@ -36,9 +37,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
                 >
                     <Menu size={24} />
                 </button>
-
-                {/* Page Title */}
-                <h1 className="text-xl font-semibold text-white light-mode:text-slate-900">{title}</h1>
+                <h1 className="text-xl font-semibold text-white light-mode:text-slate-900">{hotelName || 'Hosila'}</h1>
             </div>
 
             {/* Right side */}

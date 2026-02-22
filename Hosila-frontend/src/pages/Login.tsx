@@ -3,7 +3,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useHotel, useUsers } from '@/hooks/useSupabaseData';
 import { supabase } from '@/lib/supabase';
-import { Building2, Eye, EyeOff, Loader2, ChevronDown, Wifi, WifiOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ChevronDown, Wifi, WifiOff } from 'lucide-react';
 
 export function LoginPage() {
     const navigate = useNavigate();
@@ -17,8 +17,6 @@ export function LoginPage() {
     const [sessionChecked, setSessionChecked] = useState(false);
 
     // Check for an active Supabase session.
-    // If there is NO session at all (new browser/device), redirect to onboarding
-    // instead of showing a login form that will fail with 406 errors.
     useEffect(() => {
         async function checkSessionAndRedirect() {
             if (!supabase) {
@@ -27,21 +25,18 @@ export function LoginPage() {
             }
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
-                // No active Supabase session — this is a brand new browser instance.
                 navigate('/onboarding', { replace: true });
                 return;
             }
-            // Session exists — user is returning after a local session timeout.
-            // Show the normal login form.
             setSessionChecked(true);
         }
         checkSessionAndRedirect();
     }, [navigate]);
 
-    // Get hotel info for branding (from Supabase) — only after session check
+    // Get hotel info for branding (from Supabase)
     const { data: hotel } = useHotel();
 
-    // Get all active users for the role dropdown (from Supabase)
+    // Get all active users for the role dropdown
     const { data: allUsers } = useUsers();
     const users = allUsers?.filter(u => u.is_active);
 
@@ -77,7 +72,6 @@ export function LoginPage() {
 
         setIsSubmitting(true);
 
-        // Find the selected user's username to pass to login
         const selectedUser = users?.find(u => u.id === selectedUserId);
         if (!selectedUser) {
             setIsSubmitting(false);
@@ -93,12 +87,12 @@ export function LoginPage() {
         setIsSubmitting(false);
     };
 
-    // Check if hotel branding exists (post-onboarding state)
+    // Check if hotel branding exists
     const hasHotelBranding = hotel && hotel.name && hotel.name !== 'My Hotel';
 
     return (
         <div className="min-h-screen bg-slate-900 flex">
-            {/* Left Side — HotelFlow Branding */}
+            {/* Left Side — Hosila Branding */}
             <div className="hidden lg:flex flex-col justify-center items-center w-1/2 bg-gradient-to-br from-slate-900 via-slate-800 to-primary-900/30 p-12 relative overflow-hidden">
                 {/* Background decorations */}
                 <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
@@ -107,10 +101,8 @@ export function LoginPage() {
                 </div>
 
                 <div className="relative z-10 max-w-md text-center">
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-primary-500 rounded-2xl mb-6 shadow-lg shadow-primary-500/25">
-                        <Building2 className="text-white" size={40} />
-                    </div>
-                    <h1 className="text-4xl font-bold text-white mb-3">HotelFlow</h1>
+                    <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-20 h-20 rounded-2xl mx-auto mb-6 shadow-lg shadow-primary-500/25" />
+                    <h1 className="text-4xl font-bold text-white mb-3">Hosila</h1>
                     <p className="text-lg text-slate-400 mb-8">
                         Property Management System
                     </p>
@@ -132,7 +124,7 @@ export function LoginPage() {
                 </div>
 
                 <p className="absolute bottom-6 text-slate-600 text-xs">
-                    © 2026 HotelFlow. All rights reserved.
+                    © 2026 Hosila. All rights reserved.
                 </p>
             </div>
 
@@ -148,12 +140,10 @@ export function LoginPage() {
                                 className="w-20 h-20 rounded-2xl object-cover mx-auto mb-4 border-2 border-slate-700"
                             />
                         ) : (
-                            <div className="w-20 h-20 bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border-2 border-slate-700">
-                                <Building2 className="text-slate-500" size={32} />
-                            </div>
+                            <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-20 h-20 rounded-2xl mx-auto mb-4 border-2 border-slate-700 bg-slate-800 p-2" />
                         )}
                         <h2 className="text-2xl font-bold text-white">
-                            {hasHotelBranding ? hotel.name : 'HotelFlow'}
+                            {hasHotelBranding ? hotel.name : 'Hosila'}
                         </h2>
                         {!hasHotelBranding && (
                             <p className="text-slate-400 mt-1">Sign in to your hotel</p>
@@ -175,11 +165,11 @@ export function LoginPage() {
                         </div>
                     </div>
 
-                    {/* Mobile HotelFlow logo (shown only on small screens) */}
+                    {/* Mobile Hosila logo (shown only on small screens) */}
                     <div className="lg:hidden text-center mb-6">
                         <div className="inline-flex items-center gap-2 text-slate-500 text-sm">
-                            <Building2 size={14} />
-                            Powered by HotelFlow
+                            <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-4 h-4" />
+                            Powered by Hosila
                         </div>
                     </div>
 

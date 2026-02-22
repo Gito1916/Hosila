@@ -23,7 +23,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
     const [accountPassword, setAccountPassword] = useState('');
     const [accountError, setAccountError] = useState('');
 
-    // Hotel form
+    // Hotel form (new setup)
     const [hotelName, setHotelName] = useState('');
     const [hotelAddress, setHotelAddress] = useState('');
     const [hotelPhone, setHotelPhone] = useState('');
@@ -78,7 +78,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                 return;
             }
 
-            // Pre-fill hotel email with account email
+            // Pre-fill org email with account email
             if (!hotelEmail) {
                 setHotelEmail(accountEmail);
             }
@@ -105,10 +105,9 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
             clearHotelIdCache();
 
             // Seed the database — creates hotel + admin user in Supabase
-            // This works because user is authenticated (RLS passes)
             await seedDatabase();
 
-            // Now update the hotel with the user's info
+            // Update hotel with user-provided details
             await updateHotel({
                 name: hotelName,
                 address: hotelAddress,
@@ -126,7 +125,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
     };
 
     // =========================================================================
-    // Connect Existing: Login to Supabase → verify hotel data exists
+    // Connect Existing: Login to Supabase → verify org data exists
     // =========================================================================
     const handleConnectExisting = async () => {
         if (!connectEmail || !connectEmail.includes('@')) {
@@ -215,7 +214,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
     };
 
     // =========================================================================
-    // New Hotel: Complete → auto-login as admin
+    // New Org: Complete → auto-login as admin
     // =========================================================================
     const handleComplete = async () => {
         setIsSubmitting(true);
@@ -302,10 +301,10 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                     {currentStep === 'welcome' && (
                         <div className="p-6">
                             <div className="text-center mb-8">
-                                <div className="w-20 h-20 bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Building2 size={40} className="text-primary-400" />
+                                <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-16 h-16 rounded-xl" />
                                 </div>
-                                <h2 className="text-2xl font-bold text-white">Welcome to HotelFlow</h2>
+                                <h2 className="text-2xl font-bold text-white">Welcome to Hosila</h2>
                                 <p className="text-slate-400 mt-2">How would you like to get started?</p>
                             </div>
 
@@ -319,8 +318,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                             <Building2 size={24} className="text-primary-400" />
                                         </div>
                                         <div>
-                                            <p className="text-white font-semibold text-lg">Set Up New Hotel</p>
-                                            <p className="text-sm text-slate-400">First time using HotelFlow? Start fresh.</p>
+                                            <p className="text-white font-semibold text-lg">Create New Hotel</p>
+                                            <p className="text-sm text-slate-400">First time using Hosila? Set up your hotel.</p>
                                         </div>
                                         <ChevronRight size={20} className="text-slate-500 ml-auto shrink-0" />
                                     </div>
@@ -336,8 +335,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                             <Link2 size={24} className="text-cyan-400" />
                                         </div>
                                         <div>
-                                            <p className="text-white font-semibold text-lg">Connect to Existing Hotel</p>
-                                            <p className="text-sm text-slate-400">Already set up? Link this device.</p>
+                                            <p className="text-white font-semibold text-lg">Connect to Hotel</p>
+                                            <p className="text-sm text-slate-400">Already set up? Join an existing hotel.</p>
                                         </div>
                                         <ChevronRight size={20} className="text-slate-500 ml-auto shrink-0" />
                                     </div>
@@ -435,10 +434,10 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                     {currentStep === 'hotel' && (
                         <div className="p-6">
                             <div className="text-center mb-6">
-                                <div className="w-16 h-16 bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Building2 size={32} className="text-primary-400" />
+                                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-12 h-12 rounded-xl" />
                                 </div>
-                                <h2 className="text-2xl font-bold text-white">Hotel Information</h2>
+                                <h2 className="text-2xl font-bold text-white">Hotel Details</h2>
                                 <p className="text-slate-400 mt-2">Tell us about your hotel</p>
                             </div>
 
@@ -513,7 +512,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                         </div>
                     )}
 
-                    {/* Connect to Existing Hotel */}
+                    {/* Connect to Existing Org */}
                     {currentStep === 'connect' && (
                         <div className="p-6">
                             <div className="text-center mb-6">
@@ -521,7 +520,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                     <Monitor size={32} className="text-cyan-400" />
                                 </div>
                                 <h2 className="text-2xl font-bold text-white">Connect to Hotel</h2>
-                                <p className="text-slate-400 mt-2">Enter the cloud account details from the hotel's primary device</p>
+                                <p className="text-slate-400 mt-2">Enter the cloud account details from the hotel's account</p>
                             </div>
 
                             {!connectSuccess ? (
@@ -583,7 +582,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                     </button>
 
                                     <p className="text-xs text-slate-500 text-center">
-                                        Ask the hotel manager for the cloud email and password.
+                                        Ask the hotel administrator for the cloud email and password.
                                     </p>
                                 </div>
                             ) : (

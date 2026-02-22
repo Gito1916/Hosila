@@ -9,6 +9,7 @@ import { SessionTimeoutWarning } from '@/components/layout/SessionTimeoutWarning
 import { OnboardingWizard } from '@/components/onboarding';
 import { useHotel } from '@/hooks/useSupabaseData';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { NotificationToast } from '@/components/notifications/NotificationToast';
 import { Loader2, WifiOff } from 'lucide-react';
 
@@ -62,15 +63,16 @@ function OfflineBanner() {
 function ProtectedRoute() {
     const { isAuthenticated, isLoading } = useAuthStore();
 
-    // Auth check FIRST — if not authenticated, go straight to login.
+    // Use React Query to fetch hotel data — replaces useLiveQuery(db.hotel...)
+    // IMPORTANT: Must be called before any early returns to satisfy React's rules of hooks.
+    const { data: hotel, isLoading: hotelLoading, error: hotelError } = useHotel();
+
+    // Auth check — if not authenticated, go straight to login.
     // This prevents session timeout from showing the onboarding wizard
     // (which happens when useHotel() errors due to missing Supabase session).
     if (!isLoading && !isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
-
-    // Use React Query to fetch hotel data — replaces useLiveQuery(db.hotel...)
-    const { data: hotel, isLoading: hotelLoading, error: hotelError } = useHotel();
 
     if (isLoading || hotelLoading) {
         return (
@@ -101,6 +103,9 @@ function AppInner() {
     // Subscribe to Supabase Realtime for critical tables
     useRealtimeSync();
 
+    // Monitor connectivity and flush offline write queue on reconnect
+    useOfflineSync();
+
     useEffect(() => {
         // Revalidate session in the background (doesn't block UI)
         checkSession().catch(console.error);
@@ -127,11 +132,11 @@ function AppInner() {
 
                         {/* Protected routes */}
                         <Route element={<ProtectedRoute />}>
-                            <Route element={<MainLayout title="Dashboard" />}>
+                            <Route element={<MainLayout />}>
                                 <Route index element={<DashboardPage />} />
                             </Route>
 
-                            <Route element={<MainLayout title="Bookings" />}>
+                            <Route element={<MainLayout />}>
                                 <Route path="/bookings" element={<BookingsPage />} />
                             </Route>
 
@@ -139,27 +144,27 @@ function AppInner() {
                             <Route path="/rooms" element={<Navigate to="/bookings" replace />} />
                             <Route path="/reservations" element={<Navigate to="/bookings" replace />} />
 
-                            <Route element={<MainLayout title="Guests" />}>
+                            <Route element={<MainLayout />}>
                                 <Route path="/guests" element={<GuestsPage />} />
                             </Route>
 
-                            <Route element={<MainLayout title="Guest Ledger" />}>
+                            <Route element={<MainLayout />}>
                                 <Route path="/bookings/:bookingId/ledger" element={<GuestLedgerPage />} />
                             </Route>
 
-                            <Route element={<MainLayout title="Restaurant" />}>
+                            <Route element={<MainLayout />}>
                                 <Route path="/restaurant" element={<RestaurantPage />} />
                             </Route>
 
-                            <Route element={<MainLayout title="Inventory" />}>
+                            <Route element={<MainLayout />}>
                                 <Route path="/inventory" element={<InventoryPage />} />
                             </Route>
 
-                            <Route element={<MainLayout title="Finance" />}>
+                            <Route element={<MainLayout />}>
                                 <Route path="/finance" element={<FinancePage />} />
                             </Route>
 
-                            <Route element={<MainLayout title="Settings" />}>
+                            <Route element={<MainLayout />}>
                                 <Route path="/settings" element={<SettingsPage />} />
                             </Route>
                         </Route>

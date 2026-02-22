@@ -69,12 +69,6 @@ export function FinancePage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-white">Finance</h2>
-                    <p className="text-slate-400">Revenue, expenses, and financial reports</p>
-                </div>
-            </div>
 
             {/* Tab Navigation + Date Filters + Export in same row */}
             <div className="flex flex-wrap items-center justify-between gap-4">
