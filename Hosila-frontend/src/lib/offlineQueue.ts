@@ -16,7 +16,6 @@
 import { get as idbGet, set as idbSet } from 'idb-keyval';
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from './supabase';
-import { toast } from './errorMessages';
 
 // ============================================================================
 // Types
