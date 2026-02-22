@@ -8,13 +8,13 @@ export default defineConfig({
     plugins: [
         react(),
         VitePWA({
-            registerType: 'autoUpdate',
+            registerType: 'prompt',
             includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
             manifest: {
-                name: 'HotelFlow',
-                short_name: 'HotelFlow',
-                description: 'Offline-first hotel management system',
-                theme_color: '#2563EB',
+                name: 'Hosila',
+                short_name: 'Hosila',
+                description: 'Hotel Property Management System',
+                theme_color: '#21C29C',
                 background_color: '#0f172a',
                 display: 'standalone',
                 icons: [

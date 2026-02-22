@@ -188,6 +188,10 @@ export interface HotelSettings {
     invoice_terms?: string;
     // Onboarding
     onboarding_complete?: boolean;
+    // Configurable tax name (default: 'TDL')
+    // Allows hotels in different states to rename TDL to their local tax name
+    // e.g., 'Consumption Tax', 'Tourism Levy', 'Hotel Occupancy Tax', etc.
+    tdl_name?: string;
 }
 
 export interface Room {

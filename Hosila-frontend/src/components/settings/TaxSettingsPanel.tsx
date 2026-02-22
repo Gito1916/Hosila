@@ -37,12 +37,14 @@ function DepartmentTaxCard({
     onChange,
     onSave,
     isSaving,
+    tdlName,
 }: {
     dept: typeof DEPARTMENTS[number];
     settings: TaxSettings | null;
     onChange: (field: string, value: number | boolean | string) => void;
     onSave: () => void;
     isSaving: boolean;
+    tdlName: string;
 }) {
     const Icon = dept.icon;
     const colorMap: Record<string, string> = {
@@ -85,9 +87,9 @@ function DepartmentTaxCard({
                     onToggle={() => onChange('vat_enabled', !(settings?.vat_enabled ?? true))}
                 />
 
-                {/* TDL */}
+                {/* TDL / Custom Tax */}
                 <TaxRow
-                    label="TDL (Tourism Dev. Levy)"
+                    label={tdlName}
                     rate={settings?.tdl_rate ?? 5}
                     enabled={settings?.tdl_enabled ?? true}
                     onRateChange={(v) => onChange('tdl_rate', v)}
@@ -99,7 +101,7 @@ function DepartmentTaxCard({
             <div className="space-y-3 pt-2 border-t border-slate-700">
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                     <Info size={14} />
-                    <span>Choose how VAT and TDL are calculated</span>
+                    <span>Choose how VAT and {tdlName} are calculated</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
@@ -115,7 +117,7 @@ function DepartmentTaxCard({
                         </select>
                     </div>
                     <div>
-                        <label className="label text-xs">TDL calculated on</label>
+                        <label className="label text-xs">{tdlName} calculated on</label>
                         <select
                             value={settings?.tdl_calculation_base ?? 'base_plus_sc'}
                             onChange={(e) => onChange('tdl_calculation_base', e.target.value)}
@@ -292,9 +294,23 @@ export function TaxSettingsPanel() {
                     </select>
                 </div>
 
+                <div>
+                    <label className="label">State/Local Tax Name</label>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                        Customize the name of the third tax component (default: TDL). This applies to all departments, invoices, and reports.
+                    </p>
+                    <input
+                        type="text"
+                        value={localSettings?.tdl_name ?? 'TDL'}
+                        onChange={(e) => setLocalSettings(s => s ? { ...s, tdl_name: e.target.value } : null)}
+                        className="input w-64"
+                        placeholder="e.g. TDL, Consumption Tax, Tourism Levy"
+                    />
+                </div>
+
                 <button onClick={handleSaveLocal} disabled={isSavingLocal} className="btn btn-primary">
                     <Save size={16} className="mr-2" />
-                    Save Currency
+                    Save Currency & Tax Name
                 </button>
             </div>
 
@@ -351,7 +367,7 @@ export function TaxSettingsPanel() {
                     <Percent size={20} className="text-primary-400" />
                     <div>
                         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Tax Rates by Department</h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Configure Service Charge, VAT, and TDL per department</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Configure Service Charge, VAT, and {localSettings?.tdl_name || 'TDL'} per department</p>
                     </div>
                 </div>
             </div>
@@ -364,6 +380,7 @@ export function TaxSettingsPanel() {
                     onChange={(field, value) => handleFieldChange(dept.key, field, value)}
                     onSave={() => handleSaveDept(dept.key)}
                     isSaving={updateMutation.isPending}
+                    tdlName={localSettings?.tdl_name || 'TDL'}
                 />
             ))}
         </div>

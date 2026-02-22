@@ -11,6 +11,7 @@ import { useHotel } from '@/hooks/useSupabaseData';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { NotificationToast } from '@/components/notifications/NotificationToast';
+import { UpdatePrompt } from '@/components/layout/UpdatePrompt';
 import { Loader2, WifiOff } from 'lucide-react';
 
 // Lazy load pages for code splitting (improved performance)
@@ -118,6 +119,7 @@ function AppInner() {
     return (
         <ErrorBoundary>
             <OfflineBanner />
+            <UpdatePrompt />
             <HashRouter>
                 {/* Session timeout warning - shown when session is about to expire */}
                 <SessionTimeoutWarning />

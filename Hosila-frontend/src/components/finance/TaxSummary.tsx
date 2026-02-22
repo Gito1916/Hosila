@@ -12,6 +12,7 @@ import {
     FileText,
 } from 'lucide-react';
 import { requireSupabase, getHotelId } from '@/lib/api';
+import { useHotel } from '@/hooks/useSupabaseData';
 import { useTaxSettings, useTaxRemittanceReport, useMarkRemitted, useReportDownload } from '@/hooks/useHosilaApi';
 import { toast } from '@/lib/errorMessages';
 
@@ -23,6 +24,8 @@ interface TaxSummaryProps {
 export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
     // ── Backend tax settings ─────────────────────────────────
     const { data: taxSettingsData } = useTaxSettings();
+    const { data: hotel } = useHotel();
+    const tdlName = hotel?.settings?.tdl_name || 'TDL';
     const settings = taxSettingsData?.settings ?? [];
     const accSettings = settings.find(s => s.department === 'accommodation') ?? settings.find(s => s.department === 'all');
 
@@ -131,7 +134,7 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
                 </p>
             </div>
 
-            {/* ═══ Top KPI Cards — SC / VAT / TDL / Total ═══ */}
+            {/* ═══ Top KPI Cards — SC / VAT / {tdlName} / Total ═══ */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
                     <div className="flex items-center gap-2 mb-1.5">
@@ -152,7 +155,7 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
                 <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
                     <div className="flex items-center gap-2 mb-1.5">
                         <TrendingUp size={16} className="text-amber-400" />
-                        <span className="text-slate-400 text-sm">Tourism Levy</span>
+                        <span className="text-slate-400 text-sm">{tdlName}</span>
                     </div>
                     <p className="text-2xl font-bold text-white">{f(taxSummary.totalTDL)}</p>
                     <p className="text-xs text-slate-500 mt-1">{accSettings?.tdl_enabled ? `${accSettings.tdl_rate}%` : 'Disabled'}</p>
@@ -181,7 +184,7 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
                                 <th className="text-right text-slate-400 text-sm font-medium py-3 px-4">Base Revenue</th>
                                 <th className="text-right text-blue-400 text-sm font-medium py-3 px-4">SC</th>
                                 <th className="text-right text-green-400 text-sm font-medium py-3 px-4">VAT</th>
-                                <th className="text-right text-amber-400 text-sm font-medium py-3 px-4">TDL</th>
+                                <th className="text-right text-amber-400 text-sm font-medium py-3 px-4">{tdlName}</th>
                                 <th className="text-right text-slate-400 text-sm font-medium py-3 pl-4">Total Tax</th>
                             </tr>
                         </thead>
@@ -261,7 +264,7 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {[
                                 { type: 'vat', label: 'VAT', amount: taxSummary.totalVAT, color: 'green' },
-                                { type: 'tdl', label: 'TDL', amount: taxSummary.totalTDL, color: 'amber' },
+                                { type: 'tdl', label: tdlName, amount: taxSummary.totalTDL, color: 'amber' },
                                 { type: 'service_charge', label: 'Service Charge', amount: taxSummary.totalSC, color: 'blue' },
                             ].map((tax) => {
                                 const remitted = remittanceData?.remittances?.find(
@@ -321,9 +324,9 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
             {/* Info Note */}
             <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                 <p className="text-sm text-blue-300">
-                    <strong>Note:</strong> Tax breakdown shows Service Charge (SC), VAT, and Tourism Development Levy (TDL) separately.
+                    <strong>Note:</strong> Tax breakdown shows Service Charge (SC), VAT, and {tdlName} separately.
                     Rates are configured per-department in Settings → Finance.
-                    {accSettings && <> VAT: {accSettings.vat_rate}%, SC: {accSettings.service_charge_rate}%, TDL: {accSettings.tdl_enabled ? `${accSettings.tdl_rate}%` : 'Disabled'}.</>}
+                    {accSettings && <> VAT: {accSettings.vat_rate}%, SC: {accSettings.service_charge_rate}%, {tdlName}: {accSettings.tdl_enabled ? `${accSettings.tdl_rate}%` : 'Disabled'}.</>}
                 </p>
             </div>
         </div>

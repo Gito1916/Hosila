@@ -20,7 +20,7 @@ import { getAllExpenses } from '@/db/finance';
 import { getAllPayments } from '@/db/bookings';
 import { getAllCharges } from '@/db/accounting';
 import { requireSupabase, getHotelId } from '@/lib/api';
-import { useExpenses } from '@/hooks/useSupabaseData';
+import { useExpenses, useHotel } from '@/hooks/useSupabaseData';
 import { useDashboardKPIs } from '@/hooks/useHosilaApi';
 import type { ExpenseCategory } from '@/types';
 
@@ -286,6 +286,8 @@ export function FinanceDashboard({ dateFilter = 'daily', onNavigate, onAddExpens
     const startStr = format(start, 'yyyy-MM-dd');
     const endStr = format(end, 'yyyy-MM-dd');
     const { data: backendKPIs } = useDashboardKPIs(startStr, endStr);
+    const { data: hotel } = useHotel();
+    const tdlName = hotel?.settings?.tdl_name || 'TDL';
 
     // ── Data fetching ────────────────────────────────────────────────
     const { data: expenses } = useQuery({ queryKey: ['expenses'], queryFn: getAllExpenses });
@@ -497,7 +499,7 @@ export function FinanceDashboard({ dateFilter = 'daily', onNavigate, onAddExpens
                             ? (backendKPIs.total_vat_collected + backendKPIs.total_tdl_collected + backendKPIs.total_service_charge)
                             : totalTaxCollected
                     )}
-                    trendLabel={backendKPIs ? `VAT ${fmt(backendKPIs.total_vat_collected)} · TDL ${fmt(backendKPIs.total_tdl_collected)}` : 'Collected'}
+                    trendLabel={backendKPIs ? `VAT ${fmt(backendKPIs.total_vat_collected)} · ${tdlName} ${fmt(backendKPIs.total_tdl_collected)}` : 'Collected'}
                     icon={Scale}
                     accentColor="#f59e0b"
                 />
