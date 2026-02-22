@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
-import { useUsers } from '@/hooks/useSupabaseData';
-import { createUser, updateUser, deleteUser, updateUserPassword } from '@/db/settings';
+import { useUsers, useDeleteUser } from '@/hooks/useSupabaseData';
+import { createUser, updateUser, updateUserPassword } from '@/db/settings';
 import { toast } from '@/lib/errorMessages';
 import type { User, UserRole } from '@/types';
 import {
@@ -33,6 +33,7 @@ export function UserManagement() {
     const [resetPasswordUser, setResetPasswordUser] = useState<User | null>(null);
 
     const { data: users } = useUsers();
+    const deleteUserMutation = useDeleteUser();
 
     const handleEdit = (user: User) => {
         setEditingUser(user);
@@ -45,7 +46,12 @@ export function UserManagement() {
             return;
         }
         if (confirm(`Delete user "${user.name}"?`)) {
-            await deleteUser(user.id);
+            try {
+                await deleteUserMutation.mutateAsync(user.id);
+                toast.success('User deleted', `${user.name} has been removed.`);
+            } catch (err) {
+                toast.error('Failed to delete user', err);
+            }
         }
     };
 
