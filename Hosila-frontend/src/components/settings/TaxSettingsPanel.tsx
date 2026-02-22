@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getHotelSettings, updateHotelSettings } from '@/db/settings';
 import { toast } from '@/lib/errorMessages';
 import type { HotelSettings } from '@/types';
-import { useTaxSettings, useUpdateTaxSettings } from '@/hooks/useHosilaApi';
+import { requireSupabase, getHotelId } from '@/lib/api';
 import type { TaxSettings } from '@/lib/apiClient';
 import {
     Save,
@@ -98,7 +98,7 @@ function DepartmentTaxCard({
             </div>
 
             {/* Calculation Base */}
-            <div className="space-y-3 pt-2 border-t border-slate-700">
+            <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                     <Info size={14} />
                     <span>Choose how VAT and {tdlName} are calculated</span>
@@ -214,23 +214,45 @@ export function TaxSettingsPanel() {
         }
     };
 
-    // ── Backend tax settings ─────────────────────────────────
-    const { data: taxData, isLoading: isLoadingTax } = useTaxSettings();
-    const updateMutation = useUpdateTaxSettings();
+    // ── Backend tax settings (direct Supabase) ────────────────
+    const [taxSettings, setTaxSettings] = useState<Record<string, Partial<TaxSettings>>>({});
+    const [isLoadingTax, setIsLoadingTax] = useState(true);
+    const [isSavingDept, setIsSavingDept] = useState(false);
+
+    // Load tax settings directly from Supabase
+    useEffect(() => {
+        async function loadTax() {
+            try {
+                const sb = requireSupabase();
+                const hotelId = await getHotelId();
+                const { data, error } = await sb
+                    .from('tax_settings')
+                    .select('*')
+                    .eq('hotel_id', hotelId);
+                if (error) throw error;
+                const map: Record<string, Partial<TaxSettings>> = {};
+                for (const s of (data ?? [])) {
+                    map[s.department] = { ...s };
+                }
+                setTaxSettings(map);
+            } catch (err) {
+                console.error('Failed to load tax settings:', err);
+            } finally {
+                setIsLoadingTax(false);
+            }
+        }
+        loadTax();
+    }, []);
 
     // Local draft state for each department
     const [drafts, setDrafts] = useState<Record<string, Partial<TaxSettings>>>({});
 
     // Populate drafts when data loads
     useEffect(() => {
-        if (taxData?.settings) {
-            const map: Record<string, Partial<TaxSettings>> = {};
-            for (const s of taxData.settings) {
-                map[s.department] = { ...s };
-            }
-            setDrafts(map);
+        if (Object.keys(taxSettings).length > 0) {
+            setDrafts({ ...taxSettings });
         }
-    }, [taxData]);
+    }, [taxSettings]);
 
     const getDeptSettings = (dept: string): TaxSettings | null => {
         const draft = drafts[dept];
@@ -248,11 +270,39 @@ export function TaxSettingsPanel() {
     const handleSaveDept = async (dept: string) => {
         const data = drafts[dept];
         if (!data) return;
+        setIsSavingDept(true);
         try {
-            await updateMutation.mutateAsync({ department: dept, data });
+            const sb = requireSupabase();
+            const hotelId = await getHotelId();
+            const payload = {
+                hotel_id: hotelId,
+                department: dept,
+                vat_rate: data.vat_rate ?? 7.5,
+                tdl_rate: data.tdl_rate ?? 5,
+                service_charge_rate: data.service_charge_rate ?? 10,
+                service_charge_enabled: data.service_charge_enabled ?? true,
+                vat_enabled: data.vat_enabled ?? true,
+                tdl_enabled: data.tdl_enabled ?? false,
+                vat_calculation_base: data.vat_calculation_base ?? 'base_only',
+                tdl_calculation_base: data.tdl_calculation_base ?? 'base_only',
+                updated_at: new Date().toISOString(),
+            };
+
+            // Upsert: insert or update if exists
+            if (data.id) {
+                const { error } = await sb.from('tax_settings').update(payload).eq('id', data.id);
+                if (error) throw error;
+            } else {
+                const { data: inserted, error } = await sb.from('tax_settings').insert(payload).select().single();
+                if (error) throw error;
+                // Update local state with new id
+                setDrafts(prev => ({ ...prev, [dept]: { ...prev[dept], id: inserted.id } }));
+            }
             toast.success(`${dept} tax settings saved`);
         } catch (err) {
             toast.error('Failed to save tax settings', err);
+        } finally {
+            setIsSavingDept(false);
         }
     };
 
@@ -331,7 +381,7 @@ export function TaxSettingsPanel() {
                         onClick={() => setLocalSettings(s => s ? { ...s, auto_late_checkout_enabled: !s.auto_late_checkout_enabled } : null)}
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${localSettings?.auto_late_checkout_enabled
                             ? 'bg-primary-500/20 text-primary-400'
-                            : 'bg-slate-700 text-slate-400'
+                            : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                             }`}
                     >
                         {localSettings?.auto_late_checkout_enabled ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
@@ -341,7 +391,7 @@ export function TaxSettingsPanel() {
 
                 {localSettings?.auto_late_checkout_enabled && (
                     <div className="flex items-center gap-3 pl-12">
-                        <label className="text-sm text-slate-300">Fee per hour:</label>
+                        <label className="text-sm text-slate-600 dark:text-slate-300">Fee per hour:</label>
                         <div className="relative w-40">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
                             <input
@@ -379,7 +429,7 @@ export function TaxSettingsPanel() {
                     settings={getDeptSettings(dept.key)}
                     onChange={(field, value) => handleFieldChange(dept.key, field, value)}
                     onSave={() => handleSaveDept(dept.key)}
-                    isSaving={updateMutation.isPending}
+                    isSaving={isSavingDept}
                     tdlName={localSettings?.tdl_name || 'TDL'}
                 />
             ))}

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useThemeStore } from '@/stores/themeStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useQueryClient } from '@tanstack/react-query';
 import { NotificationPanel } from './NotificationPanel';
 import { format } from 'date-fns';
-import { Menu, Sun, Moon, Cloud, CloudOff } from 'lucide-react';
+import { Menu, Sun, Moon, Cloud, CloudOff, RefreshCw } from 'lucide-react';
 
 
 interface HeaderProps {
@@ -25,6 +26,15 @@ export function Header({ onMenuClick }: HeaderProps) {
             window.removeEventListener('offline', handleOffline);
         };
     }, []);
+
+    const queryClient = useQueryClient();
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const handleReload = useCallback(async () => {
+        setIsRefreshing(true);
+        await queryClient.invalidateQueries();
+        // Small delay so user sees the spin
+        setTimeout(() => setIsRefreshing(false), 800);
+    }, [queryClient]);
 
     return (
         <header className="h-16 bg-slate-800 light-mode:bg-white border-b border-slate-700 light-mode:border-slate-200 flex items-center justify-between px-4 lg:px-6">
@@ -55,6 +65,16 @@ export function Header({ onMenuClick }: HeaderProps) {
                         <span className="hidden sm:inline">{isOnline ? 'Connected' : 'Offline'}</span>
                     </div>
                 </div>
+
+                {/* Reload / Refresh button (essential for PWA without browser chrome) */}
+                <button
+                    onClick={handleReload}
+                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+                    aria-label="Refresh data"
+                    title="Refresh data"
+                >
+                    <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
+                </button>
 
                 {/* Theme Toggle */}
                 <button
