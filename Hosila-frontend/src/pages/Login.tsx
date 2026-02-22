@@ -81,6 +81,11 @@ export function LoginPage() {
         const success = await login(selectedUser.username, password);
 
         if (success) {
+            // Invalidate all queries so they refetch with the new auth session.
+            // This is critical: without this, useHotel() serves stale pre-auth
+            // data (hotel=undefined) which causes ProtectedRoute to show onboarding.
+            const { queryClient } = await import('@/lib/queryClient');
+            await queryClient.invalidateQueries();
             navigate('/');
         }
 
