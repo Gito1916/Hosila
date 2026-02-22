@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getHotelSettings, updateHotelSettings } from '@/db/settings';
 import { toast } from '@/lib/errorMessages';
 import type { HotelSettings } from '@/types';
-import { requireSupabase, getHotelId } from '@/lib/api';
+import { useTaxSettings, useUpdateTaxSettings } from '@/hooks/useHosilaApi';
 import type { TaxSettings } from '@/lib/apiClient';
 import {
     Save,
@@ -214,45 +214,23 @@ export function TaxSettingsPanel() {
         }
     };
 
-    // ── Backend tax settings (direct Supabase) ────────────────
-    const [taxSettings, setTaxSettings] = useState<Record<string, Partial<TaxSettings>>>({});
-    const [isLoadingTax, setIsLoadingTax] = useState(true);
-    const [isSavingDept, setIsSavingDept] = useState(false);
-
-    // Load tax settings directly from Supabase
-    useEffect(() => {
-        async function loadTax() {
-            try {
-                const sb = requireSupabase();
-                const hotelId = await getHotelId();
-                const { data, error } = await sb
-                    .from('tax_settings')
-                    .select('*')
-                    .eq('hotel_id', hotelId);
-                if (error) throw error;
-                const map: Record<string, Partial<TaxSettings>> = {};
-                for (const s of (data ?? [])) {
-                    map[s.department] = { ...s };
-                }
-                setTaxSettings(map);
-            } catch (err) {
-                console.error('Failed to load tax settings:', err);
-            } finally {
-                setIsLoadingTax(false);
-            }
-        }
-        loadTax();
-    }, []);
+    // ── Backend tax settings ─────────────────────────────────
+    const { data: taxData, isLoading: isLoadingTax } = useTaxSettings();
+    const updateMutation = useUpdateTaxSettings();
 
     // Local draft state for each department
     const [drafts, setDrafts] = useState<Record<string, Partial<TaxSettings>>>({});
 
     // Populate drafts when data loads
     useEffect(() => {
-        if (Object.keys(taxSettings).length > 0) {
-            setDrafts({ ...taxSettings });
+        if (taxData?.settings) {
+            const map: Record<string, Partial<TaxSettings>> = {};
+            for (const s of taxData.settings) {
+                map[s.department] = { ...s };
+            }
+            setDrafts(map);
         }
-    }, [taxSettings]);
+    }, [taxData]);
 
     const getDeptSettings = (dept: string): TaxSettings | null => {
         const draft = drafts[dept];
@@ -270,39 +248,11 @@ export function TaxSettingsPanel() {
     const handleSaveDept = async (dept: string) => {
         const data = drafts[dept];
         if (!data) return;
-        setIsSavingDept(true);
         try {
-            const sb = requireSupabase();
-            const hotelId = await getHotelId();
-            const payload = {
-                hotel_id: hotelId,
-                department: dept,
-                vat_rate: data.vat_rate ?? 7.5,
-                tdl_rate: data.tdl_rate ?? 5,
-                service_charge_rate: data.service_charge_rate ?? 10,
-                service_charge_enabled: data.service_charge_enabled ?? true,
-                vat_enabled: data.vat_enabled ?? true,
-                tdl_enabled: data.tdl_enabled ?? false,
-                vat_calculation_base: data.vat_calculation_base ?? 'base_only',
-                tdl_calculation_base: data.tdl_calculation_base ?? 'base_only',
-                updated_at: new Date().toISOString(),
-            };
-
-            // Upsert: insert or update if exists
-            if (data.id) {
-                const { error } = await sb.from('tax_settings').update(payload).eq('id', data.id);
-                if (error) throw error;
-            } else {
-                const { data: inserted, error } = await sb.from('tax_settings').insert(payload).select().single();
-                if (error) throw error;
-                // Update local state with new id
-                setDrafts(prev => ({ ...prev, [dept]: { ...prev[dept], id: inserted.id } }));
-            }
+            await updateMutation.mutateAsync({ department: dept, data });
             toast.success(`${dept} tax settings saved`);
         } catch (err) {
             toast.error('Failed to save tax settings', err);
-        } finally {
-            setIsSavingDept(false);
         }
     };
 
@@ -429,7 +379,7 @@ export function TaxSettingsPanel() {
                     settings={getDeptSettings(dept.key)}
                     onChange={(field, value) => handleFieldChange(dept.key, field, value)}
                     onSave={() => handleSaveDept(dept.key)}
-                    isSaving={isSavingDept}
+                    isSaving={updateMutation.isPending}
                     tdlName={localSettings?.tdl_name || 'TDL'}
                 />
             ))}

@@ -112,11 +112,13 @@ export interface CreateChargeData {
 
 /**
  * Create a charge (revenue recognition) with corresponding journal entries.
+ * Uses the FastAPI tax engine for full SC + VAT + TDL calculation.
+ * Falls back to local VAT-only calculation if the API is unreachable.
  *
  * Journal entries generated:
- *   DR: Guest AR (1020)          grossAmount
- *   CR: Revenue (40xx)           netRevenue
- *   CR: Tax Payable (2010)       taxAmount
+ *   DR: Guest AR (1020)          total (base + all taxes)
+ *   CR: Revenue (40xx)           base_amount
+ *   CR: Tax Payable (2010)       total_tax (SC + VAT + TDL)
  */
 export async function createCharge(data: CreateChargeData): Promise<Charge> {
     const sb = requireSupabase();
@@ -124,7 +126,34 @@ export async function createCharge(data: CreateChargeData): Promise<Charge> {
     const now = new Date();
     const chargeDate = data.charge_date || now;
 
-    const taxBreakdown = calculateTaxBreakdown(data.gross_amount, data.tax_rate);
+    // Try the FastAPI tax engine for full SC+VAT+TDL breakdown
+    let baseAmount = data.gross_amount;
+    let serviceChargeAmt = 0;
+    let vatAmount = 0;
+    let tdlAmount = 0;
+    let totalWithTax = data.gross_amount;
+    let taxRate = data.tax_rate;
+
+    try {
+        const { taxApi } = await import('@/lib/apiClient');
+        const breakdown = await taxApi.calculate(data.gross_amount, data.department);
+        baseAmount = breakdown.base_amount;
+        serviceChargeAmt = breakdown.service_charge.amount;
+        vatAmount = breakdown.vat.amount;
+        tdlAmount = breakdown.tdl.amount;
+        totalWithTax = breakdown.total;
+        taxRate = (breakdown.vat.rate || 0) + (breakdown.tdl.rate || 0) + (breakdown.service_charge.rate || 0);
+    } catch (err) {
+        // Fallback to local VAT-only calculation if API is unreachable
+        console.warn('Tax engine unreachable, falling back to local calculation:', err);
+        const fallback = calculateTaxBreakdown(data.gross_amount, data.tax_rate);
+        baseAmount = fallback.net_revenue;
+        vatAmount = fallback.tax_amount;
+        totalWithTax = fallback.gross_amount;
+        taxRate = fallback.tax_rate;
+    }
+
+    const totalTax = serviceChargeAmt + vatAmount + tdlAmount;
 
     const charge = {
         id: uuidv4(),
@@ -133,10 +162,15 @@ export async function createCharge(data: CreateChargeData): Promise<Charge> {
         booking_id: data.booking_id,
         department: data.department,
         description: data.description,
-        gross_amount: taxBreakdown.gross_amount,
-        net_revenue: taxBreakdown.net_revenue,
-        tax_amount: taxBreakdown.tax_amount,
-        tax_rate: taxBreakdown.tax_rate,
+        gross_amount: totalWithTax,
+        net_revenue: baseAmount,
+        tax_amount: totalTax,
+        tax_rate: taxRate,
+        // Store individual tax components for finance reporting
+        service_charge_amount: serviceChargeAmt,
+        vat_amount_v2: vatAmount,
+        tdl_amount: tdlAmount,
+        base_amount: baseAmount,
         status: 'active',
         reference_id: data.reference_id,
         reference_type: data.reference_type,
@@ -156,7 +190,7 @@ export async function createCharge(data: CreateChargeData): Promise<Charge> {
             description: data.description,
             account_code: '1020', // Guest AR
             entry_type: 'debit',
-            amount: taxBreakdown.gross_amount,
+            amount: totalWithTax,
             department: data.department,
             reference_type: 'charge',
             reference_id: charge.id,
@@ -166,7 +200,7 @@ export async function createCharge(data: CreateChargeData): Promise<Charge> {
             description: data.description,
             account_code: revenueAccount,
             entry_type: 'credit',
-            amount: taxBreakdown.net_revenue,
+            amount: baseAmount,
             department: data.department,
             reference_type: 'charge',
             reference_id: charge.id,
@@ -174,13 +208,13 @@ export async function createCharge(data: CreateChargeData): Promise<Charge> {
     ];
 
     // Only add tax entry if there is tax
-    if (taxBreakdown.tax_amount > 0) {
+    if (totalTax > 0) {
         journalData.push({
             entry_date: chargeDate,
             description: `Tax on: ${data.description}`,
             account_code: '2010', // Tax Payable
             entry_type: 'credit',
-            amount: taxBreakdown.tax_amount,
+            amount: totalTax,
             department: data.department,
             reference_type: 'charge',
             reference_id: charge.id,
