@@ -20,7 +20,9 @@ export function useTaxCalculation(baseAmount: number, department: string) {
         queryKey: ['hosila', 'tax', 'calculate', baseAmount, department],
         queryFn: () => taxApi.calculate(baseAmount, department),
         enabled: baseAmount > 0,
-        staleTime: 1000 * 60 * 5, // 5 min cache
+        staleTime: 1000 * 60 * 5,
+        retry: false,
+        throwOnError: false,
     });
 }
 
@@ -70,6 +72,8 @@ export function useAccommodationReport(start: string, end: string) {
         queryFn: () => reportsApi.accommodation(start, end),
         enabled: !!start && !!end,
         staleTime: 1000 * 60 * 5,
+        retry: false,
+        throwOnError: false,
     });
 }
 
@@ -80,6 +84,8 @@ export function useRestaurantReport(start: string, end: string) {
         queryFn: () => reportsApi.restaurant(start, end),
         enabled: !!start && !!end,
         staleTime: 1000 * 60 * 5,
+        retry: false,
+        throwOnError: false,
     });
 }
 
@@ -90,6 +96,8 @@ export function useInventoryReport(start: string, end: string) {
         queryFn: () => reportsApi.inventory(start, end),
         enabled: !!start && !!end,
         staleTime: 1000 * 60 * 5,
+        retry: false,
+        throwOnError: false,
     });
 }
 
@@ -100,6 +108,8 @@ export function useTaxRemittanceReport(start: string, end: string) {
         queryFn: () => reportsApi.taxRemittance(start, end),
         enabled: !!start && !!end,
         staleTime: 1000 * 60 * 5,
+        retry: false,
+        throwOnError: false,
     });
 }
 
@@ -140,6 +150,8 @@ export function useDashboardKPIs(start: string, end: string) {
         queryKey: ['hosila', 'analytics', 'dashboard', start, end],
         queryFn: () => analyticsApi.dashboard(start, end),
         enabled: !!start && !!end,
-        staleTime: 1000 * 60 * 2, // 2 min cache — dashboards refresh more often
+        staleTime: 1000 * 60 * 2,
+        retry: false,
+        throwOnError: false,
     });
 }
