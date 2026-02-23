@@ -128,10 +128,11 @@ export function RestaurantCart({
         }
         try {
             const breakdown = await taxApi.calculate(amount, 'restaurant');
-            setScAmount(breakdown.service_charge.amount);
-            setVatAmount(breakdown.vat.amount);
-            setTdlAmount(breakdown.tdl.amount);
-            setCartTotal(breakdown.total);
+            // Coerce Pydantic Decimal strings to numbers
+            setScAmount(Number(breakdown.service_charge.amount));
+            setVatAmount(Number(breakdown.vat.amount));
+            setTdlAmount(Number(breakdown.tdl.amount));
+            setCartTotal(Number(breakdown.total));
         } catch {
             // Fallback to local single-rate calculation
             const tax = Math.round(amount * (fallbackTaxRate / 100) * 100) / 100;

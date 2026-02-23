@@ -134,8 +134,8 @@ export async function placeServiceOrder(data: {
 
     // Update booking total_charged
     await sb.from('bookings').update({
-        total_charged: booking.total_charged + totalPrice,
-        balance: booking.balance + totalPrice,
+        total_charged: Number(booking.total_charged) + totalPrice,
+        balance: Number(booking.balance) + totalPrice,
         updated_at: nowIso,
     }).eq('id', data.bookingId);
 
@@ -151,16 +151,16 @@ export async function placeServiceOrder(data: {
         const { data: allOrders } = await sb.from('service_orders')
             .select('total_price')
             .eq('booking_id', data.bookingId);
-        const servicesTotal = (allOrders ?? []).reduce((sum: number, o: any) => sum + o.total_price, 0);
+        const servicesTotal = (allOrders ?? []).reduce((sum: number, o: any) => sum + Number(o.total_price), 0);
 
         const { data: hotel } = await sb.from('hotels').select('settings').limit(1).single();
-        const accommodationTaxRate = hotel?.settings?.accommodation_tax_rate ?? hotel?.settings?.tax_rate ?? 0;
-        const servicesTaxRate = hotel?.settings?.services_tax_rate ?? hotel?.settings?.tax_rate ?? 0;
+        const accommodationTaxRate = Number(hotel?.settings?.accommodation_tax_rate ?? hotel?.settings?.tax_rate ?? 0);
+        const servicesTaxRate = Number(hotel?.settings?.services_tax_rate ?? hotel?.settings?.tax_rate ?? 0);
 
-        const accommodationTax = booking.rate * (accommodationTaxRate / 100);
+        const accommodationTax = Number(booking.rate) * (accommodationTaxRate / 100);
         const servicesTax = servicesTotal * (servicesTaxRate / 100);
 
-        const newSubtotal = booking.rate + servicesTotal;
+        const newSubtotal = Number(booking.rate) + servicesTotal;
         const newTax = accommodationTax + servicesTax;
         const newTotal = newSubtotal + newTax;
 
@@ -178,7 +178,7 @@ export async function placeServiceOrder(data: {
         const { data: allPayments } = await sb.from('payments')
             .select('amount')
             .eq('booking_id', data.bookingId);
-        const totalPaid = (allPayments ?? []).reduce((sum: number, p: any) => sum + p.amount, 0);
+        const totalPaid = (allPayments ?? []).reduce((sum: number, p: any) => sum + Number(p.amount), 0);
 
         let status: 'unpaid' | 'partial' | 'paid' = 'unpaid';
         if (totalPaid >= newTotal) status = 'paid';
@@ -380,8 +380,8 @@ export async function createServiceCharge(data: {
     // Update booking balance
     const { data: booking } = await sb.from('bookings').select('*').eq('id', data.bookingId).single();
     if (booking) {
-        const newTotalCharged = booking.total_charged + totalAmount;
-        const newBalance = newTotalCharged - booking.total_paid;
+        const newTotalCharged = Number(booking.total_charged) + Number(totalAmount);
+        const newBalance = newTotalCharged - Number(booking.total_paid);
         await sb.from('bookings').update({
             total_charged: newTotalCharged,
             balance: newBalance,

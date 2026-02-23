@@ -125,11 +125,12 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
     const fetchTaxBreakdown = useCallback(async (baseAmount: number) => {
         try {
             const breakdown = await taxApi.calculate(baseAmount, 'accommodation');
-            setScAmount(breakdown.service_charge.amount);
-            setVatAmount(breakdown.vat.amount);
-            setTdlAmount(breakdown.tdl.amount);
-            setTotalWithTax(breakdown.total);
-            setValue('amountPaid', breakdown.total);
+            // Coerce Pydantic Decimal strings to numbers
+            setScAmount(Number(breakdown.service_charge.amount));
+            setVatAmount(Number(breakdown.vat.amount));
+            setTdlAmount(Number(breakdown.tdl.amount));
+            setTotalWithTax(Number(breakdown.total));
+            setValue('amountPaid', Number(breakdown.total));
         } catch {
             // Fallback to local single-rate calculation
             const tax = Math.round(baseAmount * (fallbackTaxRate / 100));

@@ -199,7 +199,12 @@ export async function checkIn(data: {
         plannedCheckout = setMinutes(setHours(plannedCheckout, 12), 0); // Noon
     }
 
-    const totalCharged = data.totalWithTax ?? data.rate;
+    // Coerce all financial values to Number — API responses (Pydantic Decimal)
+    // and react-hook-form setValue() can pass strings, causing JS string
+    // concatenation instead of arithmetic (e.g. "3525.00" + "2643.75" → "3525.002643.75").
+    const totalCharged = Number(data.totalWithTax ?? data.rate);
+    const amountPaid = Number(data.amountPaid);
+    const rate = Number(data.rate);
 
     // Create booking
     const booking = {
@@ -212,11 +217,11 @@ export async function checkIn(data: {
         check_out_time: plannedCheckout.toISOString(),
         planned_checkout: plannedCheckout.toISOString(),
         num_guests: data.numGuests,
-        rate: data.rate,
+        rate: rate,
         duration_hours: data.durationHours,
         total_charged: totalCharged,
-        total_paid: data.amountPaid,
-        balance: totalCharged - data.amountPaid,
+        total_paid: amountPaid,
+        balance: totalCharged - amountPaid,
         status: 'active',
         created_by: data.createdBy,
         created_at: nowIso,
@@ -244,18 +249,18 @@ export async function checkIn(data: {
         department: 'accommodation',
         description: `Room ${roomNumber} – ${typeLabel}`,
         gross_amount: totalCharged,
-        tax_rate: taxRate,
+        tax_rate: Number(taxRate),
         reference_id: booking.id,
         reference_type: 'room',
         charge_date: now,
     });
 
     // Record payment via FIFO allocation if any
-    if (data.amountPaid > 0) {
+    if (amountPaid > 0) {
         await createPaymentWithAllocation({
             booking_id: booking.id,
             guest_id: guestId,
-            amount: data.amountPaid,
+            amount: amountPaid,
             payment_method: data.paymentMethod,
             received_by: data.createdBy,
             notes: `Check-in payment – Room ${roomNumber}`,
@@ -303,8 +308,8 @@ export async function extendShortRest(
     const now = new Date();
     const nowIso = now.toISOString();
     const newCheckout = addHours(new Date(booking.planned_checkout), additionalHours);
-    const newTotalCharged = booking.total_charged + additionalRate;
-    const newBalance = newTotalCharged - booking.total_paid;
+    const newTotalCharged = Number(booking.total_charged) + Number(additionalRate);
+    const newBalance = newTotalCharged - Number(booking.total_paid);
 
     // Get room number for description
     const { data: room } = await sb.from('rooms').select('room_number').eq('id', booking.room_id).single();
@@ -390,8 +395,8 @@ export async function extendNightStay(
     const now = new Date();
     const nowIso = now.toISOString();
     const newCheckout = addDays(new Date(booking.planned_checkout), additionalNights);
-    const newTotalCharged = booking.total_charged + additionalRate;
-    const newBalance = newTotalCharged - booking.total_paid;
+    const newTotalCharged = Number(booking.total_charged) + Number(additionalRate);
+    const newBalance = newTotalCharged - Number(booking.total_paid);
 
     // Get room number for description
     const { data: room } = await sb.from('rooms').select('room_number').eq('id', booking.room_id).single();

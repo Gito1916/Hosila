@@ -137,16 +137,17 @@ export async function createCharge(data: CreateChargeData): Promise<Charge> {
     try {
         const { taxApi } = await import('@/lib/apiClient');
         const breakdown = await taxApi.calculate(data.gross_amount, data.department);
-        baseAmount = breakdown.base_amount;
-        serviceChargeAmt = breakdown.service_charge.amount;
-        vatAmount = breakdown.vat.amount;
-        tdlAmount = breakdown.tdl.amount;
-        totalWithTax = breakdown.total;
-        taxRate = (breakdown.vat.rate || 0) + (breakdown.tdl.rate || 0) + (breakdown.service_charge.rate || 0);
+        // Coerce Decimal-serialized strings from Pydantic to numbers
+        baseAmount = Number(breakdown.base_amount);
+        serviceChargeAmt = Number(breakdown.service_charge.amount);
+        vatAmount = Number(breakdown.vat.amount);
+        tdlAmount = Number(breakdown.tdl.amount);
+        totalWithTax = Number(breakdown.total);
+        taxRate = Number(breakdown.vat.rate || 0) + Number(breakdown.tdl.rate || 0) + Number(breakdown.service_charge.rate || 0);
     } catch (err) {
         // Fallback to local VAT-only calculation if API is unreachable
         console.warn('Tax engine unreachable, falling back to local calculation:', err);
-        const fallback = calculateTaxBreakdown(data.gross_amount, data.tax_rate);
+        const fallback = calculateTaxBreakdown(Number(data.gross_amount), Number(data.tax_rate));
         baseAmount = fallback.net_revenue;
         vatAmount = fallback.tax_amount;
         totalWithTax = fallback.gross_amount;
