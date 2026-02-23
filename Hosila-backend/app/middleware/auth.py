@@ -83,7 +83,7 @@ async def get_current_user(
                 payload = jwt.decode(
                     token,
                     matching_key,
-                    algorithms=["RS256", "EdDSA"],
+                    algorithms=["RS256", "ES256", "EdDSA"],
                     audience="authenticated",
                 )
                 return _extract_user(payload)
