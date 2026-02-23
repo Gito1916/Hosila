@@ -30,6 +30,8 @@ export function useTaxSettings() {
         queryKey: ['hosila', 'tax', 'settings'],
         queryFn: () => taxApi.getSettings(),
         staleTime: 1000 * 60 * 10, // 10 min cache
+        retry: false,              // Don't retry on auth failures
+        throwOnError: false,       // Don't crash the app if backend is down
     });
 }
 

@@ -215,7 +215,7 @@ export function TaxSettingsPanel() {
     };
 
     // ── Backend tax settings ─────────────────────────────────
-    const { data: taxData, isLoading: isLoadingTax } = useTaxSettings();
+    const { data: taxData, isLoading: isLoadingTax, error: taxError } = useTaxSettings();
     const updateMutation = useUpdateTaxSettings();
 
     // Local draft state for each department
@@ -410,6 +410,19 @@ export function TaxSettingsPanel() {
                     </div>
                 </div>
             </div>
+
+            {taxError && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3">
+                    <Info size={18} className="text-amber-400 mt-0.5 shrink-0" />
+                    <div>
+                        <p className="text-sm text-amber-300 font-medium">Unable to connect to tax engine</p>
+                        <p className="text-xs text-amber-400/70 mt-1">
+                            Department tax rates could not be loaded from the backend. Check your internet connection
+                            or verify the backend is running. Local settings (currency, pricing mode) still work.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {DEPARTMENTS.map(dept => (
                 <DepartmentTaxCard
