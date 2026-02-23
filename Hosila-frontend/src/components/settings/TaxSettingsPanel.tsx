@@ -217,6 +217,7 @@ export function TaxSettingsPanel() {
     // ── Backend tax settings ─────────────────────────────────
     const { data: taxData, isLoading: isLoadingTax, error: taxError } = useTaxSettings();
     const updateMutation = useUpdateTaxSettings();
+    const [savingDept, setSavingDept] = useState<string | null>(null);
 
     // Local draft state for each department
     const [drafts, setDrafts] = useState<Record<string, Partial<TaxSettings>>>({});
@@ -248,11 +249,14 @@ export function TaxSettingsPanel() {
     const handleSaveDept = async (dept: string) => {
         const data = drafts[dept];
         if (!data) return;
+        setSavingDept(dept);
         try {
             await updateMutation.mutateAsync({ department: dept, data });
             toast.success(`${dept} tax settings saved`);
         } catch (err) {
             toast.error('Failed to save tax settings', err);
+        } finally {
+            setSavingDept(null);
         }
     };
 
@@ -431,7 +435,7 @@ export function TaxSettingsPanel() {
                     settings={getDeptSettings(dept.key)}
                     onChange={(field, value) => handleFieldChange(dept.key, field, value)}
                     onSave={() => handleSaveDept(dept.key)}
-                    isSaving={updateMutation.isPending}
+                    isSaving={savingDept === dept.key}
                     tdlName={localSettings?.tdl_name || 'TDL'}
                 />
             ))}

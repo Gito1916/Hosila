@@ -12,7 +12,8 @@ import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { NotificationToast } from '@/components/notifications/NotificationToast';
 import { UpdatePrompt } from '@/components/layout/UpdatePrompt';
-import { Loader2, WifiOff } from 'lucide-react';
+import { warmUpBackend, onBackendStatusChange } from '@/lib/apiClient';
+import { Loader2, WifiOff, Server } from 'lucide-react';
 
 // Lazy load pages for code splitting (improved performance)
 const LoginPage = lazy(() => import('@/pages/Login').then(m => ({ default: m.LoginPage })));
@@ -100,6 +101,7 @@ function ProtectedRoute() {
 // App component
 function AppInner() {
     const { checkSession } = useAuthStore();
+    const [backendStatus, setBackendStatus] = useState<'awake' | 'waking' | 'unreachable'>('awake');
 
     // Subscribe to Supabase Realtime for critical tables
     useRealtimeSync();
@@ -110,6 +112,13 @@ function AppInner() {
     useEffect(() => {
         // Revalidate session in the background (doesn't block UI)
         checkSession().catch(console.error);
+
+        // Warm up the backend (Render free tier may be sleeping)
+        warmUpBackend();
+
+        // Subscribe to backend status changes for UI feedback
+        const unsub = onBackendStatusChange(setBackendStatus);
+        return unsub;
     }, [checkSession]);
 
     // If we've never logged in (no persisted auth), show a brief loader
@@ -119,6 +128,12 @@ function AppInner() {
     return (
         <ErrorBoundary>
             <OfflineBanner />
+            {backendStatus === 'waking' && (
+                <div className="bg-blue-600/90 text-white text-center py-2 px-4 text-sm flex items-center justify-center gap-2 z-50">
+                    <Server size={14} className="animate-pulse" />
+                    Connecting to server… This may take up to 60 seconds on first visit.
+                </div>
+            )}
             <UpdatePrompt />
             <HashRouter>
                 {/* Session timeout warning - shown when session is about to expire */}

@@ -13,6 +13,86 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 
 // ── HTTP Client ──────────────────────────────────────────────
 
+// Backend wake-up state (Render free tier sleeps after 15min)
+let _backendAwake = false;
+let _lastAwakeCheck = 0;
+const AWAKE_CACHE_MS = 10 * 60 * 1000; // 10 minutes
+let _wakePromise: Promise<boolean> | null = null;
+
+/** Current backend connection status for UI */
+export type BackendStatus = 'awake' | 'waking' | 'unreachable';
+let _statusListeners: Array<(s: BackendStatus) => void> = [];
+let _currentStatus: BackendStatus = 'awake';
+
+function _setStatus(s: BackendStatus) {
+    _currentStatus = s;
+    _statusListeners.forEach(fn => fn(s));
+}
+
+/** Subscribe to backend status changes. Returns unsubscribe function. */
+export function onBackendStatusChange(fn: (s: BackendStatus) => void): () => void {
+    _statusListeners.push(fn);
+    fn(_currentStatus); // call immediately with current
+    return () => { _statusListeners = _statusListeners.filter(f => f !== fn); };
+}
+
+/**
+ * Ensure the backend is awake. Pings /health with exponential backoff.
+ * Render free tier cold starts take 20-60 seconds.
+ * Returns true if backend is alive, false if unreachable after all attempts.
+ */
+export async function ensureBackendAwake(): Promise<boolean> {
+    // If recently confirmed awake, skip
+    if (_backendAwake && Date.now() - _lastAwakeCheck < AWAKE_CACHE_MS) {
+        return true;
+    }
+
+    // Deduplicate concurrent wake-up calls
+    if (_wakePromise) return _wakePromise;
+
+    _wakePromise = (async () => {
+        const maxAttempts = 6;
+        let delay = 5000; // start at 5s — cold starts need time
+
+        _setStatus('waking');
+
+        for (let i = 0; i < maxAttempts; i++) {
+            try {
+                const resp = await fetch(`${API_BASE_URL}/health`, {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(10000), // 10s timeout per attempt
+                });
+                if (resp.ok) {
+                    _backendAwake = true;
+                    _lastAwakeCheck = Date.now();
+                    _setStatus('awake');
+                    return true;
+                }
+            } catch {
+                // Network error or timeout — backend still booting
+            }
+
+            if (i < maxAttempts - 1) {
+                console.log(`⏳ Backend waking up... retry ${i + 1}/${maxAttempts} in ${delay / 1000}s`);
+                await new Promise(r => setTimeout(r, delay));
+                delay = Math.min(delay * 2, 40000); // cap at 40s
+            }
+        }
+
+        _setStatus('unreachable');
+        return false;
+    })();
+
+    const result = await _wakePromise;
+    _wakePromise = null;
+    return result;
+}
+
+/** Fire-and-forget warmup ping on app load */
+export function warmUpBackend(): void {
+    ensureBackendAwake().catch(() => { });
+}
+
 async function getAuthHeaders(): Promise<Record<string, string>> {
     if (!supabase) throw new Error('Supabase client not initialized');
     const { data: { session } } = await supabase.auth.getSession();
@@ -32,17 +112,46 @@ async function apiRequest<T>(
     const headers = await getAuthHeaders();
     const url = `${API_BASE_URL}${path}`;
 
-    const response = await fetch(url, {
-        ...options,
-        headers: { ...headers, ...options.headers },
-    });
+    try {
+        const response = await fetch(url, {
+            ...options,
+            headers: { ...headers, ...options.headers },
+        });
 
-    if (!response.ok) {
-        const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
-        throw new Error(error.detail || `API Error: ${response.status}`);
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+            throw new Error(error.detail || `API Error: ${response.status}`);
+        }
+
+        // Backend responded successfully — mark as awake
+        _backendAwake = true;
+        _lastAwakeCheck = Date.now();
+        _setStatus('awake');
+
+        return response.json();
+    } catch (err) {
+        // Network failure (ERR_CONNECTION_REFUSED, timeout, etc.)
+        // This likely means the backend is sleeping — wake it and retry once
+        if (err instanceof TypeError && err.message.includes('fetch')) {
+            _backendAwake = false;
+            const awoke = await ensureBackendAwake();
+            if (awoke) {
+                // Retry the original request once
+                const retryHeaders = await getAuthHeaders();
+                const retryResponse = await fetch(url, {
+                    ...options,
+                    headers: { ...retryHeaders, ...options.headers },
+                });
+                if (!retryResponse.ok) {
+                    const error = await retryResponse.json().catch(() => ({ detail: 'Unknown error' }));
+                    throw new Error(error.detail || `API Error: ${retryResponse.status}`);
+                }
+                return retryResponse.json();
+            }
+            throw new Error('Backend is starting up. Please try again in a moment.');
+        }
+        throw err;
     }
-
-    return response.json();
 }
 
 async function apiDownload(path: string): Promise<Blob> {
