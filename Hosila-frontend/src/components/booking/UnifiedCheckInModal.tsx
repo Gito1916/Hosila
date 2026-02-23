@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/authStore';
@@ -7,6 +7,7 @@ import type { Room, BookingType, PaymentMethod } from '@/types';
 import { addDays, format } from 'date-fns';
 import { X, Loader2, Plus, Minus, Car } from 'lucide-react';
 import { getHotel } from '@/db/settings';
+import { taxApi } from '@/lib/apiClient';
 
 // Optional guest data for prefilling from Guest Directory or Reservation
 interface PrefilledGuest {
@@ -62,9 +63,15 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
     const [error, setError] = useState<string | null>(null);
     const [showVehicle, setShowVehicle] = useState(false);
 
-    // Get hotel settings for tax rate
+    // Tax breakdown state from FastAPI
+    const [scAmount, setScAmount] = useState(0);
+    const [vatAmount, setVatAmount] = useState(0);
+    const [tdlAmount, setTdlAmount] = useState(0);
+    const [totalWithTax, setTotalWithTax] = useState(room.night_rate);
+
+    // Get hotel settings for fallback tax rate
     const { data: hotel } = useQuery({ queryKey: ['hotel'], queryFn: getHotel });
-    const taxRate = hotel?.settings?.accommodation_tax_rate ?? hotel?.settings?.tax_rate ?? 0;
+    const fallbackTaxRate = hotel?.settings?.accommodation_tax_rate ?? hotel?.settings?.tax_rate ?? 0;
 
     const {
         register,
@@ -102,15 +109,6 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
     const checkoutDate = addDays(new Date(), numNights);
     checkoutDate.setHours(12, 0, 0, 0); // Noon checkout
 
-    // Update amountPaid to include VAT when tax rate is loaded
-    useEffect(() => {
-        if (taxRate > 0) {
-            const baseRate = room.night_rate;
-            const withTax = baseRate + Math.round(baseRate * (taxRate / 100));
-            setValue('amountPaid', withTax);
-        }
-    }, [taxRate, room.night_rate, setValue]);
-
     // Calculate rate based on booking type
     const calculateRate = (nights?: number, hours?: number) => {
         if (bookingType === 'night') {
@@ -123,10 +121,33 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
         }
     };
 
-    // Calculate tax amount
+    // Fetch tax breakdown from FastAPI whenever customRate changes
+    const fetchTaxBreakdown = useCallback(async (baseAmount: number) => {
+        try {
+            const breakdown = await taxApi.calculate(baseAmount, 'accommodation');
+            setScAmount(breakdown.service_charge.amount);
+            setVatAmount(breakdown.vat.amount);
+            setTdlAmount(breakdown.tdl.amount);
+            setTotalWithTax(breakdown.total);
+            setValue('amountPaid', breakdown.total);
+        } catch {
+            // Fallback to local single-rate calculation
+            const tax = Math.round(baseAmount * (fallbackTaxRate / 100));
+            setScAmount(0);
+            setVatAmount(tax);
+            setTdlAmount(0);
+            setTotalWithTax(baseAmount + tax);
+            setValue('amountPaid', baseAmount + tax);
+        }
+    }, [fallbackTaxRate, setValue]);
+
+    useEffect(() => {
+        if (customRate > 0) {
+            fetchTaxBreakdown(customRate);
+        }
+    }, [customRate, fetchTaxBreakdown]);
+
     const subtotal = customRate;
-    const taxAmount = Math.round(subtotal * (taxRate / 100));
-    const totalWithTax = subtotal + taxAmount;
     const balance = totalWithTax - amountPaid;
 
     const suggestedRate = calculateRate();
@@ -137,7 +158,6 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
         setValue('numNights', newNights);
         const rate = room.night_rate * newNights;
         setValue('customRate', rate);
-        setValue('amountPaid', rate + Math.round(rate * (taxRate / 100)));
     };
 
     const decrementNights = () => {
@@ -145,7 +165,6 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
         setValue('numNights', newNights);
         const rate = room.night_rate * newNights;
         setValue('customRate', rate);
-        setValue('amountPaid', rate + Math.round(rate * (taxRate / 100)));
     };
 
     const onSubmit = async (data: CheckInFormData) => {
@@ -169,7 +188,7 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                 numGuests: data.numGuests,
                 numNights: data.bookingType === 'night' ? data.numNights : undefined,
                 rate: data.customRate,
-                totalWithTax: data.customRate + Math.round(data.customRate * (taxRate / 100)),
+                totalWithTax: totalWithTax,
                 durationHours: data.bookingType === 'short_rest' ? data.durationHours : undefined,
                 paymentMethod: data.paymentMethod,
                 amountPaid: data.amountPaid,
@@ -332,7 +351,6 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                                     const nights = watch('numNights') || 1;
                                     const rate = room.night_rate * nights;
                                     setValue('customRate', rate);
-                                    setValue('amountPaid', rate + Math.round(rate * (taxRate / 100)));
                                 }}
                                 className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${bookingType === 'night'
                                     ? 'border-primary-500 bg-primary-500/20 text-primary-400'
@@ -348,7 +366,6 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                                     setValue('bookingType', 'short_rest');
                                     const rate = calculateRate();
                                     setValue('customRate', rate);
-                                    setValue('amountPaid', rate + Math.round(rate * (taxRate / 100)));
                                 }}
                                 className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${bookingType === 'short_rest'
                                     ? 'border-status-shortRest bg-status-shortRest/20 text-status-shortRest'
@@ -399,7 +416,6 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                                         onChange={(e) => {
                                             const rate = parseInt(e.target.value) || 0;
                                             setValue('customRate', rate);
-                                            setValue('amountPaid', rate + Math.round(rate * (taxRate / 100)));
                                         }}
                                     />
                                 </div>
@@ -422,7 +438,6 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                                                 const pkgRate = room.short_rest_packages?.find(p => p.duration === pkg.hours)?.rate
                                                     ?? (room.short_rest_hourly_rate ?? room.night_rate * 0.15) * pkg.hours;
                                                 setValue('customRate', pkgRate);
-                                                setValue('amountPaid', pkgRate + Math.round(pkgRate * (taxRate / 100)));
                                             }}
                                             className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all ${durationHours === pkg.hours
                                                 ? 'border-status-shortRest bg-status-shortRest/20 text-status-shortRest'
@@ -445,7 +460,6 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                                         onChange={(e) => {
                                             const rate = parseInt(e.target.value) || 0;
                                             setValue('customRate', rate);
-                                            setValue('amountPaid', rate + Math.round(rate * (taxRate / 100)));
                                         }}
                                     />
                                 </div>
@@ -456,13 +470,27 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                     {/* Total Breakdown with Tax */}
                     <div className="bg-slate-700/50 rounded-lg p-4 space-y-2">
                         <div className="flex justify-between text-sm">
-                            <span className="text-slate-400">Subtotal:</span>
+                            <span className="text-slate-400">Room Rate:</span>
                             <span className="text-white">₦{subtotal.toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                            <span className="text-slate-400">Tax ({taxRate}%):</span>
-                            <span className="text-white">₦{taxAmount.toLocaleString()}</span>
-                        </div>
+                        {scAmount > 0 && (
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-400">Service Charge:</span>
+                                <span className="text-white">₦{scAmount.toLocaleString()}</span>
+                            </div>
+                        )}
+                        {vatAmount > 0 && (
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-400">VAT:</span>
+                                <span className="text-white">₦{vatAmount.toLocaleString()}</span>
+                            </div>
+                        )}
+                        {tdlAmount > 0 && (
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-400">TDL:</span>
+                                <span className="text-white">₦{tdlAmount.toLocaleString()}</span>
+                            </div>
+                        )}
                         <div className="border-t border-slate-600 pt-2 flex justify-between">
                             <span className="text-slate-300 font-medium">Total Due:</span>
                             <span className="text-white font-bold text-lg">₦{totalWithTax.toLocaleString()}</span>

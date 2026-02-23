@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useAuthStore } from '@/stores/authStore';
@@ -20,6 +20,7 @@ import {
 import { RestaurantReceiptView, RestaurantInvoiceView } from './RestaurantReceipt';
 import { getHotel } from '@/db/settings';
 import { requireSupabase, getHotelId } from '@/lib/api';
+import { taxApi } from '@/lib/apiClient';
 
 export interface CartItem {
     service: Service;
@@ -77,11 +78,17 @@ export function RestaurantCart({
     const [guestBalance, setGuestBalance] = useState(0);
     const [creditLimitWarning, setCreditLimitWarning] = useState(false);
 
-    // Get hotel settings for tax and credit limit
+    // Get hotel settings for fallback tax rate and credit limit
     const { data: hotel } = useQuery({ queryKey: ['hotel'], queryFn: getHotel });
-    const taxRate = hotel?.settings?.services_tax_rate ?? hotel?.settings?.tax_rate ?? 0;
+    const fallbackTaxRate = hotel?.settings?.services_tax_rate ?? hotel?.settings?.tax_rate ?? 0;
     const creditLimitEnabled = hotel?.settings?.credit_limit_enabled ?? false;
     const creditLimitAmount = hotel?.settings?.credit_limit_amount ?? 50000;
+
+    // Tax breakdown state from FastAPI
+    const [scAmount, setScAmount] = useState(0);
+    const [vatAmount, setVatAmount] = useState(0);
+    const [tdlAmount, setTdlAmount] = useState(0);
+    const [cartTotal, setCartTotal] = useState(0);
 
     // Get active bookings
     const { data: activeBookings } = useQuery({ queryKey: ['bookings', 'status', 'active'], queryFn: async () => { const sb = requireSupabase(); const hotelId = await getHotelId(); const { data } = await sb.from('bookings').select('*').eq('hotel_id', hotelId).eq('status', 'active'); return data ?? []; } });
@@ -106,11 +113,40 @@ export function RestaurantCart({
         }, enabled: !!activeBookings
     });
 
-    // Calculate totals with tax (2 decimal place precision to prevent kobo/cent drift)
+    // Calculate subtotal
     const subtotal = cart.reduce((sum, item) => sum + item.service.price * item.quantity, 0);
-    const taxAmount = Math.round(subtotal * (taxRate / 100) * 100) / 100;
-    const cartTotal = Math.round((subtotal + taxAmount) * 100) / 100;
     const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+    // Fetch tax breakdown from FastAPI whenever subtotal changes
+    const fetchTaxBreakdown = useCallback(async (amount: number) => {
+        if (amount <= 0) {
+            setScAmount(0);
+            setVatAmount(0);
+            setTdlAmount(0);
+            setCartTotal(0);
+            return;
+        }
+        try {
+            const breakdown = await taxApi.calculate(amount, 'restaurant');
+            setScAmount(breakdown.service_charge.amount);
+            setVatAmount(breakdown.vat.amount);
+            setTdlAmount(breakdown.tdl.amount);
+            setCartTotal(breakdown.total);
+        } catch {
+            // Fallback to local single-rate calculation
+            const tax = Math.round(amount * (fallbackTaxRate / 100) * 100) / 100;
+            setScAmount(0);
+            setVatAmount(tax);
+            setTdlAmount(0);
+            setCartTotal(Math.round((amount + tax) * 100) / 100);
+        }
+    }, [fallbackTaxRate]);
+
+    useEffect(() => {
+        fetchTaxBreakdown(subtotal);
+    }, [subtotal, fetchTaxBreakdown]);
+
+    const taxAmount = scAmount + vatAmount + tdlAmount;
 
     const handleCheckout = async () => {
         if (!user) return;
@@ -228,8 +264,8 @@ export function RestaurantCart({
                     booking_id: selectedBookingId,
                     department: 'restaurant',
                     description: `Room ${room?.room_number ?? '?'} Tab: ${itemSummary}`,
-                    gross_amount: cartTotal,
-                    tax_rate: taxRate,
+                    gross_amount: subtotal,
+                    tax_rate: fallbackTaxRate,
                     reference_id: orderNumber,
                     reference_type: 'service_order',
                     charge_date: now,
@@ -300,8 +336,8 @@ export function RestaurantCart({
                 await createCharge({
                     department: 'restaurant',
                     description: walkInDescription,
-                    gross_amount: cartTotal,
-                    tax_rate: taxRate,
+                    gross_amount: subtotal,
+                    tax_rate: fallbackTaxRate,
                     reference_id: orderNumber,
                     reference_type: 'service_order',
                     charge_date: now,
@@ -377,7 +413,7 @@ export function RestaurantCart({
         return (
             <RestaurantInvoiceView
                 cart={cart}
-                taxRate={taxRate}
+                taxRate={fallbackTaxRate}
                 subtotal={subtotal}
                 taxAmount={taxAmount}
                 total={cartTotal}
@@ -586,10 +622,22 @@ export function RestaurantCart({
                         <span className="text-slate-400">Subtotal</span>
                         <span className="text-white">₦{subtotal.toLocaleString()}</span>
                     </div>
-                    {taxRate > 0 && (
+                    {scAmount > 0 && (
                         <div className="flex justify-between text-sm">
-                            <span className="text-slate-400">Tax ({taxRate}%)</span>
-                            <span className="text-white">₦{taxAmount.toLocaleString()}</span>
+                            <span className="text-slate-400">Service Charge</span>
+                            <span className="text-white">₦{scAmount.toLocaleString()}</span>
+                        </div>
+                    )}
+                    {vatAmount > 0 && (
+                        <div className="flex justify-between text-sm">
+                            <span className="text-slate-400">VAT</span>
+                            <span className="text-white">₦{vatAmount.toLocaleString()}</span>
+                        </div>
+                    )}
+                    {tdlAmount > 0 && (
+                        <div className="flex justify-between text-sm">
+                            <span className="text-slate-400">TDL</span>
+                            <span className="text-white">₦{tdlAmount.toLocaleString()}</span>
                         </div>
                     )}
                     <div className="border-t border-slate-600 pt-1.5 flex justify-between">
