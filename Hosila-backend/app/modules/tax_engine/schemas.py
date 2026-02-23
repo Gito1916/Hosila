@@ -40,6 +40,8 @@ class TaxCalculationResponse(BaseModel):
 
 class TaxSettingsRead(BaseModel):
     """Tax settings for a specific department."""
+    model_config = {"from_attributes": True, "arbitrary_types_allowed": True}
+
     id: str
     hotel_id: str
     department: str

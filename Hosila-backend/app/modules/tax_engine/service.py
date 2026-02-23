@@ -39,6 +39,16 @@ def _round(amount: Decimal) -> Decimal:
     return amount.quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
 
 
+def _coerce_row(row) -> dict:
+    """Convert a DB row to a dict, coercing UUID fields to strings."""
+    from uuid import UUID
+    d = dict(row)
+    for key, value in d.items():
+        if isinstance(value, UUID):
+            d[key] = str(value)
+    return d
+
+
 # ── Settings Retrieval ────────────────────────────────────────
 
 async def get_tax_settings(
@@ -100,7 +110,7 @@ async def get_all_tax_settings(
         {"hotel_id": hotel_id},
     )
     rows = result.mappings().all()
-    return [TaxSettingsRead(**dict(row)) for row in rows]
+    return [TaxSettingsRead(**_coerce_row(row)) for row in rows]
 
 
 async def upsert_tax_settings(
@@ -138,7 +148,7 @@ async def upsert_tax_settings(
         {"hotel_id": hotel_id, "department": department},
     )
     row = result.mappings().first()
-    return TaxSettingsRead(**dict(row))
+    return TaxSettingsRead(**_coerce_row(row))
 
 
 # ── Core Calculation ──────────────────────────────────────────
