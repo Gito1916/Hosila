@@ -275,8 +275,8 @@ export function TaxSettingsPanel() {
                         <Globe size={20} className="text-blue-400" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Currency</h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Select your hotel's operating currency</p>
+                        <h3 className="text-lg font-semibold text-white">Currency</h3>
+                        <p className="text-sm text-slate-400">Select your hotel's operating currency</p>
                     </div>
                 </div>
 
@@ -296,7 +296,7 @@ export function TaxSettingsPanel() {
 
                 <div>
                     <label className="label">State/Local Tax Name</label>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                    <p className="text-xs text-slate-400 mb-2">
                         Customize the name of the third tax component (default: TDL). This applies to all departments, invoices, and reports.
                     </p>
                     <input
@@ -314,6 +314,45 @@ export function TaxSettingsPanel() {
                 </button>
             </div>
 
+            {/* Tax-Inclusive Pricing */}
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+                            <Percent size={20} className="text-green-400" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold text-white">Tax-Inclusive Pricing</h3>
+                            <p className="text-sm text-slate-400">Are your displayed prices inclusive of tax?</p>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={() => setLocalSettings(s => s ? { ...s, tax_inclusive_pricing: !s.tax_inclusive_pricing } : null)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${localSettings?.tax_inclusive_pricing
+                            ? 'bg-primary-500/20 text-primary-400'
+                            : 'bg-slate-700 text-slate-400'
+                            }`}
+                    >
+                        {localSettings?.tax_inclusive_pricing ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
+                        {localSettings?.tax_inclusive_pricing ? 'Inclusive' : 'Exclusive'}
+                    </button>
+                </div>
+
+                <div className="bg-slate-700/30 rounded-lg p-3">
+                    <p className="text-xs text-slate-400">
+                        {localSettings?.tax_inclusive_pricing
+                            ? '✓ Prices shown to guests already include taxes. The system will extract and report taxes from the total.'
+                            : '✓ Taxes will be added on top of displayed prices. The total charged will be higher than the displayed rate.'}
+                    </p>
+                </div>
+
+                <button onClick={handleSaveLocal} disabled={isSavingLocal} className="btn btn-primary">
+                    <Save size={16} className="mr-2" />
+                    Save Pricing Mode
+                </button>
+            </div>
+
             {/* Late Checkout Fee */}
             <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 space-y-4">
                 <div className="flex items-center justify-between">
@@ -322,8 +361,8 @@ export function TaxSettingsPanel() {
                             <Clock size={20} className="text-orange-400" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Auto Late Checkout Fee</h3>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">Automatically apply fee when guests checkout late</p>
+                            <h3 className="text-lg font-semibold text-white">Auto Late Checkout Fee</h3>
+                            <p className="text-sm text-slate-400">Automatically apply fee when guests checkout late</p>
                         </div>
                     </div>
 
@@ -366,8 +405,8 @@ export function TaxSettingsPanel() {
                 <div className="flex items-center gap-3 px-1">
                     <Percent size={20} className="text-primary-400" />
                     <div>
-                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Tax Rates by Department</h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Configure Service Charge, VAT, and {localSettings?.tdl_name || 'TDL'} per department</p>
+                        <h3 className="text-lg font-semibold text-white">Tax Rates by Department</h3>
+                        <p className="text-sm text-slate-400">Configure Service Charge, VAT, and {localSettings?.tdl_name || 'TDL'} per department</p>
                     </div>
                 </div>
             </div>

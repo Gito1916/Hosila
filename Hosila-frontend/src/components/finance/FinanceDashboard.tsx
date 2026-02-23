@@ -410,26 +410,53 @@ export function FinanceDashboard({ dateFilter = 'daily', onNavigate, onAddExpens
         return result;
     }, [charges, expenses]);
 
-    // ── Chart data (7 or 12 points) ──────────────────────────────────
-    const chartDays = dateFilter === 'yearly' ? 12 : 7;
+    // ── Chart data (weekly for monthly, daily for others, monthly for yearly)
     const chartData = useMemo(() => {
         const data: Array<{ name: string; revenue: number }> = [];
-        for (let i = chartDays - 1; i >= 0; i--) {
-            const day = dateFilter === 'yearly'
-                ? new Date(new Date().getFullYear(), new Date().getMonth() - i, 1)
-                : subDays(new Date(), i);
-            const dayStart = startOfDay(day);
-            const dayEnd = endOfDay(day);
-            const dayRevenue = (charges ?? [])
-                .filter(c => { const d = new Date(c.charge_date); return d >= dayStart && d <= dayEnd && (c.status === 'active' || c.status === 'partially_refunded'); })
-                .reduce((s, c) => s + (c.net_revenue ?? c.gross_amount), 0);
-            data.push({
-                name: dateFilter === 'yearly' ? format(day, 'MMM') : format(day, 'EEE'),
-                revenue: dayRevenue,
-            });
+
+        if (dateFilter === 'yearly') {
+            // Monthly points for yearly view
+            for (let i = 11; i >= 0; i--) {
+                const day = new Date(new Date().getFullYear(), new Date().getMonth() - i, 1);
+                const dayStart = startOfDay(day);
+                const dayEnd = endOfDay(day);
+                const dayRevenue = (charges ?? [])
+                    .filter(c => { const d = new Date(c.charge_date); return d >= dayStart && d <= dayEnd && (c.status === 'active' || c.status === 'partially_refunded'); })
+                    .reduce((s, c) => s + (c.net_revenue ?? c.gross_amount), 0);
+                data.push({ name: format(day, 'MMM'), revenue: dayRevenue });
+            }
+        } else if (dateFilter === 'monthly') {
+            // Weekly buckets for monthly view (Week 1-4)
+            const monthStart = startOfDay(start);
+            for (let week = 0; week < 4; week++) {
+                const weekStart = new Date(monthStart);
+                weekStart.setDate(monthStart.getDate() + week * 7);
+                const weekEnd = new Date(monthStart);
+                weekEnd.setDate(monthStart.getDate() + (week + 1) * 7 - 1);
+                // Cap the last week at end of month
+                const cappedEnd = weekEnd > end ? end : weekEnd;
+                const ws = startOfDay(weekStart);
+                const we = endOfDay(cappedEnd);
+                const weekRevenue = (charges ?? [])
+                    .filter(c => { const d = new Date(c.charge_date); return d >= ws && d <= we && (c.status === 'active' || c.status === 'partially_refunded'); })
+                    .reduce((s, c) => s + (c.net_revenue ?? c.gross_amount), 0);
+                data.push({ name: `Week ${week + 1}`, revenue: weekRevenue });
+            }
+        } else {
+            // Daily points for daily/weekly view
+            for (let i = 6; i >= 0; i--) {
+                const day = subDays(new Date(), i);
+                const dayStart = startOfDay(day);
+                const dayEnd = endOfDay(day);
+                const dayRevenue = (charges ?? [])
+                    .filter(c => { const d = new Date(c.charge_date); return d >= dayStart && d <= dayEnd && (c.status === 'active' || c.status === 'partially_refunded'); })
+                    .reduce((s, c) => s + (c.net_revenue ?? c.gross_amount), 0);
+                data.push({ name: format(day, 'EEE'), revenue: dayRevenue });
+            }
         }
+
         return data;
-    }, [charges, dateFilter, chartDays]);
+    }, [charges, dateFilter, start, end]);
 
     // ── Donut segments ───────────────────────────────────────────────
     const revSegments = [

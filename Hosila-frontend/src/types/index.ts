@@ -192,6 +192,9 @@ export interface HotelSettings {
     // Allows hotels in different states to rename TDL to their local tax name
     // e.g., 'Consumption Tax', 'Tourism Levy', 'Hotel Occupancy Tax', etc.
     tdl_name?: string;
+    // Tax-inclusive pricing: when true, displayed prices already include taxes
+    // The tax engine will extract taxes from the total instead of adding them on top
+    tax_inclusive_pricing?: boolean;
 }
 
 export interface Room {
