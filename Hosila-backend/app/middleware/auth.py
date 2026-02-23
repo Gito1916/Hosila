@@ -57,13 +57,10 @@ async def get_current_user(
 
     Tries JWKS-based RS256 verification first (Supabase's new signing keys),
     falls back to HS256 with the legacy JWT secret.
-
-    Usage in routes:
-        @router.get("/something")
-        async def something(user: AuthenticatedUser = Depends(get_current_user)):
-            ...
     """
     token = credentials.credentials
+    jwks_error = None
+    hs256_error = None
 
     # ── Strategy 1: Try JWKS (RS256 / EdDSA) ────────────
     try:
@@ -72,35 +69,58 @@ async def get_current_user(
             # Decode header to find the kid
             header = jwt.get_unverified_header(token)
             kid = header.get("kid")
+            alg = header.get("alg", "unknown")
 
             # Find the matching key
+            available_kids = [k.get("kid") for k in jwks["keys"]]
+            matching_key = None
             for key_data in jwks["keys"]:
                 if key_data.get("kid") == kid:
-                    payload = jwt.decode(
-                        token,
-                        key_data,
-                        algorithms=["RS256", "EdDSA"],
-                        audience="authenticated",
-                    )
-                    return _extract_user(payload)
-    except (ExpiredSignatureError,):
+                    matching_key = key_data
+                    break
+
+            if matching_key:
+                payload = jwt.decode(
+                    token,
+                    matching_key,
+                    algorithms=["RS256", "EdDSA"],
+                    audience="authenticated",
+                )
+                return _extract_user(payload)
+            else:
+                jwks_error = f"kid '{kid}' (alg={alg}) not in JWKS keys: {available_kids}"
+        else:
+            jwks_error = f"JWKS endpoint returned no keys (URL: {settings.supabase_url}/auth/v1/.well-known/jwks.json)"
+    except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
-    except (JWTError, Exception):
-        pass  # Fall through to HS256
+    except (JWTError, Exception) as e:
+        jwks_error = f"JWKS decode failed: {type(e).__name__}: {e}"
 
     # ── Strategy 2: HS256 with legacy JWT secret ────────
     try:
-        payload = jwt.decode(
-            token,
-            settings.supabase_jwt_secret,
-            algorithms=["HS256"],
-            audience="authenticated",
-        )
-        return _extract_user(payload)
+        # Check if the secret looks valid
+        secret = settings.supabase_jwt_secret
+        if secret in ("dev-jwt-secret", ""):
+            hs256_error = "SUPABASE_JWT_SECRET is not configured (still default)"
+        else:
+            payload = jwt.decode(
+                token,
+                secret,
+                algorithms=["HS256"],
+                audience="authenticated",
+            )
+            return _extract_user(payload)
     except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid authentication token")
+    except JWTError as e:
+        hs256_error = f"HS256 decode failed: {type(e).__name__}: {e}"
+
+    # Both strategies failed — return diagnostic info
+    print(f"⚠️ AUTH FAILED — JWKS: {jwks_error} | HS256: {hs256_error}")
+    raise HTTPException(
+        status_code=401,
+        detail=f"Invalid authentication token. JWKS: {jwks_error}. HS256: {hs256_error}",
+    )
 
 
 def _extract_user(payload: dict) -> AuthenticatedUser:
