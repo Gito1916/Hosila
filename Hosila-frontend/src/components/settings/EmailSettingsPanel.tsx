@@ -17,7 +17,7 @@ import {
     Clock,
     AlertTriangle,
 } from 'lucide-react';
-import { emailApi, type EmailSettings, type EmailLog } from '@/lib/apiClient';
+import { emailApi, type EmailLog } from '@/lib/apiClient';
 import { ensureBackendAwake } from '@/lib/apiClient';
 
 export function EmailSettingsPanel() {
