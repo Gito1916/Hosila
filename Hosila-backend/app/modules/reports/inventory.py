@@ -62,7 +62,7 @@ async def generate_inventory_report(
                 FROM inventory_movements
                 WHERE item_id = :item_id
                   AND hotel_id = :hotel_id
-                  AND movement_time < :start_ts::timestamptz
+                  AND movement_time < CAST(:start_ts AS timestamptz)
             """),
             {"item_id": item_id, "hotel_id": hotel_id, "start_ts": start.isoformat()},
         )
@@ -84,8 +84,8 @@ async def generate_inventory_report(
                 FROM inventory_movements
                 WHERE item_id = :item_id
                   AND hotel_id = :hotel_id
-                  AND movement_time >= :start_ts::timestamptz
-                  AND movement_time < :end_ts::timestamptz
+                  AND movement_time >= CAST(:start_ts AS timestamptz)
+                  AND movement_time < CAST(:end_ts AS timestamptz)
             """),
             {
                 "item_id": item_id,

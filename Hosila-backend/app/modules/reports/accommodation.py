@@ -40,8 +40,8 @@ async def generate_accommodation_report(
                     CASE WHEN b.booking_type = 'night'
                     THEN GREATEST(1,
                         EXTRACT(DAY FROM
-                            LEAST(b.check_out_time, :end_ts::timestamptz)
-                            - GREATEST(b.check_in_time, :start_ts::timestamptz)
+                            LEAST(b.check_out_time, CAST(:end_ts AS timestamptz))
+                            - GREATEST(b.check_in_time, CAST(:start_ts AS timestamptz))
                         )::int
                     )
                     ELSE 1 END
@@ -54,8 +54,8 @@ async def generate_accommodation_report(
                 AND c.status = 'active'
                 AND c.hotel_id = :hotel_id
             WHERE b.hotel_id = :hotel_id
-              AND b.check_in_time < :end_ts::timestamptz
-              AND b.check_out_time > :start_ts::timestamptz
+              AND b.check_in_time < CAST(:end_ts AS timestamptz)
+              AND b.check_out_time > CAST(:start_ts AS timestamptz)
             GROUP BY r.room_type
             ORDER BY revenue DESC
         """),
@@ -107,8 +107,8 @@ async def generate_accommodation_report(
             FROM tax_transactions
             WHERE hotel_id = :hotel_id
               AND department = 'accommodation'
-              AND transaction_date >= :start_ts::timestamptz
-              AND transaction_date < :end_ts::timestamptz
+              AND transaction_date >= CAST(:start_ts AS timestamptz)
+              AND transaction_date < CAST(:end_ts AS timestamptz)
         """),
         {
             "hotel_id": hotel_id,

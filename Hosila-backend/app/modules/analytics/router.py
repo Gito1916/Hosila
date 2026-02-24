@@ -50,8 +50,8 @@ async def get_dashboard_kpis(
                     COALESCE(SUM(gross_amount), 0) as total_rev
                 FROM charges
                 WHERE hotel_id = :hotel_id AND status = 'active'
-                  AND charge_date >= :start_ts::timestamptz
-                  AND charge_date < :end_ts::timestamptz
+                  AND charge_date >= CAST(:start_ts AS timestamptz)
+                  AND charge_date < CAST(:end_ts AS timestamptz)
             """),
             {"hotel_id": tenant.hotel_id, "start_ts": start.isoformat(), "end_ts": end.isoformat() + "T23:59:59Z"},
         )
@@ -63,8 +63,8 @@ async def get_dashboard_kpis(
                 SELECT COALESCE(SUM(amount), 0) as total_expenses
                 FROM expenses
                 WHERE hotel_id = :hotel_id
-                  AND date >= :start_ts::timestamptz
-                  AND date < :end_ts::timestamptz
+                  AND date >= CAST(:start_ts AS timestamptz)
+                  AND date < CAST(:end_ts AS timestamptz)
             """),
             {"hotel_id": tenant.hotel_id, "start_ts": start.isoformat(), "end_ts": end.isoformat() + "T23:59:59Z"},
         )
@@ -79,8 +79,8 @@ async def get_dashboard_kpis(
                     COALESCE(SUM(CASE WHEN tax_type = 'service_charge' THEN tax_amount ELSE 0 END), 0) as sc
                 FROM tax_transactions
                 WHERE hotel_id = :hotel_id
-                  AND transaction_date >= :start_ts::timestamptz
-                  AND transaction_date < :end_ts::timestamptz
+                  AND transaction_date >= CAST(:start_ts AS timestamptz)
+                  AND transaction_date < CAST(:end_ts AS timestamptz)
             """),
             {"hotel_id": tenant.hotel_id, "start_ts": start.isoformat(), "end_ts": end.isoformat() + "T23:59:59Z"},
         )

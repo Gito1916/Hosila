@@ -39,8 +39,8 @@ async def generate_restaurant_report(
             JOIN services s ON so.service_id = s.id
             WHERE so.hotel_id = :hotel_id
               AND so.status != 'cancelled'
-              AND so.ordered_at >= :start_ts::timestamptz
-              AND so.ordered_at < :end_ts::timestamptz
+              AND so.ordered_at >= CAST(:start_ts AS timestamptz)
+              AND so.ordered_at < CAST(:end_ts AS timestamptz)
             GROUP BY s.name, s.category, s.cost_price
             ORDER BY revenue DESC
         """),
@@ -85,8 +85,8 @@ async def generate_restaurant_report(
             FROM service_orders
             WHERE hotel_id = :hotel_id
               AND status != 'cancelled'
-              AND ordered_at >= :start_ts::timestamptz
-              AND ordered_at < :end_ts::timestamptz
+              AND ordered_at >= CAST(:start_ts AS timestamptz)
+              AND ordered_at < CAST(:end_ts AS timestamptz)
         """),
         {
             "hotel_id": hotel_id,
@@ -111,8 +111,8 @@ async def generate_restaurant_report(
             WHERE t.hotel_id = :hotel_id
               AND t.source = 'restaurant'
               AND t.type = 'income'
-              AND t.date >= :start_ts::timestamptz
-              AND t.date < :end_ts::timestamptz
+              AND t.date >= CAST(:start_ts AS timestamptz)
+              AND t.date < CAST(:end_ts AS timestamptz)
             GROUP BY t.payment_method
         """),
         {
@@ -140,8 +140,8 @@ async def generate_restaurant_report(
             FROM service_orders
             WHERE hotel_id = :hotel_id
               AND status != 'cancelled'
-              AND ordered_at >= :start_ts::timestamptz
-              AND ordered_at < :end_ts::timestamptz
+              AND ordered_at >= CAST(:start_ts AS timestamptz)
+              AND ordered_at < CAST(:end_ts AS timestamptz)
             GROUP BY DATE(ordered_at)
             ORDER BY order_date
         """),
@@ -169,8 +169,8 @@ async def generate_restaurant_report(
             FROM tax_transactions
             WHERE hotel_id = :hotel_id
               AND department = 'restaurant'
-              AND transaction_date >= :start_ts::timestamptz
-              AND transaction_date < :end_ts::timestamptz
+              AND transaction_date >= CAST(:start_ts AS timestamptz)
+              AND transaction_date < CAST(:end_ts AS timestamptz)
         """),
         {
             "hotel_id": hotel_id,

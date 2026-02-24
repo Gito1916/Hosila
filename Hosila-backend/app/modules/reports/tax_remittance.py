@@ -46,8 +46,8 @@ async def generate_tax_remittance_report(
                 SUM(CASE WHEN NOT remitted THEN tax_amount ELSE 0 END) as pending_amount
             FROM tax_transactions
             WHERE hotel_id = :hotel_id
-              AND transaction_date >= :start_ts::timestamptz
-              AND transaction_date < :end_ts::timestamptz
+              AND transaction_date >= CAST(:start_ts AS timestamptz)
+              AND transaction_date < CAST(:end_ts AS timestamptz)
             GROUP BY tax_type
         """),
         {
@@ -86,8 +86,8 @@ async def generate_tax_remittance_report(
                 COALESCE(SUM(CASE WHEN tax_type = 'service_charge' THEN tax_amount ELSE 0 END), 0) as sc
             FROM tax_transactions
             WHERE hotel_id = :hotel_id
-              AND transaction_date >= :start_ts::timestamptz
-              AND transaction_date < :end_ts::timestamptz
+              AND transaction_date >= CAST(:start_ts AS timestamptz)
+              AND transaction_date < CAST(:end_ts AS timestamptz)
             GROUP BY department
             ORDER BY department
         """),
@@ -138,8 +138,8 @@ async def mark_as_remitted(
             WHERE hotel_id = :hotel_id
               AND tax_type = :tax_type
               AND remitted = FALSE
-              AND transaction_date >= :start_ts::timestamptz
-              AND transaction_date < :end_ts::timestamptz
+              AND transaction_date >= CAST(:start_ts AS timestamptz)
+              AND transaction_date < CAST(:end_ts AS timestamptz)
         """),
         {
             "hotel_id": hotel_id,
@@ -194,8 +194,8 @@ async def mark_as_remitted(
             WHERE hotel_id = :hotel_id
               AND tax_type = :tax_type
               AND remitted = FALSE
-              AND transaction_date >= :start_ts::timestamptz
-              AND transaction_date < :end_ts::timestamptz
+              AND transaction_date >= CAST(:start_ts AS timestamptz)
+              AND transaction_date < CAST(:end_ts AS timestamptz)
         """),
         {
             "batch_id": batch_id,
