@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '@/stores/authStore';
 import { createReservation, checkConflicts } from '@/db/reservations';
@@ -8,6 +8,7 @@ import { format, addDays, differenceInDays } from 'date-fns';
 import { X, Loader2, AlertTriangle, Car } from 'lucide-react';
 import { getHotel } from '@/db/settings';
 import { requireSupabase, getHotelId } from '@/lib/api';
+import { taxApi } from '@/lib/apiClient';
 
 interface PrefilledGuest {
     id?: string;
@@ -50,6 +51,78 @@ const sourceOptions: { value: ReservationSource; label: string }[] = [
     { value: 'direct', label: 'Direct (Website)' },
 ];
 
+// ────────────────────────────────────────────────────────────
+// Availability helper – returns a map of room_id → status hint
+// ────────────────────────────────────────────────────────────
+interface RoomAvailHint {
+    available: boolean;
+    hint?: string;  // e.g. "Free from Mar 5" or "Booked"
+}
+
+async function fetchRoomAvailability(
+    checkIn: string,
+    checkOut: string
+): Promise<Record<string, RoomAvailHint>> {
+    const sb = requireSupabase();
+    const hotelId = await getHotelId();
+
+    // Fetch reservations that overlap
+    const { data: reservations } = await sb
+        .from('reservations')
+        .select('room_id, check_in_date, check_out_date')
+        .eq('hotel_id', hotelId)
+        .in('status', ['confirmed', 'pending'])
+        .lt('check_in_date', checkOut)
+        .gt('check_out_date', checkIn);
+
+    // Fetch active bookings that overlap
+    const { data: bookings } = await sb
+        .from('bookings')
+        .select('room_id, check_in_time, check_out_time')
+        .eq('hotel_id', hotelId)
+        .eq('status', 'active')
+        .lt('check_in_time', checkOut)
+        .gt('check_out_time', checkIn);
+
+    const hints: Record<string, RoomAvailHint> = {};
+
+    // Mark rooms with overlapping reservations
+    for (const r of reservations ?? []) {
+        const resCheckOut = new Date(r.check_out_date);
+        const reqCheckIn = new Date(checkIn);
+        // If the reservation ends during our range, room is free after that
+        if (resCheckOut > reqCheckIn && resCheckOut < new Date(checkOut)) {
+            hints[r.room_id] = {
+                available: false,
+                hint: `Free from ${format(resCheckOut, 'MMM d')}`,
+            };
+        } else {
+            hints[r.room_id] = { available: false, hint: 'Booked' };
+        }
+    }
+
+    // Mark rooms with active bookings
+    for (const b of bookings ?? []) {
+        if (!hints[b.room_id]) {
+            const bookingOut = new Date(b.check_out_time);
+            if (bookingOut < new Date(checkOut)) {
+                hints[b.room_id] = {
+                    available: false,
+                    hint: `Free from ${format(bookingOut, 'MMM d')}`,
+                };
+            } else {
+                hints[b.room_id] = { available: false, hint: 'Occupied' };
+            }
+        }
+    }
+
+    return hints;
+}
+
+// ────────────────────────────────────────────────────────────
+// Component
+// ────────────────────────────────────────────────────────────
+
 export function UnifiedReservationModal({
     onClose,
     onSuccess,
@@ -63,21 +136,46 @@ export function UnifiedReservationModal({
     const [conflictWarning, setConflictWarning] = useState<string | null>(null);
     const [showVehicle, setShowVehicle] = useState(false);
 
+    // Tax breakdown state (SC + VAT + TDL)
+    const [scAmount, setScAmount] = useState(0);
+    const [vatAmount, setVatAmount] = useState(0);
+    const [tdlAmount, setTdlAmount] = useState(0);
+    const [totalWithTax, setTotalWithTax] = useState(0);
+
+    // Room availability hints keyed by room_id
+    const [availHints, setAvailHints] = useState<Record<string, RoomAvailHint>>({});
+    const [loadingAvail, setLoadingAvail] = useState(false);
+
     // Get available rooms
-    const { data: rooms } = useQuery({ queryKey: ['rooms'], queryFn: async () => { const sb = requireSupabase(); const hotelId = await getHotelId(); const { data } = await sb.from('rooms').select('*').eq('hotel_id', hotelId); return data ?? []; } });
+    const { data: rooms } = useQuery({
+        queryKey: ['rooms'],
+        queryFn: async () => {
+            const sb = requireSupabase();
+            const hotelId = await getHotelId();
+            const { data } = await sb
+                .from('rooms')
+                .select('*')
+                .eq('hotel_id', hotelId)
+                .in('status', ['available', 'occupied']); // exclude maintenance
+            return data ?? [];
+        }
+    });
 
-    // Get hotel settings for tax
+    // Get hotel settings for fallback tax rate
     const { data: hotel } = useQuery({ queryKey: ['hotel'], queryFn: getHotel });
-    const taxRate = hotel?.settings?.accommodation_tax_rate ?? hotel?.settings?.tax_rate ?? 0;
+    const fallbackTaxRate = hotel?.settings?.accommodation_tax_rate ?? hotel?.settings?.tax_rate ?? 0;
 
+    // Today's date for min attribute
+    const today = format(new Date(), 'yyyy-MM-dd');
     const defaultDate = preselectedDate ?? addDays(new Date(), 1);
-    const tomorrow = format(defaultDate, 'yyyy-MM-dd');
-    const dayAfterTomorrow = format(addDays(defaultDate, 1), 'yyyy-MM-dd');
+    const defaultCheckIn = format(defaultDate, 'yyyy-MM-dd');
+    const defaultCheckOut = format(addDays(defaultDate, 1), 'yyyy-MM-dd');
 
     const {
         register,
         handleSubmit,
         watch,
+        setValue,
         formState: { errors },
     } = useForm<FormData>({
         defaultValues: {
@@ -90,8 +188,8 @@ export function UnifiedReservationModal({
             vehicleNumber: '',
             vehicleModel: '',
             roomId: preselectedRoomId ?? '',
-            checkInDate: tomorrow,
-            checkOutDate: dayAfterTomorrow,
+            checkInDate: defaultCheckIn,
+            checkOutDate: defaultCheckOut,
             source: 'phone',
             depositPaid: 0,
             notes: '',
@@ -111,25 +209,66 @@ export function UnifiedReservationModal({
     // Get selected room rate
     const selectedRoom = rooms?.find(r => r.id === roomId);
     const subtotal = selectedRoom ? selectedRoom.night_rate * nights : 0;
-    const taxAmount = Math.round(subtotal * (taxRate / 100));
-    const totalAmount = subtotal + taxAmount;
-    const balance = totalAmount - depositPaid;
+    const balance = totalWithTax - (depositPaid || 0);
 
-    // Check for conflicts when room or dates change
+    // ── Fetch room availability when dates change ──
+
+    useEffect(() => {
+        if (!checkInDate || !checkOutDate || checkOutDate <= checkInDate) {
+            setAvailHints({});
+            return;
+        }
+        let cancelled = false;
+        setLoadingAvail(true);
+        fetchRoomAvailability(checkInDate, checkOutDate)
+            .then(hints => { if (!cancelled) setAvailHints(hints); })
+            .catch(() => { if (!cancelled) setAvailHints({}); })
+            .finally(() => { if (!cancelled) setLoadingAvail(false); });
+        return () => { cancelled = true; };
+    }, [checkInDate, checkOutDate]);
+
+    // ── Fetch tax breakdown when subtotal changes ──
+
+    const fetchTaxBreakdown = useCallback(async (baseAmount: number) => {
+        if (baseAmount <= 0) {
+            setScAmount(0); setVatAmount(0); setTdlAmount(0);
+            setTotalWithTax(0);
+            return;
+        }
+        try {
+            const breakdown = await taxApi.calculate(baseAmount, 'accommodation');
+            setScAmount(Number(breakdown.service_charge.amount));
+            setVatAmount(Number(breakdown.vat.amount));
+            setTdlAmount(Number(breakdown.tdl.amount));
+            setTotalWithTax(Number(breakdown.total));
+        } catch {
+            // Fallback to local single-rate calculation
+            const tax = Math.round(baseAmount * (fallbackTaxRate / 100));
+            setScAmount(0);
+            setVatAmount(tax);
+            setTdlAmount(0);
+            setTotalWithTax(baseAmount + tax);
+        }
+    }, [fallbackTaxRate]);
+
+    useEffect(() => {
+        fetchTaxBreakdown(subtotal);
+    }, [subtotal, fetchTaxBreakdown]);
+
+    // ── Check for conflicts when room or dates change ──
+
     useEffect(() => {
         async function checkForConflicts() {
             if (!roomId || !checkInDate || !checkOutDate) {
                 setConflictWarning(null);
                 return;
             }
-
             try {
                 const conflicts = await checkConflicts(
                     roomId,
                     new Date(checkInDate),
                     new Date(checkOutDate)
                 );
-
                 if (conflicts.length > 0) {
                     setConflictWarning(`This room has ${conflicts.length} conflicting reservation(s) for selected dates`);
                 } else {
@@ -139,25 +278,21 @@ export function UnifiedReservationModal({
                 setConflictWarning(null);
             }
         }
-
         checkForConflicts();
     }, [roomId, checkInDate, checkOutDate]);
 
-    // Date validation
-    const validateCheckOutDate = (value: string) => {
-        if (!checkInDate) return true;
-        return new Date(value) > new Date(checkInDate) || 'Check-out must be after check-in';
-    };
+    // ── Auto update check-out min date when check-in changes ──
 
-    const validateCheckInDate = (value: string) => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return new Date(value) >= today || 'Check-in cannot be in the past';
-    };
+    useEffect(() => {
+        if (checkInDate && checkOutDate && checkOutDate <= checkInDate) {
+            setValue('checkOutDate', format(addDays(new Date(checkInDate), 1), 'yyyy-MM-dd'));
+        }
+    }, [checkInDate, checkOutDate, setValue]);
+
+    // ── Submit ──
 
     const onSubmit = async (data: FormData) => {
         if (!user) return;
-
         setIsSubmitting(true);
         setError(null);
 
@@ -180,7 +315,6 @@ export function UnifiedReservationModal({
                 createdBy: user.id,
                 existingGuestId: prefilledGuest?.id,
             });
-
             onSuccess();
         } catch (err) {
             console.error('Reservation error:', err);
@@ -189,6 +323,15 @@ export function UnifiedReservationModal({
             setIsSubmitting(false);
         }
     };
+
+    // Sort rooms: available first, then unavailable
+    const sortedRooms = [...(rooms ?? [])].sort((a, b) => {
+        const aAvail = !availHints[a.id] || availHints[a.id].available;
+        const bAvail = !availHints[b.id] || availHints[b.id].available;
+        if (aAvail && !bAvail) return -1;
+        if (!aAvail && bAvail) return 1;
+        return (a.room_number || '').localeCompare(b.room_number || '', undefined, { numeric: true });
+    });
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -306,34 +449,20 @@ export function UnifiedReservationModal({
                         )}
                     </div>
 
-                    {/* Room Selection */}
-                    <div>
-                        <label className="label">Room *</label>
-                        <select
-                            {...register('roomId', { required: 'Room is required' })}
-                            className={`input ${errors.roomId ? 'input-error' : ''}`}
-                        >
-                            <option value="">Select a room</option>
-                            {rooms?.map(room => (
-                                <option key={room.id} value={room.id}>
-                                    Room {room.room_number} - {room.room_type} (₦{room.night_rate.toLocaleString()}/night)
-                                </option>
-                            ))}
-                        </select>
-                        {errors.roomId && (
-                            <p className="text-xs text-error mt-1">{errors.roomId.message}</p>
-                        )}
-                    </div>
-
-                    {/* Dates */}
+                    {/* ── DATES (moved BEFORE room selection) ── */}
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label className="label">Check-in Date *</label>
                             <input
                                 type="date"
+                                min={today}
                                 {...register('checkInDate', {
                                     required: 'Required',
-                                    validate: validateCheckInDate
+                                    validate: (value) => {
+                                        const todayDate = new Date();
+                                        todayDate.setHours(0, 0, 0, 0);
+                                        return new Date(value) >= todayDate || 'Check-in cannot be in the past';
+                                    }
                                 })}
                                 className={`input ${errors.checkInDate ? 'input-error' : ''}`}
                             />
@@ -345,9 +474,13 @@ export function UnifiedReservationModal({
                             <label className="label">Check-out Date *</label>
                             <input
                                 type="date"
+                                min={checkInDate || today}
                                 {...register('checkOutDate', {
                                     required: 'Required',
-                                    validate: validateCheckOutDate
+                                    validate: (value) => {
+                                        if (!checkInDate) return true;
+                                        return new Date(value) > new Date(checkInDate) || 'Check-out must be after check-in';
+                                    }
                                 })}
                                 className={`input ${errors.checkOutDate ? 'input-error' : ''}`}
                             />
@@ -355,6 +488,54 @@ export function UnifiedReservationModal({
                                 <p className="text-xs text-error mt-1">{errors.checkOutDate.message}</p>
                             )}
                         </div>
+                    </div>
+
+                    {nights > 0 && (
+                        <p className="text-xs text-slate-400 -mt-2">{nights} night{nights !== 1 ? 's' : ''}</p>
+                    )}
+
+                    {/* ── ROOM SELECTION (after dates, filtered by availability) ── */}
+                    <div>
+                        <label className="label">
+                            Room *
+                            {loadingAvail && (
+                                <span className="ml-2 text-xs text-slate-500">
+                                    <Loader2 size={12} className="inline animate-spin mr-1" />
+                                    Checking availability...
+                                </span>
+                            )}
+                        </label>
+                        <select
+                            {...register('roomId', { required: 'Room is required' })}
+                            className={`input ${errors.roomId ? 'input-error' : ''}`}
+                        >
+                            <option value="">Select a room</option>
+                            {sortedRooms.map(room => {
+                                const hint = availHints[room.id];
+                                const isUnavailable = hint && !hint.available;
+                                // Also mark maintenance rooms
+                                const isMaintenance = room.status === 'maintenance';
+                                const label = `Room ${room.room_number} – ${room.room_type} (₦${room.night_rate.toLocaleString()}/night)`;
+                                const suffix = isMaintenance
+                                    ? ' — Maintenance'
+                                    : isUnavailable
+                                        ? ` — ${hint.hint}`
+                                        : '';
+
+                                return (
+                                    <option
+                                        key={room.id}
+                                        value={room.id}
+                                        disabled={isUnavailable || isMaintenance}
+                                    >
+                                        {label}{suffix}
+                                    </option>
+                                );
+                            })}
+                        </select>
+                        {errors.roomId && (
+                            <p className="text-xs text-error mt-1">{errors.roomId.message}</p>
+                        )}
                     </div>
 
                     {/* Source */}
@@ -367,7 +548,7 @@ export function UnifiedReservationModal({
                         </select>
                     </div>
 
-                    {/* Pricing Summary */}
+                    {/* ── Pricing Summary (full tax breakdown) ── */}
                     {selectedRoom && nights > 0 && (
                         <div className="bg-slate-700/50 rounded-lg p-4 space-y-2">
                             <div className="flex justify-between text-sm">
@@ -376,13 +557,29 @@ export function UnifiedReservationModal({
                                 </span>
                                 <span className="text-white">₦{subtotal.toLocaleString()}</span>
                             </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">Tax ({taxRate}%)</span>
-                                <span className="text-white">₦{taxAmount.toLocaleString()}</span>
-                            </div>
+
+                            {scAmount > 0 && (
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-slate-400">Service Charge (10%)</span>
+                                    <span className="text-white">₦{scAmount.toLocaleString()}</span>
+                                </div>
+                            )}
+                            {vatAmount > 0 && (
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-slate-400">VAT (7.5%)</span>
+                                    <span className="text-white">₦{vatAmount.toLocaleString()}</span>
+                                </div>
+                            )}
+                            {tdlAmount > 0 && (
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-slate-400">TDL (5%)</span>
+                                    <span className="text-white">₦{tdlAmount.toLocaleString()}</span>
+                                </div>
+                            )}
+
                             <div className="border-t border-slate-600 pt-2 flex justify-between">
                                 <span className="text-slate-300 font-medium">Total</span>
-                                <span className="text-white font-bold">₦{totalAmount.toLocaleString()}</span>
+                                <span className="text-white font-bold text-lg">₦{totalWithTax.toLocaleString()}</span>
                             </div>
                         </div>
                     )}
@@ -399,9 +596,9 @@ export function UnifiedReservationModal({
                                 placeholder="0"
                             />
                         </div>
-                        {totalAmount > 0 && (
+                        {totalWithTax > 0 && (
                             <p className="text-xs text-slate-500 mt-1">
-                                Balance due at check-in: ₦{balance.toLocaleString()}
+                                Balance due at check-in: ₦{Math.max(0, balance).toLocaleString()}
                             </p>
                         )}
                     </div>

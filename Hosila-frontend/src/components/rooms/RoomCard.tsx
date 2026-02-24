@@ -9,7 +9,6 @@ import {
     Sparkles,
     CheckCircle,
     CalendarCheck,
-    AlertCircle,
 } from 'lucide-react';
 
 interface RoomWithBooking extends Room {
@@ -24,67 +23,51 @@ interface RoomCardProps {
     onClick: () => void;
 }
 
-/** Use inline styles for dynamic colors so Tailwind doesn't purge them */
+/** Status configuration with light-mode colors */
 const statusConfig: Record<RoomStatus, {
     label: string;
-    borderColor: string;
-    dotColor: string;
+    accentColor: string;
     badgeBg: string;
     badgeText: string;
 }> = {
     available: {
-        label: 'Vacant',
-        borderColor: '#34d399',   // emerald-400
-        dotColor: '#34d399',
+        label: 'Available',
+        accentColor: '#10b981',   // emerald-500
         badgeBg: '#ecfdf5',       // emerald-50
         badgeText: '#059669',     // emerald-600
     },
     occupied: {
         label: 'Occupied',
-        borderColor: '#f87171',   // red-400
-        dotColor: '#f87171',
+        accentColor: '#ef4444',   // red-500
         badgeBg: '#fef2f2',       // red-50
         badgeText: '#dc2626',     // red-600
     },
     short_rest: {
         label: 'Short Rest',
-        borderColor: '#c084fc',   // purple-400
-        dotColor: '#c084fc',
+        accentColor: '#a855f7',   // purple-500
         badgeBg: '#faf5ff',       // purple-50
         badgeText: '#9333ea',     // purple-600
     },
     dirty: {
         label: 'Dirty',
-        borderColor: '#fbbf24',   // amber-400
-        dotColor: '#fbbf24',
+        accentColor: '#f59e0b',   // amber-500
         badgeBg: '#fffbeb',       // amber-50
         badgeText: '#d97706',     // amber-600
     },
     maintenance: {
         label: 'Maintenance',
-        borderColor: '#94a3b8',   // slate-400
-        dotColor: '#94a3b8',
-        badgeBg: '#f1f5f9',       // slate-100
-        badgeText: '#475569',     // slate-600
+        accentColor: '#6b7280',   // gray-500
+        badgeBg: '#f3f4f6',       // gray-100
+        badgeText: '#4b5563',     // gray-600
     },
 };
 
 const reservedConfig = {
     label: 'Reserved',
-    borderColor: '#60a5fa',   // blue-400
-    dotColor: '#60a5fa',
+    accentColor: '#3b82f6',   // blue-500
     badgeBg: '#eff6ff',       // blue-50
     badgeText: '#2563eb',     // blue-600
 };
-
-function getInitials(name: string): string {
-    return name
-        .split(' ')
-        .map((w) => w[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
-}
 
 export function RoomCard({ room, onClick }: RoomCardProps) {
     const isReserved = room.status === 'available' && !!room.pendingReservation;
@@ -108,104 +91,86 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
         }
     };
 
-    // Show actions ONLY if not occupied or short_rest (per user feedback)
-    const showActions = !['occupied', 'short_rest'].includes(room.status);
+    // ── Render ──
 
     return (
         <div
-            className="relative flex flex-col h-full rounded-xl border-2 transition-all duration-200 cursor-pointer group bg-slate-800/80 hover:bg-slate-800 hover:shadow-xl hover:-translate-y-1"
-            style={{
-                borderColor: `${config.borderColor}40`, // 25% opacity
-            }}
+            className="relative flex flex-col rounded-xl border bg-white shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group overflow-hidden"
+            style={{ borderColor: '#e5e7eb', minHeight: 180 }}
             onClick={onClick}
         >
-            {/* ── Status Indicator Line ── */}
+            {/* ── Left accent stripe ── */}
             <div
-                className="absolute top-0 left-0 bottom-0 w-1.5 rounded-l-xl"
-                style={{ backgroundColor: config.borderColor }}
+                className="absolute top-0 left-0 bottom-0 w-1 rounded-l-xl"
+                style={{ backgroundColor: config.accentColor }}
             />
 
-            {/* ── Header: Room Number + Status Badge ── */}
-            <div className="flex items-start justify-between p-5 pb-2 pl-7">
-                <h3 className="text-3xl font-bold text-white tracking-tight">
+            {/* ── Header: Room Number + Badge ── */}
+            <div className="flex items-start justify-between px-5 pt-4 pb-1 pl-6">
+                <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight leading-none">
                     {room.room_number}
                 </h3>
                 <div
-                    className="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-sm"
+                    className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide shrink-0"
                     style={{
                         backgroundColor: config.badgeBg,
                         color: config.badgeText,
                     }}
                 >
                     <span
-                        className="w-2 h-2 rounded-full inline-block shadow-sm"
-                        style={{ backgroundColor: config.dotColor }}
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{ backgroundColor: config.accentColor }}
                     />
                     {config.label}
                 </div>
             </div>
 
             {/* ── Room Type ── */}
-            <div className="px-5 pb-4 pl-7">
-                <p className="text-sm font-medium text-slate-400">{room.room_type}</p>
+            <div className="px-5 pl-6 pb-2">
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">{room.room_type}</p>
             </div>
 
-            {/* ── Content Body ── */}
-            <div className="px-5 pb-5 pl-7 flex-grow flex flex-col justify-center min-h-[80px]">
+            {/* ── Content (varies by status) ── */}
+            <div className="px-5 pl-6 flex-grow flex flex-col justify-center">
 
-                {/* Vacant */}
+                {/* Vacant / Available */}
                 {room.status === 'available' && !isReserved && (
-                    <div className="flex flex-col gap-2">
-                        {room.housekeeping_status === 'inspected' ? (
-                            <div className="text-emerald-400 text-sm font-medium flex items-center gap-2">
-                                <CheckCircle size={16} />
-                                <span>Ready for check-in</span>
-                            </div>
-                        ) : room.housekeeping_status === 'clean' ? (
-                            <div className="text-blue-400 text-sm font-medium flex items-center gap-2">
-                                <Sparkles size={16} />
-                                <span>Cleaned (Needs Inspect)</span>
-                            </div>
-                        ) : room.housekeeping_status === 'in_progress' ? (
-                            <div className="text-amber-400 text-sm font-medium flex items-center gap-2">
-                                <Clock size={16} />
-                                <span>Cleaning in progress</span>
-                            </div>
-                        ) : (
-                            <span className="text-slate-500 italic">Ready for check-in</span>
-                        )}
-                        <p className="text-xs text-slate-500">
-                            Last status: {room.housekeeping_status || 'Unknown'}
+                    <div>
+                        <p className="text-lg font-bold text-emerald-600">
+                            ₦{Number(room.night_rate).toLocaleString()}
+                            <span className="text-xs font-normal text-gray-400">/night</span>
                         </p>
                     </div>
                 )}
 
                 {/* Reserved */}
                 {isReserved && room.pendingReservation && (
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-500/10 text-blue-500 shrink-0">
-                            <CalendarCheck size={20} />
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-50 text-blue-500 shrink-0">
+                            <CalendarCheck size={16} />
                         </div>
-                        <div>
-                            <p className="text-white font-medium">
+                        <div className="min-w-0">
+                            <p className="text-sm font-semibold text-gray-800 truncate">
                                 {room.reservationGuestName}
                             </p>
-                            <p className="text-xs text-slate-400">Arriving today</p>
+                            <p className="text-xs text-gray-400">Arriving today</p>
                         </div>
                     </div>
                 )}
 
                 {/* Occupied */}
                 {room.status === 'occupied' && room.activeBooking && (
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-slate-700 text-white flex items-center justify-center text-sm font-bold shrink-0">
-                            {room.guestName ? getInitials(room.guestName) : <User size={18} />}
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-bold shrink-0">
+                            {room.guestName
+                                ? room.guestName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+                                : <User size={14} />}
                         </div>
                         <div className="min-w-0">
-                            <p className="text-white font-medium truncate text-lg">
+                            <p className="text-sm font-semibold text-gray-800 truncate">
                                 {room.guestName || 'Guest'}
                             </p>
-                            <p className="text-xs text-slate-400 mt-0.5">
+                            <p className="text-xs text-gray-400 mt-0.5">
                                 Out: {format(new Date(room.activeBooking.planned_checkout), 'MMM d, h:mm a')}
                             </p>
                         </div>
@@ -214,45 +179,34 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
 
                 {/* Short Rest */}
                 {room.status === 'short_rest' && room.activeBooking && (
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
-                            <Clock size={20} />
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center shrink-0">
+                            <Clock size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-white font-medium truncate">
+                            <p className="text-sm font-semibold text-gray-800 truncate">
                                 {room.guestName || 'Guest'}
                             </p>
-                            <div className={`text-sm font-mono font-bold mt-0.5 ${countdown.isExpiringSoon ? 'text-red-400' : 'text-purple-400'}`}>
+                            <div className={`text-sm font-mono font-bold mt-0.5 ${countdown.isExpiringSoon ? 'text-red-500' : 'text-purple-500'}`}>
                                 {countdown.timeLeft}
-                                {countdown.isExpired && <span className="ml-1 text-red-500 block text-xs">Overtime</span>}
+                                {countdown.isExpired && <span className="ml-1 text-red-500 text-xs">Overtime</span>}
                             </div>
                         </div>
                     </div>
                 )}
 
-                {/* Dirty */}
+                {/* Dirty — minimal content, actions below */}
                 {room.status === 'dirty' && (
-                    <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2 text-amber-400 font-medium">
-                            <AlertCircle size={18} />
-                            <span>Needs Cleaning</span>
-                        </div>
-                        <p className="text-xs text-slate-500 pl-6">
-                            Priority: High
-                        </p>
-                    </div>
+                    <p className="text-sm text-amber-600 font-medium">Needs cleaning</p>
                 )}
 
-                {/* Maintenance */}
+                {/* Maintenance — minimal */}
                 {room.status === 'maintenance' && (
-                    <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2 text-slate-400 font-medium">
-                            <Wrench size={18} />
-                            <span>Under Maintenance</span>
-                        </div>
+                    <div>
+                        <p className="text-sm text-gray-500 font-medium">Under maintenance</p>
                         {room.maintenance_reason && (
-                            <p className="text-xs text-slate-500 pl-6 line-clamp-2">
-                                "{room.maintenance_reason}"
+                            <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
+                                {room.maintenance_reason}
                             </p>
                         )}
                     </div>
@@ -260,49 +214,52 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
             </div>
 
             {/* ── Footer Actions ── */}
-            {showActions && (
-                <div className="p-4 pl-7 border-t border-slate-700/50 flex gap-3 mt-auto bg-slate-900/30">
+            {/* Available: maintenance btn */}
+            {room.status === 'available' && !isReserved && (
+                <div className="px-5 pl-6 pb-3 pt-2 mt-auto flex gap-2">
+                    <button
+                        onClick={(e) => handleStatusChange(e, 'maintenance')}
+                        className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                        title="Maintenance"
+                    >
+                        <Wrench size={14} />
+                    </button>
+                </div>
+            )}
 
-                    {/* Maintenance Button - Always visible if enabled */}
-                    {room.status === 'maintenance' ? (
-                        <button
-                            onClick={(e) => handleStatusChange(e, 'available')}
-                            className="flex-1 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20"
-                        >
-                            <CheckCircle size={14} />
-                            Complete Maintenance
-                        </button>
-                    ) : (
-                        <>
-                            {/* Dirty / Clean Toggle */}
-                            {room.status === 'dirty' ? (
-                                <button
-                                    onClick={(e) => handleStatusChange(e, 'available')}
-                                    className="flex-1 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20"
-                                >
-                                    <Sparkles size={14} />
-                                    Mark Clean
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={(e) => handleStatusChange(e, 'dirty')}
-                                    className="flex-1 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 bg-slate-700/50 text-slate-300 border border-slate-600 hover:bg-amber-500/10 hover:text-amber-400 hover:border-amber-500/30"
-                                >
-                                    <AlertCircle size={14} />
-                                    Mark Dirty
-                                </button>
-                            )}
+            {/* Dirty: clean + maintenance */}
+            {room.status === 'dirty' && (
+                <div className="px-5 pl-6 pb-3 pt-2 mt-auto flex gap-2">
+                    <button
+                        onClick={(e) => handleStatusChange(e, 'available')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                        title="Mark Clean"
+                    >
+                        <Sparkles size={13} />
+                        Clean
+                    </button>
+                    <button
+                        onClick={(e) => handleStatusChange(e, 'maintenance')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100 transition-colors"
+                        title="Maintenance"
+                    >
+                        <Wrench size={13} />
+                        Maintenance
+                    </button>
+                </div>
+            )}
 
-                            {/* Maintenance Trigger */}
-                            <button
-                                onClick={(e) => handleStatusChange(e, 'maintenance')}
-                                className="flex-1 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 bg-slate-700/50 text-slate-300 border border-slate-600 hover:bg-slate-600 hover:text-white"
-                            >
-                                <Wrench size={14} />
-                                Maintenance
-                            </button>
-                        </>
-                    )}
+            {/* Maintenance: complete button */}
+            {room.status === 'maintenance' && (
+                <div className="px-5 pl-6 pb-3 pt-2 mt-auto flex gap-2">
+                    <button
+                        onClick={(e) => handleStatusChange(e, 'available')}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-colors"
+                        title="Complete Maintenance"
+                    >
+                        <CheckCircle size={13} />
+                        Complete
+                    </button>
                 </div>
             )}
         </div>

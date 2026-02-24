@@ -14,7 +14,8 @@ import {
     List,
     Filter,
     RefreshCw,
-    LayoutGrid,
+    Layers,
+    Building2,
 } from 'lucide-react';
 
 interface RoomWithBooking extends Room {
@@ -32,6 +33,8 @@ const statusOptions: { value: RoomStatus | 'all'; label: string }[] = [
     { value: 'maintenance', label: 'Maintenance' },
 ];
 
+type GroupMode = 'none' | 'type' | 'floor';
+
 export function RoomGrid() {
     const queryClient = useQueryClient();
 
@@ -41,23 +44,22 @@ export function RoomGrid() {
     const { data: allReservations } = useReservations();
     const { data: allGuests } = useGuests();
 
-    // --- Local UI state (was in Zustand store, now simpler as useState) ---
+    // --- Local UI state ---
     const [filterStatus, setFilterStatus] = useState<RoomStatus | 'all'>('all');
     const [filterFloor, setFilterFloor] = useState<number | 'all'>('all');
+    const [filterType, setFilterType] = useState<string | 'all'>('all');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [checkInRoom, setCheckInRoom] = useState<RoomWithBooking | null>(null);
     const [detailsRoom, setDetailsRoom] = useState<RoomWithBooking | null>(null);
     const [actionRoom, setActionRoom] = useState<RoomWithBooking | null>(null);
-    const [groupByType, setGroupByType] = useState(false);
+    const [groupBy, setGroupBy] = useState<GroupMode>('none');
 
-    // --- Join rooms with bookings, reservations, and guests (replaces loadRooms) ---
+    // --- Join rooms with bookings, reservations, and guests ---
     const roomsWithBookings = useMemo<RoomWithBooking[]>(() => {
         if (!rooms) return [];
 
-        // Build guest lookup map
         const guestMap = new Map((allGuests ?? []).map(g => [g.id, g]));
 
-        // Filter today's confirmed reservations
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const todayEnd = new Date(today);
@@ -84,7 +86,7 @@ export function RoomGrid() {
                     reservationGuestName: reservationGuest?.name,
                 } as RoomWithBooking;
             })
-            .sort((a, b) => a.room_number.localeCompare(b.room_number));
+            .sort((a, b) => a.room_number.localeCompare(b.room_number, undefined, { numeric: true }));
     }, [rooms, activeBookings, allReservations, allGuests]);
 
     // --- Derived data ---
@@ -92,17 +94,18 @@ export function RoomGrid() {
         roomsWithBookings.filter(room => {
             if (filterStatus !== 'all' && room.status !== filterStatus) return false;
             if (filterFloor !== 'all' && room.floor_number !== filterFloor) return false;
+            if (filterType !== 'all' && room.room_type !== filterType) return false;
             return true;
         }),
-        [roomsWithBookings, filterStatus, filterFloor]);
+        [roomsWithBookings, filterStatus, filterFloor, filterType]);
 
     const floors = useMemo(() =>
-        Array.from(new Set(roomsWithBookings.map(r => r.floor_number ?? 1))).sort(),
+        Array.from(new Set(roomsWithBookings.map(r => r.floor_number ?? 1))).sort((a, b) => a - b),
         [roomsWithBookings]);
 
     const roomTypes = useMemo(() =>
-        Array.from(new Set(filteredRooms.map(r => r.room_type))).sort(),
-        [filteredRooms]);
+        Array.from(new Set(roomsWithBookings.map(r => r.room_type))).sort(),
+        [roomsWithBookings]);
 
     const statusCounts: Record<RoomStatus, number> = {
         available: roomsWithBookings.filter(r => r.status === 'available').length,
@@ -156,32 +159,133 @@ export function RoomGrid() {
 
     const isLoading = roomsLoading && roomsWithBookings.length === 0;
 
+    const gridCls = viewMode === 'grid'
+        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+        : "space-y-3";
+
+    // Cycle through grouping modes
+    const cycleGroupBy = () => {
+        if (groupBy === 'none') setGroupBy('type');
+        else if (groupBy === 'type') setGroupBy('floor');
+        else setGroupBy('none');
+    };
+
+    const groupLabel: Record<GroupMode, string> = {
+        none: 'No Grouping',
+        type: 'By Type',
+        floor: 'By Floor',
+    };
+
+    // ── Render grouped rooms ──
+    const renderGroupedRooms = () => {
+        if (groupBy === 'type') {
+            const types = Array.from(new Set(filteredRooms.map(r => r.room_type))).sort();
+            return (
+                <div className="space-y-6">
+                    {types.map(type => {
+                        const ofType = filteredRooms.filter(r => r.room_type === type);
+                        if (ofType.length === 0) return null;
+                        return (
+                            <div key={type}>
+                                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                    {type}
+                                    <span className="text-xs font-normal text-gray-400 normal-case">
+                                        ({ofType.length} room{ofType.length !== 1 ? 's' : ''})
+                                    </span>
+                                </h3>
+                                <div className={gridCls}>
+                                    {ofType.map(room => (
+                                        <RoomCard key={room.id} room={room} onClick={() => handleRoomClick(room)} />
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        }
+
+        if (groupBy === 'floor') {
+            const floorList = Array.from(new Set(filteredRooms.map(r => r.floor_number ?? 1))).sort((a, b) => a - b);
+            return (
+                <div className="space-y-6">
+                    {floorList.map(floor => {
+                        const ofFloor = filteredRooms.filter(r => (r.floor_number ?? 1) === floor);
+                        if (ofFloor.length === 0) return null;
+                        return (
+                            <div key={floor}>
+                                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                    <Building2 size={14} />
+                                    Floor {floor}
+                                    <span className="text-xs font-normal text-gray-400 normal-case">
+                                        ({ofFloor.length} room{ofFloor.length !== 1 ? 's' : ''})
+                                    </span>
+                                </h3>
+                                <div className={gridCls}>
+                                    {ofFloor.map(room => (
+                                        <RoomCard key={room.id} room={room} onClick={() => handleRoomClick(room)} />
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        }
+
+        // No grouping
+        return (
+            <div className={gridCls}>
+                {filteredRooms.map(room => (
+                    <RoomCard key={room.id} room={room} onClick={() => handleRoomClick(room)} />
+                ))}
+            </div>
+        );
+    };
+
     return (
         <div className="space-y-4">
             {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-3 justify-between">
                 {/* Filters */}
-                <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                        <Filter size={16} className="text-slate-400" />
+                <div className="flex items-center gap-2 flex-wrap">
+                    <Filter size={16} className="text-gray-400" />
+
+                    {/* Status filter */}
+                    <select
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value as RoomStatus | 'all')}
+                        className="input py-1.5 pr-8 text-sm"
+                    >
+                        {statusOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Room type filter */}
+                    {roomTypes.length > 1 && (
                         <select
-                            value={filterStatus}
-                            onChange={(e) => setFilterStatus(e.target.value as RoomStatus | 'all')}
-                            className="input py-1.5 pr-8"
+                            value={filterType}
+                            onChange={(e) => setFilterType(e.target.value)}
+                            className="input py-1.5 text-sm"
                         >
-                            {statusOptions.map((opt) => (
-                                <option key={opt.value} value={opt.value}>
-                                    {opt.label}
+                            <option value="all">All Types</option>
+                            {roomTypes.map((type) => (
+                                <option key={type} value={type}>
+                                    {type}
                                 </option>
                             ))}
                         </select>
-                    </div>
+                    )}
 
+                    {/* Floor filter */}
                     {floors.length > 1 && (
                         <select
                             value={filterFloor === 'all' ? 'all' : filterFloor}
                             onChange={(e) => setFilterFloor(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                            className="input py-1.5"
+                            className="input py-1.5 text-sm"
                         >
                             <option value="all">All Floors</option>
                             {floors.map((floor) => (
@@ -193,8 +297,21 @@ export function RoomGrid() {
                     )}
                 </div>
 
-                {/* View toggle & refresh */}
+                {/* View toggle, grouping, & refresh */}
                 <div className="flex items-center gap-2">
+                    {/* Group toggle */}
+                    <button
+                        onClick={cycleGroupBy}
+                        className={`text-sm flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${groupBy !== 'none'
+                                ? 'bg-primary-50 text-primary-600 border-primary-200'
+                                : 'text-gray-400 border-gray-200 hover:text-gray-600 hover:border-gray-300'
+                            }`}
+                        title="Toggle grouping"
+                    >
+                        <Layers size={14} />
+                        {groupLabel[groupBy]}
+                    </button>
+
                     <button
                         onClick={refreshRooms}
                         className="btn btn-ghost p-2"
@@ -203,16 +320,16 @@ export function RoomGrid() {
                         <RefreshCw size={18} className={roomsLoading ? 'animate-spin' : ''} />
                     </button>
 
-                    <div className="flex rounded-lg overflow-hidden border border-slate-700">
+                    <div className="flex rounded-lg overflow-hidden border border-gray-200">
                         <button
                             onClick={() => setViewMode('grid')}
-                            className={`p-2 ${viewMode === 'grid' ? 'bg-primary-500 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+                            className={`p-2 ${viewMode === 'grid' ? 'bg-primary-500 text-white' : 'bg-white text-gray-400 hover:text-gray-600'}`}
                         >
                             <Grid3X3 size={18} />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`p-2 ${viewMode === 'list' ? 'bg-primary-500 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+                            className={`p-2 ${viewMode === 'list' ? 'bg-primary-500 text-white' : 'bg-white text-gray-400 hover:text-gray-600'}`}
                         >
                             <List size={18} />
                         </button>
@@ -227,18 +344,9 @@ export function RoomGrid() {
                 onFilterClick={setFilterStatus}
             />
 
-            {/* Room count & group toggle */}
-            <div className="flex items-center justify-between">
-                <div className="text-sm text-slate-400">
-                    Showing {filteredRooms.length} of {roomsWithBookings.length} rooms
-                </div>
-                <button
-                    onClick={() => setGroupByType(!groupByType)}
-                    className={`text-sm flex items-center gap-1 px-2 py-1 rounded ${groupByType ? 'bg-primary-500/20 text-primary-400' : 'text-slate-400 hover:text-white'}`}
-                >
-                    <LayoutGrid size={14} />
-                    Group by Type
-                </button>
+            {/* Room count */}
+            <div className="text-sm text-gray-400">
+                Showing {filteredRooms.length} of {roomsWithBookings.length} rooms
             </div>
 
             {/* Loading state */}
@@ -248,53 +356,12 @@ export function RoomGrid() {
                 </div>
             )}
 
-            {/* Room grid - Normal or Grouped */}
-            {groupByType ? (
-                // Grouped by room type
-                <div className="space-y-6">
-                    {roomTypes.map(type => {
-                        const roomsOfType = filteredRooms.filter(r => r.room_type === type);
-                        if (roomsOfType.length === 0) return null;
-                        return (
-                            <div key={type}>
-                                <h3 className="text-lg font-medium text-white mb-3 flex items-center gap-2">
-                                    {type}
-                                    <span className="text-sm font-normal text-slate-400">
-                                        ({roomsOfType.length} room{roomsOfType.length !== 1 ? 's' : ''})
-                                    </span>
-                                </h3>
-                                <div className={viewMode === 'grid'
-                                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-                                    : "space-y-3"
-                                }>
-                                    {roomsOfType.map((room) => (
-                                        <RoomCard key={room.id} room={room} onClick={() => handleRoomClick(room)} />
-                                    ))}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            ) : (
-                // Normal grid/list view
-                viewMode === 'grid' ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredRooms.map((room) => (
-                            <RoomCard key={room.id} room={room} onClick={() => handleRoomClick(room)} />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="space-y-2">
-                        {filteredRooms.map((room) => (
-                            <RoomCard key={room.id} room={room} onClick={() => handleRoomClick(room)} />
-                        ))}
-                    </div>
-                )
-            )}
+            {/* Room grid */}
+            {!isLoading && renderGroupedRooms()}
 
             {/* Empty state */}
             {!isLoading && filteredRooms.length === 0 && (
-                <div className="text-center py-12 text-slate-400">
+                <div className="text-center py-12 text-gray-400">
                     <p>No rooms match your filters</p>
                 </div>
             )}
