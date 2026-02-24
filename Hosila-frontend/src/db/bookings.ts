@@ -233,6 +233,9 @@ export async function checkIn(data: {
     if (bookingErr) throw bookingErr;
 
     // === ACCOUNTING v2: Create accommodation charge ===
+    // IMPORTANT: Pass pre-tax `rate` as gross_amount so createCharge() applies tax exactly once.
+    // The check-in modal already calculated tax for display, but createCharge() has its own
+    // tax engine call — passing totalCharged (tax-inclusive) would double-tax.
     const { data: room } = await sb.from('rooms').select('room_number').eq('id', data.roomId).single();
     const roomNumber = room?.room_number ?? 'Unknown';
     const { data: hotel } = await sb.from('hotels').select('settings').limit(1).single();
@@ -244,17 +247,27 @@ export async function checkIn(data: {
         ? `Short Rest (${data.durationHours}hr)`
         : `Night Stay (${data.numNights ?? 1} night${(data.numNights ?? 1) > 1 ? 's' : ''})`;
 
-    await createCharge({
+    const charge = await createCharge({
         guest_id: guestId,
         booking_id: booking.id,
         department: 'accommodation',
         description: `Room ${roomNumber} – ${typeLabel}`,
-        gross_amount: totalCharged,
+        gross_amount: rate,  // Pre-tax base — createCharge() will add tax
         tax_rate: Number(taxRate),
         reference_id: booking.id,
         reference_type: 'room',
         charge_date: now,
     });
+
+    // Update booking with correct tax-inclusive total from the charge
+    const chargeTotal = Number(charge.gross_amount);
+    if (chargeTotal !== totalCharged) {
+        await sb.from('bookings').update({
+            total_charged: chargeTotal,
+            balance: chargeTotal - amountPaid,
+            updated_at: new Date().toISOString(),
+        }).eq('id', booking.id);
+    }
 
     // Record payment via FIFO allocation if any
     if (amountPaid > 0) {
