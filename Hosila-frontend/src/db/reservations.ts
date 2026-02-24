@@ -8,6 +8,7 @@ import { requireSupabase, getHotelId } from '@/lib/api';
 import { findOrCreateGuest } from './bookings';
 import type { Reservation, ReservationStatus, ReservationSource } from '@/types';
 import { differenceInDays, startOfDay, endOfDay } from 'date-fns';
+import { emailApi } from '@/lib/apiClient';
 
 // Get all reservations
 export async function getAllReservations(): Promise<Reservation[]> {
@@ -195,6 +196,9 @@ export async function createReservation(data: {
         },
         timestamp: nowIso,
     });
+
+    // Auto-send reservation confirmation email (non-blocking)
+    emailApi.sendReservationEmail(reservation.id).catch(() => { });
 
     return reservation as unknown as Reservation;
 }

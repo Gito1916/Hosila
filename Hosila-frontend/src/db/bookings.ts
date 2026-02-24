@@ -8,6 +8,7 @@ import { requireSupabase, getHotelId } from '@/lib/api';
 import { updateRoomStatus } from './rooms';
 import type { Booking, BookingType, Guest } from '@/types';
 import { addHours, addDays, setHours, setMinutes } from 'date-fns';
+import { emailApi } from '@/lib/apiClient';
 
 // Get all active bookings
 export async function getActiveBookings(): Promise<Booking[]> {
@@ -288,6 +289,9 @@ export async function checkIn(data: {
         timestamp: nowIso,
     });
 
+    // Auto-send check-in welcome email (non-blocking)
+    emailApi.sendCheckinEmail(booking.id).catch(() => { });
+
     return booking as unknown as Booking;
 }
 
@@ -506,6 +510,9 @@ export async function checkOut(
         },
         timestamp: nowIso,
     });
+
+    // Auto-send checkout receipt email (non-blocking)
+    emailApi.sendCheckoutEmail(bookingId).catch(() => { });
 }
 
 // Record payment for booking — uses FIFO allocation to correctly attribute to departments

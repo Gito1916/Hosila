@@ -7,3 +7,4 @@ export { TaxSettingsPanel } from './TaxSettingsPanel';
 export { SystemSettingsPanel } from './SystemSettingsPanel';
 export { AccountPanel } from './AccountPanel';
 export { AdvancedPanel } from './AdvancedPanel';
+export { EmailSettingsPanel } from './EmailSettingsPanel';

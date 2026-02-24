@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ subject }}</title>
+<!--[if mso]>
+<noscript>
+<xml>
+<o:OfficeDocumentSettings>
+<o:PixelsPerInch>96</o:PixelsPerInch>
+</o:OfficeDocumentSettings>
+</xml>
+</noscript>
+<![endif]-->
+</head>
+<body style="margin:0; padding:0; background-color:#f0f2f5; font-family: 'Segoe UI', Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased;">
+
+<!-- Outer wrapper -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f2f5; padding:32px 16px;">
+<tr>
+<td align="center">
+
+<!-- Main Container -->
+<table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; width:100%; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
+
+<!-- Hotel Logo Header -->
+<tr>
+<td align="center" style="padding:36px 40px 20px 40px; background: linear-gradient(135deg, {{ primary_color | default('#2563EB') }}11, {{ primary_color | default('#2563EB') }}08);">
+{% if hotel_logo_url %}
+<img src="{{ hotel_logo_url }}" alt="{{ hotel_name }}" width="160" style="display:block; max-width:160px; height:auto; border:0;">
+{% else %}
+<h2 style="margin:0; font-size:22px; color:#1a1a2e; font-weight:700; letter-spacing:-0.3px;">{{ hotel_name }}</h2>
+{% endif %}
+</td>
+</tr>
+
+<!-- Title Section -->
+<tr>
+<td style="padding:28px 40px 8px 40px; text-align:center;">
+<h1 style="margin:0; font-size:26px; color:#1a1a2e; font-weight:700; letter-spacing:-0.5px; line-height:1.3;">
+{{ email_title }}
+</h1>
+</td>
+</tr>
+
+<!-- Subtitle -->
+{% if email_subtitle %}
+<tr>
+<td style="padding:0 40px 24px 40px; text-align:center;">
+<p style="margin:0; color:#64748b; font-size:15px; line-height:1.6;">
+{{ email_subtitle }}
+</p>
+</td>
+</tr>
+{% endif %}
+
+<!-- Divider -->
+<tr>
+<td style="padding:0 40px;">
+<div style="height:1px; background: linear-gradient(to right, transparent, #e2e8f0, transparent);"></div>
+</td>
+</tr>
+
+<!-- Dynamic Content Block -->
+<tr>
+<td style="padding:24px 40px;">
+{{ dynamic_content | safe }}
+</td>
+</tr>
+
+<!-- CTA Button -->
+{% if cta_link and cta_text %}
+<tr>
+<td align="center" style="padding:8px 40px 32px 40px;">
+<table cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td align="center" style="background-color:{{ primary_color | default('#2563EB') }}; border-radius:10px;">
+<a href="{{ cta_link }}"
+target="_blank"
+style="display:inline-block;
+padding:14px 32px;
+color:#ffffff;
+text-decoration:none;
+font-size:15px;
+font-weight:600;
+letter-spacing:0.3px;
+border-radius:10px;
+mso-padding-alt:0;">
+{{ cta_text }}
+</a>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+{% endif %}
+
+<!-- Promo Block -->
+{% if promo_enabled and promo_title %}
+<tr>
+<td style="padding:0 40px 24px 40px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: linear-gradient(135deg, {{ primary_color | default('#2563EB') }}08, {{ primary_color | default('#2563EB') }}15); border-radius:12px; border-left:4px solid {{ primary_color | default('#2563EB') }};">
+<tr>
+<td style="padding:20px 24px;">
+<p style="margin:0 0 4px 0; font-size:10px; font-weight:700; color:{{ primary_color | default('#2563EB') }}; text-transform:uppercase; letter-spacing:1.5px;">Special Offer</p>
+<h3 style="margin:0 0 8px 0; font-size:17px; color:#1a1a2e; font-weight:700;">{{ promo_title }}</h3>
+<p style="margin:0; font-size:14px; color:#64748b; line-height:1.5;">
+{{ promo_body }}
+</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+{% endif %}
+
+<!-- Hotel Contact Footer -->
+<tr>
+<td style="padding:24px 40px 20px 40px; background-color:#f8fafc; border-top:1px solid #e2e8f0;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td align="center">
+<p style="margin:0 0 4px 0; font-size:14px; color:#1a1a2e; font-weight:600;">{{ hotel_name }}</p>
+{% if hotel_address %}
+<p style="margin:0 0 2px 0; font-size:13px; color:#94a3b8;">{{ hotel_address }}</p>
+{% endif %}
+{% if hotel_phone %}
+<p style="margin:0 0 2px 0; font-size:13px; color:#94a3b8;">📞 {{ hotel_phone }}</p>
+{% endif %}
+{% if hotel_email %}
+<p style="margin:0; font-size:13px; color:#94a3b8;">✉️ {{ hotel_email }}</p>
+{% endif %}
+{% if custom_footer %}
+<p style="margin:12px 0 0 0; font-size:12px; color:#94a3b8; font-style:italic;">{{ custom_footer }}</p>
+{% endif %}
+</td>
+</tr>
+</table>
+</td>
+</tr>
+
+<!-- Powered by Hosila -->
+<tr>
+<td align="center" style="padding:20px 40px 28px 40px; background-color:#f8fafc;">
+<p style="margin:0 0 8px 0; font-size:11px; color:#b0b8c9; letter-spacing:0.3px;">
+Powered by <strong style="color:#94a3b8;">Hosila</strong> — Hotel &amp; Property Management Software
+</p>
+{% if hosila_logo_url %}
+<img src="{{ hosila_logo_url }}" alt="Hosila" width="72" style="display:block; margin:0 auto; opacity:0.45; border:0;">
+{% endif %}
+</td>
+</tr>
+
+</table>
+<!-- End Main Container -->
+
+</td>
+</tr>
+</table>
+<!-- End Outer Wrapper -->
+
+</body>
+</html>

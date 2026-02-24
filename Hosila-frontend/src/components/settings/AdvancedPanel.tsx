@@ -4,6 +4,7 @@ import { requireSupabase, getHotelId } from '@/lib/api';
 import { toast } from '@/lib/errorMessages';
 import { EmailImportPanel } from './EmailImportPanel';
 import { ApiKeyPanel } from './ApiKeyPanel';
+import { EmailSettingsPanel } from './EmailSettingsPanel';
 import {
     Download,
     Upload,
@@ -15,9 +16,10 @@ import {
     ChevronRight,
     Mail,
     Globe,
+    Send,
 } from 'lucide-react';
 
-type Section = 'backup' | 'email_import' | 'website_api';
+type Section = 'backup' | 'email_import' | 'website_api' | 'guest_emails';
 
 export function AdvancedPanel() {
     const [expandedSection, setExpandedSection] = useState<Section | null>('backup');
@@ -128,7 +130,7 @@ export function AdvancedPanel() {
         <div className="space-y-3">
             <div className="mb-4">
                 <h3 className="text-lg font-semibold text-white">Advanced</h3>
-                <p className="text-sm text-slate-400">Backup, email import, and API settings</p>
+                <p className="text-sm text-slate-400">Backup, email import, guest emails, and API settings</p>
             </div>
 
             {/* Backup & Restore Section */}
@@ -231,6 +233,31 @@ export function AdvancedPanel() {
                 {expandedSection === 'website_api' && (
                     <div className="px-4 pb-4 border-t border-slate-700/50 pt-4">
                         <ApiKeyPanel />
+                    </div>
+                )}
+            </div>
+
+            {/* Guest Email Automation Section */}
+            <div className="card overflow-hidden">
+                <button
+                    onClick={() => toggleSection('guest_emails')}
+                    className="w-full flex items-center gap-3 p-4 hover:bg-slate-700/30 transition-colors text-left"
+                >
+                    <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center shrink-0">
+                        <Send className="text-blue-400" size={18} />
+                    </div>
+                    <div className="flex-1">
+                        <h4 className="text-white font-medium text-sm">Guest Email Automation</h4>
+                        <p className="text-xs text-slate-400">Auto-send confirmation, welcome & receipt emails</p>
+                    </div>
+                    {expandedSection === 'guest_emails'
+                        ? <ChevronDown size={18} className="text-slate-400" />
+                        : <ChevronRight size={18} className="text-slate-400" />
+                    }
+                </button>
+                {expandedSection === 'guest_emails' && (
+                    <div className="px-4 pb-4 border-t border-slate-700/50 pt-4">
+                        <EmailSettingsPanel />
                     </div>
                 )}
             </div>

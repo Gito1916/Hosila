@@ -1,0 +1,130 @@
+<!-- Reservation Confirmation — Dynamic Content Block -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0"
+    style="background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
+    <tr>
+        <td style="padding:24px;">
+
+            <!-- Booking Details Grid -->
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td style="padding:0 0 16px 0;">
+                        <p
+                            style="margin:0 0 2px 0; font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">
+                            Guest</p>
+                        <p style="margin:0; font-size:16px; color:#1a1a2e; font-weight:600;">{{ guest_name }}</p>
+                    </td>
+                </tr>
+
+                <!-- Divider -->
+                <tr>
+                    <td style="padding:0 0 16px 0;">
+                        <div style="height:1px; background:#e2e8f0;"></div>
+                    </td>
+                </tr>
+
+                <!-- Dates Row -->
+                <tr>
+                    <td>
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td width="50%" valign="top" style="padding:0 8px 16px 0;">
+                                    <p
+                                        style="margin:0 0 2px 0; font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">
+                                        Check-in</p>
+                                    <p style="margin:0; font-size:15px; color:#1a1a2e; font-weight:600;">{{ checkin_date
+                                        }}</p>
+                                </td>
+                                <td width="50%" valign="top" style="padding:0 0 16px 8px;">
+                                    <p
+                                        style="margin:0 0 2px 0; font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">
+                                        Check-out</p>
+                                    <p style="margin:0; font-size:15px; color:#1a1a2e; font-weight:600;">{{
+                                        checkout_date }}</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Room & Nights -->
+                <tr>
+                    <td>
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td width="50%" valign="top" style="padding:0 8px 16px 0;">
+                                    <p
+                                        style="margin:0 0 2px 0; font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">
+                                        Room Type</p>
+                                    <p style="margin:0; font-size:15px; color:#1a1a2e; font-weight:600;">{{ room_type }}
+                                    </p>
+                                </td>
+                                <td width="50%" valign="top" style="padding:0 0 16px 8px;">
+                                    <p
+                                        style="margin:0 0 2px 0; font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">
+                                        Duration</p>
+                                    <p style="margin:0; font-size:15px; color:#1a1a2e; font-weight:600;">{{ nights }}
+                                        Night{{ 's' if nights != 1 else '' }}</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Divider -->
+                <tr>
+                    <td style="padding:0 0 16px 0;">
+                        <div style="height:1px; background:#e2e8f0;"></div>
+                    </td>
+                </tr>
+
+                <!-- Financial Summary -->
+                <tr>
+                    <td>
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td style="padding:4px 0;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td style="font-size:14px; color:#64748b;">Total Amount</td>
+                                            <td align="right" style="font-size:14px; color:#1a1a2e; font-weight:600;">{{
+                                                currency }}{{ "{:,.2f}".format(total_amount) }}</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:4px 0;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                        <tr>
+                                            <td style="font-size:14px; color:#64748b;">Deposit Paid</td>
+                                            <td align="right" style="font-size:14px; color:#16a34a; font-weight:600;">{{
+                                                currency }}{{ "{:,.2f}".format(deposit_paid) }}</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            {% if balance_due > 0 %}
+                            <tr>
+                                <td style="padding:8px 0 0 0;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                                        style="background:{{ primary_color | default('#2563EB') }}08; border-radius:8px; padding:10px 12px;">
+                                        <tr>
+                                            <td
+                                                style="padding:10px 12px; font-size:15px; color:#1a1a2e; font-weight:700;">
+                                                Balance Due at Check-in</td>
+                                            <td align="right"
+                                                style="padding:10px 12px; font-size:16px; color:{{ primary_color | default('#2563EB') }}; font-weight:700;">
+                                                {{ currency }}{{ "{:,.2f}".format(balance_due) }}</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+        </td>
+    </tr>
+</table>

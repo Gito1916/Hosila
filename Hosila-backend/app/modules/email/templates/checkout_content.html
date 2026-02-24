@@ -1,0 +1,154 @@
+<!-- Check-Out Receipt — Dynamic Content Block -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0"
+    style="background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
+    <tr>
+        <td style="padding:24px;">
+
+            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+
+                <!-- Stay Summary -->
+                <tr>
+                    <td style="padding:0 0 16px 0;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td width="50%" valign="top" style="padding:0 8px 8px 0;">
+                                    <p
+                                        style="margin:0 0 2px 0; font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">
+                                        Guest</p>
+                                    <p style="margin:0; font-size:15px; color:#1a1a2e; font-weight:600;">{{ guest_name
+                                        }}</p>
+                                </td>
+                                <td width="50%" valign="top" style="padding:0 0 8px 8px;">
+                                    <p
+                                        style="margin:0 0 2px 0; font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">
+                                        Room</p>
+                                    <p style="margin:0; font-size:15px; color:#1a1a2e; font-weight:600;">{{ room_number
+                                        }} ({{ room_type }})</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="50%" valign="top" style="padding:0 8px 8px 0;">
+                                    <p
+                                        style="margin:0 0 2px 0; font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">
+                                        Checked In</p>
+                                    <p style="margin:0; font-size:14px; color:#1a1a2e;">{{ checkin_time }}</p>
+                                </td>
+                                <td width="50%" valign="top" style="padding:0 0 8px 8px;">
+                                    <p
+                                        style="margin:0 0 2px 0; font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">
+                                        Checked Out</p>
+                                    <p style="margin:0; font-size:14px; color:#1a1a2e;">{{ checkout_time }}</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Divider -->
+                <tr>
+                    <td style="padding:0 0 16px 0;">
+                        <div style="height:1px; background:#e2e8f0;"></div>
+                    </td>
+                </tr>
+
+                <!-- Charges Header -->
+                <tr>
+                    <td style="padding:0 0 8px 0;">
+                        <p
+                            style="margin:0; font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">
+                            Services &amp; Charges</p>
+                    </td>
+                </tr>
+
+                <!-- Charges Table -->
+                <tr>
+                    <td style="padding:0 0 12px 0;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <!-- Header Row -->
+                            <tr style="border-bottom:1px solid #e2e8f0;">
+                                <td
+                                    style="padding:8px 0; font-size:12px; font-weight:700; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                    Description</td>
+                                <td align="right"
+                                    style="padding:8px 0; font-size:12px; font-weight:700; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                    Amount</td>
+                            </tr>
+                            {% for charge in charges %}
+                            <tr>
+                                <td
+                                    style="padding:10px 0 10px 0; font-size:14px; color:#1a1a2e; border-bottom:1px solid #f1f5f9;">
+                                    {{ charge.description }}
+                                    <br><span style="font-size:11px; color:#94a3b8;">{{ charge.department | capitalize
+                                        }}</span>
+                                </td>
+                                <td align="right"
+                                    style="padding:10px 0; font-size:14px; color:#1a1a2e; font-weight:600; border-bottom:1px solid #f1f5f9;">
+                                    {{ currency }}{{ "{:,.2f}".format(charge.amount) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Divider -->
+                <tr>
+                    <td style="padding:0 0 12px 0;">
+                        <div style="height:2px; background:#e2e8f0;"></div>
+                    </td>
+                </tr>
+
+                <!-- Totals -->
+                <tr>
+                    <td>
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td style="padding:4px 0; font-size:14px; color:#64748b;">Total Charges</td>
+                                <td align="right"
+                                    style="padding:4px 0; font-size:14px; color:#1a1a2e; font-weight:600;">{{ currency
+                                    }}{{ "{:,.2f}".format(total_charged) }}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:4px 0; font-size:14px; color:#64748b;">Total Paid</td>
+                                <td align="right"
+                                    style="padding:4px 0; font-size:14px; color:#16a34a; font-weight:600;">{{ currency
+                                    }}{{ "{:,.2f}".format(total_paid) }}</td>
+                            </tr>
+                            {% if balance > 0 %}
+                            <tr>
+                                <td style="padding:8px 0 0 0;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                                        style="background:#fef3c7; border-radius:8px;">
+                                        <tr>
+                                            <td
+                                                style="padding:10px 12px; font-size:14px; color:#92400e; font-weight:700;">
+                                                Outstanding Balance</td>
+                                            <td align="right"
+                                                style="padding:10px 12px; font-size:16px; color:#92400e; font-weight:700;">
+                                                {{ currency }}{{ "{:,.2f}".format(balance) }}</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td style="padding:8px 0 0 0;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                                        style="background:#dcfce7; border-radius:8px;">
+                                        <tr>
+                                            <td align="center"
+                                                style="padding:10px 12px; font-size:14px; color:#16a34a; font-weight:700;">
+                                                ✅ Fully Paid — Thank You!</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>

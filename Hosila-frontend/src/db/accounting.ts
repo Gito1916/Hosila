@@ -352,8 +352,8 @@ async function allocatePaymentFIFO(
         // Calculate how much is already paid on this charge
         const paidOnCharge = activeAllocations
             .filter((a: any) => a.charge_id === charge.id)
-            .reduce((sum: number, a: any) => sum + a.allocated_amount, 0);
-        const chargeBalance = charge.gross_amount - paidOnCharge;
+            .reduce((sum: number, a: any) => sum + Number(a.allocated_amount), 0);
+        const chargeBalance = Number(charge.gross_amount) - paidOnCharge;
 
         if (chargeBalance <= 0) continue; // Already fully paid
 
@@ -581,7 +581,7 @@ export async function getBookingBalance(bookingId: string): Promise<{
 
     const activeCharges = (charges ?? []).filter((c: any) => c.status === 'active' || c.status === 'partially_refunded');
     const chargeIds = activeCharges.map((c: any) => c.id);
-    const totalCharges = activeCharges.reduce((sum: number, c: any) => sum + c.gross_amount, 0);
+    const totalCharges = activeCharges.reduce((sum: number, c: any) => sum + Number(c.gross_amount), 0);
 
     // Get all allocations for these charges
     let totalPaid = 0;
@@ -590,7 +590,7 @@ export async function getBookingBalance(bookingId: string): Promise<{
             .select('allocated_amount')
             .eq('status', 'active')
             .in('charge_id', chargeIds);
-        totalPaid = (allocations ?? []).reduce((sum: number, a: any) => sum + a.allocated_amount, 0);
+        totalPaid = (allocations ?? []).reduce((sum: number, a: any) => sum + Number(a.allocated_amount), 0);
     }
 
     return {
@@ -611,7 +611,7 @@ export async function getChargePaidAmount(chargeId: string): Promise<number> {
         .eq('charge_id', chargeId)
         .eq('status', 'active');
     if (error) throw error;
-    return (allocations ?? []).reduce((sum: number, a: any) => sum + a.allocated_amount, 0);
+    return (allocations ?? []).reduce((sum: number, a: any) => sum + Number(a.allocated_amount), 0);
 }
 
 /**
@@ -642,11 +642,11 @@ export async function getBookingChargesWithPaid(bookingId: string): Promise<Arra
     return activeCharges.map((c: any) => {
         const paid = activeAllocations
             .filter((a: any) => a.charge_id === c.id)
-            .reduce((sum: number, a: any) => sum + a.allocated_amount, 0);
+            .reduce((sum: number, a: any) => sum + Number(a.allocated_amount), 0);
         return {
             ...c,
             paid_amount: paid,
-            charge_balance: c.gross_amount - paid,
+            charge_balance: Number(c.gross_amount) - paid,
         };
     });
 }
@@ -675,9 +675,9 @@ export async function getDepartmentRevenue(
     const filtered = charges ?? [];
 
     return {
-        net_revenue: filtered.reduce((sum: number, c: any) => sum + c.net_revenue, 0),
-        gross_amount: filtered.reduce((sum: number, c: any) => sum + c.gross_amount, 0),
-        tax_amount: filtered.reduce((sum: number, c: any) => sum + c.tax_amount, 0),
+        net_revenue: filtered.reduce((sum: number, c: any) => sum + Number(c.net_revenue), 0),
+        gross_amount: filtered.reduce((sum: number, c: any) => sum + Number(c.gross_amount), 0),
+        tax_amount: filtered.reduce((sum: number, c: any) => sum + Number(c.tax_amount), 0),
     };
 }
 
@@ -722,5 +722,5 @@ export async function getDepartmentTransactions(
         .in('payment_id', filteredPaymentIds);
     if (allocErr) throw allocErr;
 
-    return (allocations ?? []).reduce((sum: number, a: any) => sum + a.allocated_amount, 0);
+    return (allocations ?? []).reduce((sum: number, a: any) => sum + Number(a.allocated_amount), 0);
 }

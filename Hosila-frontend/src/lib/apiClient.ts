@@ -317,3 +317,82 @@ export const analyticsApi = {
     dashboard: (start: string, end: string) =>
         apiRequest<DashboardKPIs>(`/api/v1/analytics/dashboard?start=${start}&end=${end}`),
 };
+
+// ── Email Types ──────────────────────────────────────────────
+
+export interface EmailSettings {
+    sending_mode: 'shared' | 'custom';
+    custom_domain: string | null;
+    custom_sender_email: string | null;
+    domain_verified: boolean;
+    spf_verified: boolean;
+    dkim_verified: boolean;
+    dmarc_verified: boolean;
+    primary_color: string;
+    promo_enabled: boolean;
+    promo_title: string | null;
+    promo_body: string | null;
+    custom_footer: string | null;
+    send_reservation_email: boolean;
+    send_checkin_email: boolean;
+    send_checkout_email: boolean;
+}
+
+export interface EmailLog {
+    id: string;
+    hotel_id: string;
+    guest_id: string | null;
+    guest_name: string | null;
+    booking_id: string | null;
+    reservation_id: string | null;
+    email_type: 'reservation_confirmation' | 'checkin_welcome' | 'checkout_receipt';
+    recipient_email: string;
+    subject: string;
+    status: 'sent' | 'failed' | 'skipped' | 'pending';
+    error_message: string | null;
+    sent_at: string;
+}
+
+export interface EmailLogsResponse {
+    logs: EmailLog[];
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+}
+
+// Email
+export const emailApi = {
+    /** Get hotel email settings */
+    getSettings: () =>
+        apiRequest<EmailSettings>('/api/v1/email/settings'),
+
+    /** Update hotel email settings */
+    updateSettings: (data: Partial<EmailSettings>) =>
+        apiRequest<EmailSettings>('/api/v1/email/settings', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        }),
+
+    /** Get paginated email logs */
+    getLogs: (page: number = 1, limit: number = 20) =>
+        apiRequest<EmailLogsResponse>(`/api/v1/email/logs?page=${page}&limit=${limit}`),
+
+    /** Manually trigger reservation email */
+    sendReservationEmail: (reservationId: string) =>
+        apiRequest<{ message: string; status: string }>(`/api/v1/email/send/reservation/${reservationId}`, {
+            method: 'POST',
+        }),
+
+    /** Manually trigger check-in email */
+    sendCheckinEmail: (bookingId: string) =>
+        apiRequest<{ message: string; status: string }>(`/api/v1/email/send/checkin/${bookingId}`, {
+            method: 'POST',
+        }),
+
+    /** Manually trigger check-out email */
+    sendCheckoutEmail: (bookingId: string) =>
+        apiRequest<{ message: string; status: string }>(`/api/v1/email/send/checkout/${bookingId}`, {
+            method: 'POST',
+        }),
+};

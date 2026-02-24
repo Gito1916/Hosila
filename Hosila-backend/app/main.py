@@ -18,6 +18,7 @@ from app.modules.tax_engine.router import router as tax_router
 from app.modules.billing.router import router as billing_router
 from app.modules.reports.router import router as reports_router
 from app.modules.analytics.router import router as analytics_router
+from app.modules.email.router import router as email_router
 
 
 @asynccontextmanager
@@ -78,6 +79,7 @@ app.include_router(tax_router, prefix="/api/v1")
 app.include_router(billing_router, prefix="/api/v1")
 app.include_router(reports_router, prefix="/api/v1")
 app.include_router(analytics_router, prefix="/api/v1")
+app.include_router(email_router, prefix="/api/v1")
 
 
 @app.get("/")
