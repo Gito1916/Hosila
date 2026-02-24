@@ -1,4 +1,4 @@
-// HotelFlow — Reservation Confirmation Email Edge Function
+// Hosila — Reservation Confirmation Email Edge Function
 // Sends a confirmation email to the guest after a reservation is created.
 //
 // Called from the main API edge function after reservation creation.
@@ -10,51 +10,51 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
 function json(data: unknown, status = 200) {
-    return new Response(JSON.stringify(data), {
-        status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 }
 
 function formatDate(dateStr: string): string {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 function formatCurrency(amount: number, currency = "NGN"): string {
-    return new Intl.NumberFormat("en-NG", {
-        style: "currency",
-        currency,
-    }).format(amount);
+  return new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency,
+  }).format(amount);
 }
 
 function buildConfirmationHtml(data: {
-    hotelName: string;
-    hotelPhone: string;
-    hotelEmail: string;
-    hotelAddress: string;
-    guestName: string;
-    roomType: string;
-    roomNumber: string;
-    checkIn: string;
-    checkOut: string;
-    nights: number;
-    totalAmount: number;
-    reservationId: string;
-    currency: string;
+  hotelName: string;
+  hotelPhone: string;
+  hotelEmail: string;
+  hotelAddress: string;
+  guestName: string;
+  roomType: string;
+  roomNumber: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  totalAmount: number;
+  reservationId: string;
+  currency: string;
 }): string {
-    return `
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -125,7 +125,7 @@ function buildConfirmationHtml(data: {
 
       <p style="color:#94a3b8;font-size:12px;margin:24px 0 0;text-align:center;">
         ${data.hotelAddress}<br/>
-        This email was sent automatically by HotelFlow.
+        This email was sent automatically by Hosila.
       </p>
     </div>
   </div>
@@ -134,110 +134,110 @@ function buildConfirmationHtml(data: {
 }
 
 Deno.serve(async (req: Request) => {
-    if (req.method === "OPTIONS") {
-        return new Response(null, { status: 204, headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
+  if (req.method !== "POST") {
+    return json({ error: "Method not allowed" }, 405);
+  }
+
+  try {
+    const { reservation_id, hotel_id } = await req.json();
+
+    if (!reservation_id || !hotel_id) {
+      return json({ error: "reservation_id and hotel_id are required" }, 400);
     }
 
-    if (req.method !== "POST") {
-        return json({ error: "Method not allowed" }, 405);
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+
+    if (!resendApiKey) {
+      console.warn("RESEND_API_KEY not set — skipping confirmation email");
+      return json({ sent: false, reason: "Email service not configured" });
     }
 
-    try {
-        const { reservation_id, hotel_id } = await req.json();
+    const supabase = createClient(supabaseUrl, serviceKey);
 
-        if (!reservation_id || !hotel_id) {
-            return json({ error: "reservation_id and hotel_id are required" }, 400);
-        }
-
-        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-        const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-        const resendApiKey = Deno.env.get("RESEND_API_KEY");
-
-        if (!resendApiKey) {
-            console.warn("RESEND_API_KEY not set — skipping confirmation email");
-            return json({ sent: false, reason: "Email service not configured" });
-        }
-
-        const supabase = createClient(supabaseUrl, serviceKey);
-
-        // Fetch reservation with joins
-        const { data: reservation, error: resErr } = await supabase
-            .from("reservations")
-            .select(
-                `id, check_in_date, check_out_date, nights, total_amount, status,
+    // Fetch reservation with joins
+    const { data: reservation, error: resErr } = await supabase
+      .from("reservations")
+      .select(
+        `id, check_in_date, check_out_date, nights, total_amount, status,
          guests!inner(name, email, phone),
          rooms!inner(room_number, room_type)`
-            )
-            .eq("id", reservation_id)
-            .eq("hotel_id", hotel_id)
-            .single();
+      )
+      .eq("id", reservation_id)
+      .eq("hotel_id", hotel_id)
+      .single();
 
-        if (resErr || !reservation) {
-            return json({ error: "Reservation not found" }, 404);
-        }
-
-        const guest = reservation.guests as any;
-        if (!guest?.email) {
-            return json({ sent: false, reason: "Guest has no email address" });
-        }
-
-        // Fetch hotel info
-        const { data: hotel } = await supabase
-            .from("hotels")
-            .select("name, phone, email, address, settings")
-            .eq("id", hotel_id)
-            .single();
-
-        if (!hotel) {
-            return json({ error: "Hotel not found" }, 404);
-        }
-
-        const currency = hotel.settings?.currency || "NGN";
-        const room = reservation.rooms as any;
-
-        const html = buildConfirmationHtml({
-            hotelName: hotel.name,
-            hotelPhone: hotel.phone || "",
-            hotelEmail: hotel.email || "",
-            hotelAddress: hotel.address || "",
-            guestName: guest.name,
-            roomType: room.room_type,
-            roomNumber: room.room_number,
-            checkIn: reservation.check_in_date,
-            checkOut: reservation.check_out_date,
-            nights: reservation.nights,
-            totalAmount: reservation.total_amount,
-            reservationId: reservation.id,
-            currency,
-        });
-
-        // Send via Resend
-        const emailRes = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${resendApiKey}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                from: `${hotel.name} <reservations@${Deno.env.get("RESEND_DOMAIN") || "hotelflow.app"}>`,
-                to: [guest.email],
-                subject: `Reservation Confirmed — ${hotel.name} (${formatDate(reservation.check_in_date)})`,
-                html,
-            }),
-        });
-
-        if (!emailRes.ok) {
-            const errBody = await emailRes.text();
-            console.error("Resend error:", errBody);
-            return json({ sent: false, reason: "Email delivery failed" }, 502);
-        }
-
-        const result = await emailRes.json();
-        console.log("Confirmation email sent:", result.id);
-
-        return json({ sent: true, email_id: result.id });
-    } catch (err) {
-        console.error("Email error:", err);
-        return json({ error: "Failed to send confirmation email" }, 500);
+    if (resErr || !reservation) {
+      return json({ error: "Reservation not found" }, 404);
     }
+
+    const guest = reservation.guests as any;
+    if (!guest?.email) {
+      return json({ sent: false, reason: "Guest has no email address" });
+    }
+
+    // Fetch hotel info
+    const { data: hotel } = await supabase
+      .from("hotels")
+      .select("name, phone, email, address, settings")
+      .eq("id", hotel_id)
+      .single();
+
+    if (!hotel) {
+      return json({ error: "Hotel not found" }, 404);
+    }
+
+    const currency = hotel.settings?.currency || "NGN";
+    const room = reservation.rooms as any;
+
+    const html = buildConfirmationHtml({
+      hotelName: hotel.name,
+      hotelPhone: hotel.phone || "",
+      hotelEmail: hotel.email || "",
+      hotelAddress: hotel.address || "",
+      guestName: guest.name,
+      roomType: room.room_type,
+      roomNumber: room.room_number,
+      checkIn: reservation.check_in_date,
+      checkOut: reservation.check_out_date,
+      nights: reservation.nights,
+      totalAmount: reservation.total_amount,
+      reservationId: reservation.id,
+      currency,
+    });
+
+    // Send via Resend
+    const emailRes = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: `${hotel.name} <reservations@${Deno.env.get("RESEND_DOMAIN") || "hosila.com"}>`,
+        to: [guest.email],
+        subject: `Reservation Confirmed — ${hotel.name} (${formatDate(reservation.check_in_date)})`,
+        html,
+      }),
+    });
+
+    if (!emailRes.ok) {
+      const errBody = await emailRes.text();
+      console.error("Resend error:", errBody);
+      return json({ sent: false, reason: "Email delivery failed" }, 502);
+    }
+
+    const result = await emailRes.json();
+    console.log("Confirmation email sent:", result.id);
+
+    return json({ sent: true, email_id: result.id });
+  } catch (err) {
+    console.error("Email error:", err);
+    return json({ error: "Failed to send confirmation email" }, 500);
+  }
 });

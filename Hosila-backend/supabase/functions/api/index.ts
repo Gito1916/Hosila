@@ -1,4 +1,4 @@
-// HotelFlow Website API — Supabase Edge Function
+// Hosila Website API — Supabase Edge Function
 // Provides public read endpoints and authenticated write endpoints for hotel websites
 //
 // Endpoints:
