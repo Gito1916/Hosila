@@ -4,7 +4,7 @@ All calculations done server-side via SQL aggregation.
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import date
+from datetime import date, datetime, time
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,6 +20,10 @@ async def generate_accommodation_report(
     end: date,
 ) -> AccommodationReport:
     """Generate accommodation revenue and performance report."""
+
+    # Build proper datetime range for asyncpg
+    start_dt = datetime.combine(start, time.min)
+    end_dt = datetime.combine(end, time(23, 59, 59))
 
     # Total rooms available
     rooms_result = await db.execute(
@@ -40,8 +44,8 @@ async def generate_accommodation_report(
                     CASE WHEN b.booking_type = 'night'
                     THEN GREATEST(1,
                         EXTRACT(DAY FROM
-                            LEAST(b.check_out_time, CAST(:end_ts AS timestamptz))
-                            - GREATEST(b.check_in_time, CAST(:start_ts AS timestamptz))
+                            LEAST(b.check_out_time, :end_ts)
+                            - GREATEST(b.check_in_time, :start_ts)
                         )::int
                     )
                     ELSE 1 END
@@ -54,15 +58,15 @@ async def generate_accommodation_report(
                 AND c.status = 'active'
                 AND c.hotel_id = :hotel_id
             WHERE b.hotel_id = :hotel_id
-              AND b.check_in_time < CAST(:end_ts AS timestamptz)
-              AND b.check_out_time > CAST(:start_ts AS timestamptz)
+              AND b.check_in_time < :end_ts
+              AND b.check_out_time > :start_ts
             GROUP BY r.room_type
             ORDER BY revenue DESC
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start.isoformat(),
-            "end_ts": end.isoformat() + "T23:59:59Z",
+            "start_ts": start_dt,
+            "end_ts": end_dt,
         },
     )
     rows = booking_result.mappings().all()
@@ -107,13 +111,13 @@ async def generate_accommodation_report(
             FROM tax_transactions
             WHERE hotel_id = :hotel_id
               AND department = 'accommodation'
-              AND transaction_date >= CAST(:start_ts AS timestamptz)
-              AND transaction_date < CAST(:end_ts AS timestamptz)
+              AND transaction_date >= :start_ts
+              AND transaction_date < :end_ts
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start.isoformat(),
-            "end_ts": end.isoformat() + "T23:59:59Z",
+            "start_ts": start_dt,
+            "end_ts": end_dt,
         },
     )
     tax_row = tax_result.mappings().first()

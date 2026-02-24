@@ -2,7 +2,7 @@
 Analytics API routes — aggregated KPIs for the financial dashboard.
 """
 
-from datetime import date
+from datetime import date, datetime, time
 from decimal import Decimal
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import text
@@ -40,6 +40,10 @@ async def get_dashboard_kpis(
     """Aggregated financial KPIs for the dashboard."""
 
     try:
+        # Build proper datetime range for asyncpg
+        start_dt = datetime.combine(start, time.min)   # 00:00:00
+        end_dt = datetime.combine(end, time(23, 59, 59))  # 23:59:59
+
         # Revenue by department
         rev_result = await db.execute(
             text("""
@@ -50,10 +54,10 @@ async def get_dashboard_kpis(
                     COALESCE(SUM(gross_amount), 0) as total_rev
                 FROM charges
                 WHERE hotel_id = :hotel_id AND status = 'active'
-                  AND charge_date >= CAST(:start_ts AS timestamptz)
-                  AND charge_date < CAST(:end_ts AS timestamptz)
+                  AND charge_date >= :start_ts
+                  AND charge_date < :end_ts
             """),
-            {"hotel_id": tenant.hotel_id, "start_ts": start.isoformat(), "end_ts": end.isoformat() + "T23:59:59Z"},
+            {"hotel_id": tenant.hotel_id, "start_ts": start_dt, "end_ts": end_dt},
         )
         rev = rev_result.mappings().first()
 
@@ -63,10 +67,10 @@ async def get_dashboard_kpis(
                 SELECT COALESCE(SUM(amount), 0) as total_expenses
                 FROM expenses
                 WHERE hotel_id = :hotel_id
-                  AND date >= CAST(:start_ts AS timestamptz)
-                  AND date < CAST(:end_ts AS timestamptz)
+                  AND date >= :start_ts
+                  AND date < :end_ts
             """),
-            {"hotel_id": tenant.hotel_id, "start_ts": start.isoformat(), "end_ts": end.isoformat() + "T23:59:59Z"},
+            {"hotel_id": tenant.hotel_id, "start_ts": start_dt, "end_ts": end_dt},
         )
         expenses = Decimal(str(exp_result.scalar() or 0))
 
@@ -79,10 +83,10 @@ async def get_dashboard_kpis(
                     COALESCE(SUM(CASE WHEN tax_type = 'service_charge' THEN tax_amount ELSE 0 END), 0) as sc
                 FROM tax_transactions
                 WHERE hotel_id = :hotel_id
-                  AND transaction_date >= CAST(:start_ts AS timestamptz)
-                  AND transaction_date < CAST(:end_ts AS timestamptz)
+                  AND transaction_date >= :start_ts
+                  AND transaction_date < :end_ts
             """),
-            {"hotel_id": tenant.hotel_id, "start_ts": start.isoformat(), "end_ts": end.isoformat() + "T23:59:59Z"},
+            {"hotel_id": tenant.hotel_id, "start_ts": start_dt, "end_ts": end_dt},
         )
         tax = tax_result.mappings().first()
 

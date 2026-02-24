@@ -76,7 +76,7 @@ export function PWAPrompt() {
                     <Download size={20} className="text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white text-sm">Install HotelFlow</h3>
+                    <h3 className="font-semibold text-white text-sm">Install Hosila</h3>
                     <p className="text-xs text-slate-400 mt-1">
                         Install this app for quick access and offline use
                     </p>

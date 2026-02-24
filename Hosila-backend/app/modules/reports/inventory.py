@@ -4,7 +4,7 @@ Proper stock accounting: Opening + Purchases - Usage - Wastage = Closing.
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import date
+from datetime import date, datetime, time
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,6 +29,10 @@ async def generate_inventory_report(
       Wastage       = deductions within period (source = 'loss')
       Closing Stock = Opening + Purchases - Usage - Wastage
     """
+
+    # Build proper datetime range for asyncpg
+    start_dt = datetime.combine(start, time.min)
+    end_dt = datetime.combine(end, time(23, 59, 59))
 
     # Get all inventory items
     items_result = await db.execute(
@@ -62,9 +66,9 @@ async def generate_inventory_report(
                 FROM inventory_movements
                 WHERE item_id = :item_id
                   AND hotel_id = :hotel_id
-                  AND movement_time < CAST(:start_ts AS timestamptz)
+                  AND movement_time < :start_ts
             """),
-            {"item_id": item_id, "hotel_id": hotel_id, "start_ts": start.isoformat()},
+            {"item_id": item_id, "hotel_id": hotel_id, "start_ts": start_dt},
         )
         opening_stock = int(opening_result.scalar() or 0)
 
@@ -84,14 +88,14 @@ async def generate_inventory_report(
                 FROM inventory_movements
                 WHERE item_id = :item_id
                   AND hotel_id = :hotel_id
-                  AND movement_time >= CAST(:start_ts AS timestamptz)
-                  AND movement_time < CAST(:end_ts AS timestamptz)
+                  AND movement_time >= :start_ts
+                  AND movement_time < :end_ts
             """),
             {
                 "item_id": item_id,
                 "hotel_id": hotel_id,
-                "start_ts": start.isoformat(),
-                "end_ts": end.isoformat() + "T23:59:59Z",
+                "start_ts": start_dt,
+                "end_ts": end_dt,
             },
         )
         period = period_result.mappings().first()

@@ -5,7 +5,7 @@ what they owe FIRS (VAT) and state revenue service (TDL).
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import date, datetime, timezone
+from datetime import date, datetime, time
 from uuid import uuid4
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,6 +35,10 @@ async def generate_tax_remittance_report(
     - Informational: Service Charge collected
     """
 
+    # Build proper datetime range for asyncpg
+    start_dt = datetime.combine(start, time.min)
+    end_dt = datetime.combine(end, time(23, 59, 59))
+
     # ── Summary by tax type ───────────────────────
     summary_result = await db.execute(
         text("""
@@ -46,14 +50,14 @@ async def generate_tax_remittance_report(
                 SUM(CASE WHEN NOT remitted THEN tax_amount ELSE 0 END) as pending_amount
             FROM tax_transactions
             WHERE hotel_id = :hotel_id
-              AND transaction_date >= CAST(:start_ts AS timestamptz)
-              AND transaction_date < CAST(:end_ts AS timestamptz)
+              AND transaction_date >= :start_ts
+              AND transaction_date < :end_ts
             GROUP BY tax_type
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start.isoformat(),
-            "end_ts": end.isoformat() + "T23:59:59Z",
+            "start_ts": start_dt,
+            "end_ts": end_dt,
         },
     )
     summary_rows = {row["tax_type"]: row for row in summary_result.mappings().all()}
@@ -86,15 +90,15 @@ async def generate_tax_remittance_report(
                 COALESCE(SUM(CASE WHEN tax_type = 'service_charge' THEN tax_amount ELSE 0 END), 0) as sc
             FROM tax_transactions
             WHERE hotel_id = :hotel_id
-              AND transaction_date >= CAST(:start_ts AS timestamptz)
-              AND transaction_date < CAST(:end_ts AS timestamptz)
+              AND transaction_date >= :start_ts
+              AND transaction_date < :end_ts
             GROUP BY department
             ORDER BY department
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start.isoformat(),
-            "end_ts": end.isoformat() + "T23:59:59Z",
+            "start_ts": start_dt,
+            "end_ts": end_dt,
         },
     )
     by_department = [
@@ -128,7 +132,11 @@ async def mark_as_remitted(
     Creates a remittance_batch record for auditing.
     """
     batch_id = str(uuid4())
-    now = datetime.now(timezone.utc)
+    now = datetime.now()
+
+    # Build proper datetime range for asyncpg
+    req_start_dt = datetime.combine(request.period_start, time.min)
+    req_end_dt = datetime.combine(request.period_end, time(23, 59, 59))
 
     # Count and sum pending transactions
     result = await db.execute(
@@ -138,14 +146,14 @@ async def mark_as_remitted(
             WHERE hotel_id = :hotel_id
               AND tax_type = :tax_type
               AND remitted = FALSE
-              AND transaction_date >= CAST(:start_ts AS timestamptz)
-              AND transaction_date < CAST(:end_ts AS timestamptz)
+              AND transaction_date >= :start_ts
+              AND transaction_date < :end_ts
         """),
         {
             "hotel_id": hotel_id,
             "tax_type": request.tax_type,
-            "start_ts": request.period_start.isoformat(),
-            "end_ts": request.period_end.isoformat() + "T23:59:59Z",
+            "start_ts": req_start_dt,
+            "end_ts": req_end_dt,
         },
     )
     row = result.mappings().first()
@@ -194,15 +202,15 @@ async def mark_as_remitted(
             WHERE hotel_id = :hotel_id
               AND tax_type = :tax_type
               AND remitted = FALSE
-              AND transaction_date >= CAST(:start_ts AS timestamptz)
-              AND transaction_date < CAST(:end_ts AS timestamptz)
+              AND transaction_date >= :start_ts
+              AND transaction_date < :end_ts
         """),
         {
             "batch_id": batch_id,
             "hotel_id": hotel_id,
             "tax_type": request.tax_type,
-            "start_ts": request.period_start.isoformat(),
-            "end_ts": request.period_end.isoformat() + "T23:59:59Z",
+            "start_ts": req_start_dt,
+            "end_ts": req_end_dt,
             "remitted_at": now,
         },
     )

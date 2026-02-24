@@ -4,7 +4,7 @@ All calculations done server-side via SQL aggregation.
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import date
+from datetime import date, datetime, time
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,6 +26,10 @@ async def generate_restaurant_report(
 ) -> RestaurantReport:
     """Generate restaurant sales analysis report."""
 
+    # Build proper datetime range for asyncpg
+    start_dt = datetime.combine(start, time.min)
+    end_dt = datetime.combine(end, time(23, 59, 59))
+
     # ── Item-level sales ──────────────────────────
     items_result = await db.execute(
         text("""
@@ -39,15 +43,15 @@ async def generate_restaurant_report(
             JOIN services s ON so.service_id = s.id
             WHERE so.hotel_id = :hotel_id
               AND so.status != 'cancelled'
-              AND so.ordered_at >= CAST(:start_ts AS timestamptz)
-              AND so.ordered_at < CAST(:end_ts AS timestamptz)
+              AND so.ordered_at >= :start_ts
+              AND so.ordered_at < :end_ts
             GROUP BY s.name, s.category, s.cost_price
             ORDER BY revenue DESC
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start.isoformat(),
-            "end_ts": end.isoformat() + "T23:59:59Z",
+            "start_ts": start_dt,
+            "end_ts": end_dt,
         },
     )
     item_rows = items_result.mappings().all()
@@ -85,13 +89,13 @@ async def generate_restaurant_report(
             FROM service_orders
             WHERE hotel_id = :hotel_id
               AND status != 'cancelled'
-              AND ordered_at >= CAST(:start_ts AS timestamptz)
-              AND ordered_at < CAST(:end_ts AS timestamptz)
+              AND ordered_at >= :start_ts
+              AND ordered_at < :end_ts
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start.isoformat(),
-            "end_ts": end.isoformat() + "T23:59:59Z",
+            "start_ts": start_dt,
+            "end_ts": end_dt,
         },
     )
     total_orders = order_count_result.scalar() or 0
@@ -111,14 +115,14 @@ async def generate_restaurant_report(
             WHERE t.hotel_id = :hotel_id
               AND t.source = 'restaurant'
               AND t.type = 'income'
-              AND t.date >= CAST(:start_ts AS timestamptz)
-              AND t.date < CAST(:end_ts AS timestamptz)
+              AND t.date >= :start_ts
+              AND t.date < :end_ts
             GROUP BY t.payment_method
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start.isoformat(),
-            "end_ts": end.isoformat() + "T23:59:59Z",
+            "start_ts": start_dt,
+            "end_ts": end_dt,
         },
     )
     payment_split = [
@@ -140,15 +144,15 @@ async def generate_restaurant_report(
             FROM service_orders
             WHERE hotel_id = :hotel_id
               AND status != 'cancelled'
-              AND ordered_at >= CAST(:start_ts AS timestamptz)
-              AND ordered_at < CAST(:end_ts AS timestamptz)
+              AND ordered_at >= :start_ts
+              AND ordered_at < :end_ts
             GROUP BY DATE(ordered_at)
             ORDER BY order_date
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start.isoformat(),
-            "end_ts": end.isoformat() + "T23:59:59Z",
+            "start_ts": start_dt,
+            "end_ts": end_dt,
         },
     )
     daily_breakdown = [
@@ -169,13 +173,13 @@ async def generate_restaurant_report(
             FROM tax_transactions
             WHERE hotel_id = :hotel_id
               AND department = 'restaurant'
-              AND transaction_date >= CAST(:start_ts AS timestamptz)
-              AND transaction_date < CAST(:end_ts AS timestamptz)
+              AND transaction_date >= :start_ts
+              AND transaction_date < :end_ts
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start.isoformat(),
-            "end_ts": end.isoformat() + "T23:59:59Z",
+            "start_ts": start_dt,
+            "end_ts": end_dt,
         },
     )
     tax_row = tax_result.mappings().first()
