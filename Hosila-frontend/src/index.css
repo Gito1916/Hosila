@@ -229,9 +229,17 @@ html.light-mode body {
 }
 
 /* Light mode text colors - Refined for better contrast and softer blacks */
-.light-mode .text-white {
+/* Exclude sidebar (aside) so its text stays white */
+.light-mode :not(aside)>.text-white,
+.light-mode .text-white:not(aside .text-white) {
   color: #1e293b !important;
   /* slate-800 - dark charcoal, not pure black */
+}
+
+.light-mode aside .text-white,
+.light-mode aside .text-slate-300,
+.light-mode aside .text-slate-400 {
+  color: inherit !important;
 }
 
 .light-mode .text-slate-100 {
