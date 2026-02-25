@@ -131,8 +131,6 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
 
     // ── Grouped rendering ──
     const renderGroupedRooms = () => {
-        // No type grouping — removed per user request
-
         if (groupBy === 'floor') {
             const floorList = Array.from(new Set(filteredRooms.map(r => r.floor_number ?? 1))).sort((a, b) => a - b);
             return (
@@ -197,13 +195,13 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
             <div className="flex items-center gap-2 justify-between flex-wrap">
                 {/* Filters — compact pill style */}
                 <div className="flex items-center gap-2">
-                    <Filter size={14} className="text-muted />
+                    <Filter size={14} className="text-muted" />
 
                     {/* Status filter */}
                     <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value as RoomStatus | 'all')}
-                        className="text-sm px-3 py-1.5 rounded-lg border border-border bg-surface-card focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
+                        className="text-sm px-3 py-1.5 rounded-lg border border-border bg-surface-card text-body focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
                         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
                     >
                         {statusOptions.map((opt) => (
@@ -218,7 +216,7 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
                         <select
                             value={filterType}
                             onChange={(e) => setFilterType(e.target.value)}
-                            className="text-sm px-3 py-1.5 rounded-lg border border-border bg-surface-card focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
+                            className="text-sm px-3 py-1.5 rounded-lg border border-border bg-surface-card text-body focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
                             style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
                         >
                             <option value="all">All Types</option>
@@ -237,8 +235,8 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
                     <button
                         onClick={cycleGroupBy}
                         className={`text-sm flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${groupBy !== 'none'
-                            ? 'bg-primary-50 text-primary-600 border-primary-200 dark:text-primary-400 dark:border-primary-500/20'
-                            : 'text-muted border-border hover:text-body hover:border-border-strong dark:hover:text-muted dark:hover:border-border-strong'
+                            ? 'bg-primary-50 text-primary-600 border-primary-200'
+                            : 'text-muted border-border hover:text-heading hover:border-border-strong'
                             }`}
                         title="Toggle grouping"
                     >
@@ -247,20 +245,20 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
                     </button>
 
                     {/* Grid / List toggle */}
-                    <div className="flex rounded-lg overflow-hidden border border-border
+                    <div className="flex rounded-lg overflow-hidden border border-border">
                         <button
                             onClick={() => setViewMode('grid')}
                             className={`p-2 ${viewMode === 'grid'
-                                ? 'bg-primary-500 text-heading'
-                                : 'bg-surface-card text-muted hover:text-body dark:hover:text-muted'}`}
+                                ? 'bg-primary-500 text-white'
+                                : 'bg-surface-card text-muted hover:text-heading'}`}
                         >
                             <Grid3X3 size={18} />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
                             className={`p-2 ${viewMode === 'list'
-                                ? 'bg-primary-500 text-heading'
-                                : 'bg-surface-card text-muted hover:text-body dark:hover:text-muted'}`}
+                                ? 'bg-primary-500 text-white'
+                                : 'bg-surface-card text-muted hover:text-heading'}`}
                         >
                             <List size={18} />
                         </button>
@@ -269,7 +267,7 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
             </div>
 
             {/* Room count */}
-            <div className="text-sm text-muted
+            <div className="text-sm text-muted">
                 Showing {filteredRooms.length} of {rooms?.length ?? 0} rooms
             </div>
 

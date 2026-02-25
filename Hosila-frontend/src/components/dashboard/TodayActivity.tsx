@@ -23,7 +23,7 @@ export function TodayActivity({ onCheckIn, onCheckOut }: TodayActivityProps) {
                 room: a.roomNumber || 'Unassigned',
                 duration: `${nights} Night${nights !== 1 ? 's' : ''}`,
                 status: 'ARRIVAL',
-                statusColor: 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20',
+                statusColor: 'bg-blue-50 text-blue-600 border-blue-200',
                 amount: `₦${a.reservation.total_price.toLocaleString()}`,
                 action: () => onCheckIn?.(a.reservation.id)
             };
@@ -39,8 +39,8 @@ export function TodayActivity({ onCheckIn, onCheckOut }: TodayActivityProps) {
                 duration: `${nights} Night${nights !== 1 ? 's' : ''}`,
                 status: d.isOverdue ? 'OVERDUE' : 'CHECKING OUT',
                 statusColor: d.isOverdue
-                    ? 'bg-red-50 text-red-600 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20'
-                    : 'bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20',
+                    ? 'bg-red-50 text-red-600 border-red-200'
+                    : 'bg-orange-50 text-orange-600 border-orange-200',
                 amount: `₦${d.booking.total_price.toLocaleString()}`,
                 action: () => onCheckOut?.(d.booking.id)
             };
@@ -49,11 +49,11 @@ export function TodayActivity({ onCheckIn, onCheckOut }: TodayActivityProps) {
 
     const getAvatarColor = (index: number) => {
         const colors = [
-            'bg-primary-400 text-heading',
-            'bg-purple-500 text-heading',
-            'bg-blue-500 text-heading',
-            'bg-amber-500 text-heading',
-            'bg-rose-500 text-heading',
+            'bg-primary-400 text-white',
+            'bg-purple-500 text-white',
+            'bg-blue-500 text-white',
+            'bg-amber-500 text-white',
+            'bg-rose-500 text-white',
         ];
         return colors[index % colors.length];
     };
@@ -70,29 +70,29 @@ export function TodayActivity({ onCheckIn, onCheckOut }: TodayActivityProps) {
         <div className="w-full">
             <table className="w-full text-left border-collapse">
                 <thead>
-                    <tr className="border-b border-border
-                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted
+                    <tr className="border-b border-border">
+                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted">Guest</th>
                         <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted hidden sm:table-cell">Room</th>
                         <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted hidden md:table-cell">Duration</th>
-                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted
+                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted">Status</th>
                         <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted text-right">Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     {activities.map((act, idx) => (
-                        <tr key={act.id + act.type} className="border-b last:border-0 border-border-subtle hover:bg-surface-inset transition-colors group cursor-pointer" onClick={act.action}>
+                        <tr key={act.id + act.type} className="border-b last:border-0 border-border hover:bg-surface-raised transition-colors group cursor-pointer" onClick={act.action}>
                             <td className="py-3">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-9 h-9 rounded-full flex items-center justify-center font-medium text-sm shrink-0 shadow-sm ${getAvatarColor(idx)}`}>
                                         {act.guestName.charAt(0).toUpperCase()}
                                     </div>
                                     <div>
-                                        <p className="text-sm font-semibold text-heading
-                                        <p className="text-xs text-muted
+                                        <p className="text-sm font-semibold text-heading">{act.guestName}</p>
+                                        <p className="text-xs text-muted">#{act.ref}</p>
                                     </div>
                                 </div>
                             </td>
-                            <td className="py-3 text-sm text-muted hidden sm:table-cell font-medium">
+                            <td className="py-3 text-sm text-body hidden sm:table-cell font-medium">
                                 {act.room}
                             </td>
                             <td className="py-3 text-sm text-muted hidden md:table-cell">
