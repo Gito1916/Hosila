@@ -162,7 +162,7 @@ export function GuestListPrint({ onClose }: GuestListPrintProps) {
                     ) : (
                         <table className="w-full text-sm border-collapse">
                             <thead>
-                                <tr className="bg-surface-base/50 text-muted text-left print:bg-surface-raised print:text-gray-800">
+                                <tr className="bg-surface-base/50 text-muted text-left print:bg-surface-raised print:text-heading">
                                     <th className="px-3 py-2 font-medium border print:border-border-strong">#</th>
                                     <th className="px-3 py-2 font-medium border print:border-border-strong">Guest Name</th>
                                     <th className="px-3 py-2 font-medium border print:border-border-strong">Phone</th>
@@ -181,19 +181,19 @@ export function GuestListPrint({ onClose }: GuestListPrintProps) {
                                         <td className="px-3 py-2 text-heading print:text-black font-medium border print:border-border-strong">
                                             {guest.guestName}
                                         </td>
-                                        <td className="px-3 py-2 text-muted print:text-gray-800 border print:border-border-strong">
+                                        <td className="px-3 py-2 text-muted print:text-heading border print:border-border-strong">
                                             {guest.phone}
                                         </td>
-                                        <td className="px-3 py-2 text-muted print:text-gray-800 border print:border-border-strong">
+                                        <td className="px-3 py-2 text-muted print:text-heading border print:border-border-strong">
                                             {guest.occupation}
                                         </td>
-                                        <td className="px-3 py-2 text-muted print:text-gray-800 border print:border-border-strong">
+                                        <td className="px-3 py-2 text-muted print:text-heading border print:border-border-strong">
                                             {guest.reasonForVisit}
                                         </td>
-                                        <td className="px-3 py-2 text-muted print:text-gray-800 border print:border-border-strong">
+                                        <td className="px-3 py-2 text-muted print:text-heading border print:border-border-strong">
                                             {guest.roomNumber}
                                         </td>
-                                        <td className="px-3 py-2 text-muted print:text-gray-800 border print:border-border-strong">
+                                        <td className="px-3 py-2 text-muted print:text-heading border print:border-border-strong">
                                             {format(new Date(guest.checkInTime), 'dd MMM yyyy HH:mm')}
                                         </td>
                                     </tr>

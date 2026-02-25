@@ -55,8 +55,8 @@ const statusConfig: Record<RoomStatus, {
     },
     maintenance: {
         label: 'Maintenance',
-        accent: 'bg-gray-500',
-        dot: 'bg-gray-400',
+        accent: 'bg-slate-500',
+        dot: 'bg-slate-400',
         badgeCls: 'bg-surface-raised text-muted',
     },
 };
