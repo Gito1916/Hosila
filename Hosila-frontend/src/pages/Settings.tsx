@@ -60,7 +60,7 @@ export function SettingsPage() {
                         onClick={() => setActiveTab(tab.value)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${activeTab === tab.value
                             ? 'bg-primary-500 text-heading'
-                            : 'text-muted hover:text-heading dark:hover:text-heading hover:bg-surface-raised
+                            : 'text-muted hover:text-heading hover:bg-surface-raised'
                             }`}
                     >
                         {tab.icon}

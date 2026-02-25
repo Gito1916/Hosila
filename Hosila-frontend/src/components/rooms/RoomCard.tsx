@@ -3,7 +3,6 @@ import { toast } from '@/lib/errorMessages';
 import { useCountdown } from '@/hooks/useCountdown';
 import { format } from 'date-fns';
 import {
-    User,
     Clock,
     Wrench,
     Sparkles,
@@ -23,42 +22,42 @@ interface RoomCardProps {
     onClick: () => void;
 }
 
-/** Status configuration with light + dark Tailwind classes */
+/** Status configuration */
 const statusConfig: Record<RoomStatus, {
     label: string;
-    accent: string;          // left stripe bg
-    dot: string;             // badge dot bg
-    badgeCls: string;        // badge container classes (light + dark)
+    accent: string;
+    dot: string;
+    badgeCls: string;
 }> = {
     available: {
         label: 'Available',
         accent: 'bg-emerald-500',
         dot: 'bg-emerald-500',
-        badgeCls: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400',
+        badgeCls: 'bg-emerald-50 text-emerald-600',
     },
     occupied: {
         label: 'Occupied',
         accent: 'bg-red-500',
         dot: 'bg-red-500',
-        badgeCls: 'bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-400',
+        badgeCls: 'bg-red-50 text-red-600',
     },
     short_rest: {
         label: 'Short Rest',
         accent: 'bg-purple-500',
         dot: 'bg-purple-500',
-        badgeCls: 'bg-purple-50 text-purple-600 dark:bg-purple-500/15 dark:text-purple-400',
+        badgeCls: 'bg-purple-50 text-purple-600',
     },
     dirty: {
         label: 'Dirty',
         accent: 'bg-amber-500',
         dot: 'bg-amber-500',
-        badgeCls: 'bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400',
+        badgeCls: 'bg-amber-50 text-amber-600',
     },
     maintenance: {
         label: 'Maintenance',
-        accent: 'bg-surface-inset0',
+        accent: 'bg-gray-500',
         dot: 'bg-gray-400',
-        badgeCls: 'bg-surface-raised text-body dark:bg-surface-inset0/15 dark:text-muted',
+        badgeCls: 'bg-surface-raised text-muted',
     },
 };
 
@@ -66,7 +65,7 @@ const reservedConfig = {
     label: 'Reserved',
     accent: 'bg-blue-500',
     dot: 'bg-blue-500',
-    badgeCls: 'bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400',
+    badgeCls: 'bg-blue-50 text-blue-600',
 };
 
 export function RoomCard({ room, onClick }: RoomCardProps) {
@@ -91,12 +90,9 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
         }
     };
 
-    // ── Render ──
-
     return (
         <div
-            className="relative flex flex-col rounded-xl border shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group overflow-hidden
-                bg-surface-card border-border dark:hover:shadow-lg
+            className="relative flex flex-col rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group overflow-hidden bg-surface-card"
             style={{ minHeight: 180 }}
             onClick={onClick}
         >
@@ -105,7 +101,7 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
 
             {/* ── Header: Room Number + Badge ── */}
             <div className="flex items-start justify-between px-5 pt-4 pb-1 pl-6">
-                <h3 className="text-2xl font-extrabold tracking-tight leading-none text-gray-900
+                <h3 className="text-2xl font-extrabold tracking-tight leading-none text-heading">
                     {room.room_number}
                 </h3>
                 <div
@@ -118,7 +114,7 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
 
             {/* ── Room Type ── */}
             <div className="px-5 pl-6 pb-2">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted
+                <p className="text-xs font-medium uppercase tracking-wide text-muted">
                     {room.room_type}
                 </p>
             </div>
@@ -129,9 +125,9 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                 {/* Vacant / Available */}
                 {room.status === 'available' && !isReserved && (
                     <div>
-                        <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                        <p className="text-lg font-bold text-emerald-600">
                             ₦{Number(room.night_rate).toLocaleString()}
-                            <span className="text-xs font-normal text-muted
+                            <span className="text-xs font-normal text-muted">/night</span>
                         </p>
                     </div>
                 )}
@@ -139,14 +135,14 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                 {/* Reserved */}
                 {isReserved && room.pendingReservation && (
                     <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-50 text-blue-500 dark:bg-blue-500/15 dark:text-blue-400 shrink-0">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-50 text-blue-500 shrink-0">
                             <CalendarCheck size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm font-semibold truncate text-gray-800
+                            <p className="text-sm font-semibold truncate text-heading">
                                 {room.reservationGuestName}
                             </p>
-                            <p className="text-xs text-muted today</p>
+                            <p className="text-xs text-muted">Arriving today</p>
                         </div>
                     </div>
                 )}
@@ -154,16 +150,16 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                 {/* Occupied */}
                 {room.status === 'occupied' && room.activeBooking && (
                     <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-surface-raised text-body
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-surface-raised text-body">
                             {room.guestName
                                 ? room.guestName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-                                : <User size={14} />}
+                                : '?'}
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm font-semibold truncate text-gray-800
+                            <p className="text-sm font-semibold truncate text-heading">
                                 {room.guestName || 'Guest'}
                             </p>
-                            <p className="text-xs mt-0.5 text-muted
+                            <p className="text-xs mt-0.5 text-muted">
                                 Out: {format(new Date(room.activeBooking.planned_checkout), 'MMM d, h:mm a')}
                             </p>
                         </div>
@@ -173,14 +169,14 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                 {/* Short Rest */}
                 {room.status === 'short_rest' && room.activeBooking && (
                     <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-purple-50 text-purple-500 dark:bg-purple-500/15 dark:text-purple-400">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-purple-50 text-purple-500">
                             <Clock size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm font-semibold truncate text-gray-800
+                            <p className="text-sm font-semibold truncate text-heading">
                                 {room.guestName || 'Guest'}
                             </p>
-                            <div className={`text-sm font-mono font-bold mt-0.5 ${countdown.isExpiringSoon ? 'text-red-500' : 'text-purple-500 dark:text-purple-400'}`}>
+                            <div className={`text-sm font-mono font-bold mt-0.5 ${countdown.isExpiringSoon ? 'text-red-500' : 'text-purple-500'}`}>
                                 {countdown.timeLeft}
                                 {countdown.isExpired && <span className="ml-1 text-red-500 text-xs">Overtime</span>}
                             </div>
@@ -190,15 +186,15 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
 
                 {/* Dirty — minimal content, actions below */}
                 {room.status === 'dirty' && (
-                    <p className="text-sm font-medium text-amber-600 dark:text-amber-400">Needs cleaning</p>
+                    <p className="text-sm font-medium text-amber-600">Needs cleaning</p>
                 )}
 
                 {/* Maintenance — minimal */}
                 {room.status === 'maintenance' && (
                     <div>
-                        <p className="text-sm font-medium text-muted dark:text-muted">Under maintenance</p>
+                        <p className="text-sm font-medium text-muted">Under maintenance</p>
                         {room.maintenance_reason && (
-                            <p className="text-xs mt-0.5 line-clamp-1 text-muted
+                            <p className="text-xs mt-0.5 line-clamp-1 text-muted">
                                 {room.maintenance_reason}
                             </p>
                         )}
@@ -212,7 +208,7 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                 <div className="px-5 pl-6 pb-3 pt-2 mt-auto flex gap-2">
                     <button
                         onClick={(e) => handleStatusChange(e, 'maintenance')}
-                        className="p-1.5 rounded-md transition-colors text-muted hover:text-body hover:bg-surface-raised dark:hover:text-muted
+                        className="p-1.5 rounded-md transition-colors text-muted hover:text-body hover:bg-surface-raised"
                         title="Maintenance"
                     >
                         <Wrench size={14} />
@@ -225,9 +221,7 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                 <div className="px-5 pl-6 pb-3 pt-2 mt-auto flex gap-2">
                     <button
                         onClick={(e) => handleStatusChange(e, 'available')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
-                            bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100
-                            dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 dark:hover:bg-emerald-500/20"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100"
                         title="Mark Clean"
                     >
                         <Sparkles size={13} />
@@ -235,9 +229,7 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                     </button>
                     <button
                         onClick={(e) => handleStatusChange(e, 'maintenance')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
-                            bg-surface-inset text-muted border border-border hover:bg-surface-raised
-                            dark:bg-surface-inset0/10 dark:text-muted dark:border-gray-500/20 dark:hover:bg-surface-inset0/20"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors bg-surface-inset text-muted border border-border hover:bg-surface-raised"
                         title="Maintenance"
                     >
                         <Wrench size={13} />
@@ -251,9 +243,7 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                 <div className="px-5 pl-6 pb-3 pt-2 mt-auto flex gap-2">
                     <button
                         onClick={(e) => handleStatusChange(e, 'available')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
-                            bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100
-                            dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20 dark:hover:bg-blue-500/20"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100"
                         title="Complete Maintenance"
                     >
                         <CheckCircle size={13} />
