@@ -66,7 +66,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     const navLinkClasses = (isActive: boolean) =>
         `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive
             ? 'bg-primary-400/15 text-primary-400 font-semibold'
-            : 'text-slate-300 hover:bg-white/10 hover:text-white'
+            : 'text-white hover:bg-primary-400/15 hover:text-primary-400'
         }`;
 
     return (
@@ -86,14 +86,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             >
                 {/* Logo */}
                 <div className="p-4 border-b border-white/10 flex items-center justify-between">
-                    <Link to="/" className="flex items-center gap-3">
-                        <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-8 h-8 rounded" />
-                        <span className="text-xl font-bold text-white tracking-tight">Hosila</span>
+                    <Link to="/" className="flex items-center justify-center w-full lg:w-auto">
+                        <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-9 h-9 rounded" />
                     </Link>
                     {/* Close button - mobile only */}
                     <button
                         onClick={onClose}
-                        className="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg"
+                        className="lg:hidden absolute right-3 top-4 p-2 text-white hover:bg-white/10 rounded-lg"
                     >
                         <X size={20} />
                     </button>
@@ -144,12 +143,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-                                <p className="text-xs text-slate-400 capitalize">{user?.role}</p>
+                                <p className="text-xs text-slate-300 capitalize">{user?.role}</p>
                             </div>
                         </div>
                         <button
                             onClick={logout}
-                            className="flex items-center gap-2 w-full px-3 py-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                            className="flex items-center gap-2 w-full px-3 py-2 text-white hover:bg-primary-400/15 hover:text-primary-400 rounded-lg transition-colors"
                         >
                             <LogOut size={18} />
                             <span>Logout</span>
