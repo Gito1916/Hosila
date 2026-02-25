@@ -219,7 +219,7 @@ Deno.serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: `${hotel.name} <reservations@${Deno.env.get("RESEND_DOMAIN") || "hosila.com"}>`,
+        from: `${hotel.name} <reservations@${Deno.env.get("RESEND_DOMAIN") || "mail.hosila.com"}>`,
         to: [guest.email],
         subject: `Reservation Confirmed — ${hotel.name} (${formatDate(reservation.check_in_date)})`,
         html,

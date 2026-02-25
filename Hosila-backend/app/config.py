@@ -16,13 +16,13 @@ class Settings(BaseSettings):
 
     # ── Email (Resend) ───────────────────────────────────────
     resend_api_key: str = ""
-    hosila_logo_url: str = "https://hosila.vercel.app/hosila-logo.png"
-    email_from_address: str = "notifications@hosila.app"
+    hosila_logo_url: str = "https://hosila.com/hosila-logo.png"
+    email_from_address: str = "notifications@mail.hosila.com"
     email_from_name: str = "Hosila"
 
     # ── App ───────────────────────────────────────────────────
     environment: str = "development"
-    allowed_origins: str = "http://localhost:5173,http://localhost:3000"
+    allowed_origins: str = "http://localhost:5173,http://localhost:3000,https://hosila.com"
     api_version: str = "v1"
     debug: bool = True
 
