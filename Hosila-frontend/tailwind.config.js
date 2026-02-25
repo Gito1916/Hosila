@@ -12,16 +12,19 @@ export default {
                 'premium-r': '4px 0 24px rgba(0, 0, 0, 0.02)',
             },
             colors: {
-                /* ── Brand Monochromatic Scale ─────────────────── */
+                /* ── Brand Scale (built around #21C29C) ────────── */
                 brand: {
-                    950: '#061E19',
-                    900: '#0A2F28',
-                    800: '#115144',
-                    700: '#1C826F',
-                    600: '#26A991',
-                    400: '#6CD1BF',
-                    300: '#B5E8DF',
-                    200: '#E6F8F5',
+                    50: '#F4FDFC',
+                    100: '#E8FAF6',
+                    200: '#D1F3EC',
+                    300: '#9DDDD0',
+                    400: '#4ADEB6',
+                    500: '#21C29C',
+                    600: '#1BAA88',
+                    700: '#168E72',
+                    800: '#0F766E',
+                    900: '#0C2622',
+                    950: '#071A17',
                 },
 
                 /* ── Semantic Surface Tokens (CSS var-driven) ─── */
@@ -30,7 +33,9 @@ export default {
                     card: 'var(--surface-card)',
                     raised: 'var(--surface-raised)',
                     inset: 'var(--surface-inset)',
-                    sidebar: '#16243D',
+                    sidebar: 'var(--surface-sidebar)',
+                    'sidebar-hover': 'var(--surface-sidebar-hover)',
+                    'sidebar-active': 'var(--surface-sidebar-active)',
                 },
 
                 /* ── Semantic Text Tokens ─────────────────────── */
@@ -38,46 +43,51 @@ export default {
                 body: 'var(--text-body)',
                 muted: 'var(--text-muted)',
                 accent: 'var(--text-accent)',
+                'sidebar-text': 'var(--text-sidebar)',
+                'sidebar-active': 'var(--text-sidebar-active)',
 
                 /* ── Semantic Border Tokens ───────────────────── */
                 border: {
                     DEFAULT: 'var(--border-default)',
                     strong: 'var(--border-strong)',
                     subtle: 'var(--border-subtle)',
+                    sidebar: 'var(--border-sidebar)',
                 },
 
                 /* ── Primary CTA ──────────────────────────────── */
                 primary: {
-                    DEFAULT: '#1C826F',
-                    hover: '#26A991',
-                    light: '#6CD1BF',
-                    50: '#E6F8F5',
-                    100: '#B5E8DF',
-                    200: '#6CD1BF',
-                    300: '#26A991',
-                    400: '#1C826F',
-                    500: '#115144',
-                    600: '#0A2F28',
+                    DEFAULT: 'var(--primary)',
+                    hover: 'var(--primary-hover)',
+                    active: 'var(--primary-active)',
+                    disabled: 'var(--primary-disabled)',
+                    50: '#F4FDFC',
+                    100: '#E8FAF6',
+                    200: '#D1F3EC',
+                    300: '#9DDDD0',
+                    400: '#4ADEB6',
+                    500: '#21C29C',
+                    600: '#1BAA88',
+                    700: '#168E72',
                 },
 
                 /* ── Room Status Colors ───────────────────────── */
                 status: {
                     available: '#10B981',
-                    occupied: '#EF4444',
+                    occupied: '#E5484D',
                     shortRest: '#3B82F6',
                     dirty: '#F59E0B',
-                    maintenance: '#6B7280',
+                    maintenance: '#64748B',
                 },
 
                 /* ── Feedback / Alert Tokens ──────────────────── */
                 ok: '#10B981',
                 warn: '#F59E0B',
-                danger: '#EF4444',
+                danger: '#E5484D',
                 info: '#3B82F6',
 
-                /* ── Legacy compat (will remove after full migration) */
+                /* ── Legacy compat ────────────────────────────── */
                 success: '#10B981',
-                error: '#EF4444',
+                error: '#E5484D',
                 warning: '#F59E0B',
             },
             fontFamily: {
