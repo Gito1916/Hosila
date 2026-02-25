@@ -81,7 +81,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
             {/* Sidebar — constant navy in both light and dark mode */}
             <aside
-                className={`fixed left-0 top-0 h-full w-64 bg-[#16243D] flex flex-col z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+                className={`fixed left-0 top-0 h-full w-64 bg-[#16243D] border-r border-white/10 flex flex-col z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
                     }`}
             >
                 {/* Logo */}
