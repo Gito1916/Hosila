@@ -189,16 +189,16 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
         <div className="space-y-4">
             {/* Summary Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-                    <div className="flex items-center gap-2 text-sm text-slate-400 mb-1">
+                <div className="bg-surface-card/50 rounded-lg p-4 border border-border">
+                    <div className="flex items-center gap-2 text-sm text-muted mb-1">
                         <ArrowUpDown size={14} />
                         Entries
                     </div>
-                    <div className="text-2xl font-bold text-white">
+                    <div className="text-2xl font-bold text-heading">
                         {filteredRows.length}
                     </div>
                 </div>
-                <div className="bg-slate-800/50 rounded-lg p-4 border border-green-500/30">
+                <div className="bg-surface-card/50 rounded-lg p-4 border border-green-500/30">
                     <div className="flex items-center gap-2 text-sm text-green-400 mb-1">
                         <TrendingUp size={14} />
                         Charges (Gross)
@@ -207,7 +207,7 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
                         ₦{totalCharges.toLocaleString()}
                     </div>
                 </div>
-                <div className="bg-slate-800/50 rounded-lg p-4 border border-cyan-500/30">
+                <div className="bg-surface-card/50 rounded-lg p-4 border border-cyan-500/30">
                     <div className="flex items-center gap-2 text-sm text-cyan-400 mb-1">
                         <Landmark size={14} />
                         Payment Received
@@ -216,7 +216,7 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
                         ₦{totalPaymentsReceived.toLocaleString()}
                     </div>
                 </div>
-                <div className="bg-slate-800/50 rounded-lg p-4 border border-red-500/30">
+                <div className="bg-surface-card/50 rounded-lg p-4 border border-red-500/30">
                     <div className="flex items-center gap-2 text-sm text-red-400 mb-1">
                         <TrendingDown size={14} />
                         Expenses
@@ -242,23 +242,23 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
             <div className="flex items-center gap-2 flex-wrap">
                 {/* Search — compact */}
                 <div className="relative w-56">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                     <input
                         type="text"
                         placeholder="Search..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="text-sm w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-200 bg-white dark:bg-navy-800 dark:border-navy-600 dark:text-slate-300 focus:outline-none focus:border-primary-400"
+                        className="text-sm w-full pl-8 pr-3 py-1.5 rounded-lg border border-border bg-surface-card focus:outline-none focus:border-primary-400"
                     />
                 </div>
 
-                <Filter size={14} className="text-slate-400" />
+                <Filter size={14} className="text-muted" />
 
                 {/* Department Filter */}
                 <select
                     value={departmentFilter}
                     onChange={(e) => setDepartmentFilter(e.target.value)}
-                    className="text-sm px-3 py-1.5 rounded-lg border border-gray-200 bg-white dark:bg-navy-800 dark:border-navy-600 dark:text-slate-300 focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
+                    className="text-sm px-3 py-1.5 rounded-lg border border-border bg-surface-card focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
                     style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
                 >
                     <option value="all">All Departments</option>
@@ -272,7 +272,7 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
                 <select
                     value={typeFilter}
                     onChange={(e) => setTypeFilter(e.target.value)}
-                    className="text-sm px-3 py-1.5 rounded-lg border border-gray-200 bg-white dark:bg-navy-800 dark:border-navy-600 dark:text-slate-300 focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
+                    className="text-sm px-3 py-1.5 rounded-lg border border-border bg-surface-card focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
                     style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
                 >
                     <option value="all">All Types</option>
@@ -284,9 +284,9 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
             </div>
 
             {/* Transactions Table */}
-            <div className="bg-slate-800/50 rounded-lg border border-slate-700 overflow-hidden">
+            <div className="bg-surface-card/50 rounded-lg border border-border overflow-hidden">
                 {filteredRows.length === 0 ? (
-                    <div className="text-center py-12 text-slate-400">
+                    <div className="text-center py-12 text-muted">
                         <Receipt size={32} className="mx-auto mb-2 opacity-50" />
                         <p>No transactions found</p>
                     </div>
@@ -294,7 +294,7 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="bg-slate-900/50 text-slate-400 text-left">
+                                <tr className="bg-surface-base/50 text-muted text-left">
                                     <th className="px-4 py-3 font-medium">Date/Time</th>
                                     <th className="px-4 py-3 font-medium">Type</th>
                                     <th className="px-4 py-3 font-medium">Department</th>
@@ -305,7 +305,7 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
                                     <th className="px-4 py-3 font-medium">Method</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-700/50">
+                            <tbody className="divide-y divide-border/50">
                                 {filteredRows.map((row) => {
                                     const DeptIcon = departmentIcons[row.department] ?? Receipt;
                                     const isReversal = row.type === 'reversal';
@@ -322,9 +322,9 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
                                     return (
                                         <tr
                                             key={row.id}
-                                            className={`hover:bg-slate-700/30 transition-colors ${isReversal ? 'opacity-60' : ''}`}
+                                            className={`hover:bg-surface-raised/30 transition-colors ${isReversal ? 'opacity-60' : ''}`}
                                         >
-                                            <td className="px-4 py-3 text-slate-300 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-muted whitespace-nowrap">
                                                 {format(row.date, 'dd MMM HH:mm')}
                                             </td>
                                             <td className="px-4 py-3">
@@ -337,25 +337,25 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3">
-                                                <div className="flex items-center gap-2 text-slate-300">
-                                                    <DeptIcon size={14} className="text-slate-400" />
+                                                <div className="flex items-center gap-2 text-muted">
+                                                    <DeptIcon size={14} className="text-muted" />
                                                     {departmentLabels[row.department] ?? row.department}
                                                 </div>
                                             </td>
-                                            <td className={`px-4 py-3 max-w-[250px] truncate ${isReversal ? 'text-slate-500 line-through' : 'text-slate-300'}`}>
+                                            <td className={`px-4 py-3 max-w-[250px] truncate ${isReversal ? 'text-muted line-through' : 'text-muted'}`}>
                                                 {row.description}
                                             </td>
                                             <td className={`px-4 py-3 text-right font-medium ${isReversal ? 'text-amber-400' : isExpense ? 'text-red-400' : row.type === 'payment' ? 'text-cyan-400' : 'text-green-400'
                                                 }`}>
                                                 {isReversal ? '-' : ''}₦{row.grossAmount.toLocaleString()}
                                             </td>
-                                            <td className="px-4 py-3 text-right text-slate-400">
+                                            <td className="px-4 py-3 text-right text-muted">
                                                 {row.netRevenue > 0 ? `₦${row.netRevenue.toLocaleString()}` : '-'}
                                             </td>
-                                            <td className="px-4 py-3 text-right text-slate-400">
+                                            <td className="px-4 py-3 text-right text-muted">
                                                 {row.taxAmount > 0 ? `₦${row.taxAmount.toLocaleString()}` : '-'}
                                             </td>
-                                            <td className="px-4 py-3 text-slate-400">
+                                            <td className="px-4 py-3 text-muted">
                                                 {row.paymentMethod ? paymentMethodLabels[row.paymentMethod] : '-'}
                                             </td>
                                         </tr>

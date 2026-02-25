@@ -48,14 +48,14 @@ export function QuickActions({
                 <button
                     key={action.label}
                     onClick={action.onClick}
-                    className={`p-4 rounded-xl border border-slate-700 transition-all ${action.color} flex flex-col items-center gap-2 text-center`}
+                    className={`p-4 rounded-xl border border-border transition-all ${action.color} flex flex-col items-center gap-2 text-center`}
                 >
-                    <div className="p-2 rounded-lg bg-slate-800/50">
+                    <div className="p-2 rounded-lg bg-surface-card/50">
                         {action.icon}
                     </div>
                     <div>
-                        <p className="font-medium text-white text-sm">{action.label}</p>
-                        <p className="text-xs text-slate-400">{action.description}</p>
+                        <p className="font-medium text-heading text-sm">{action.label}</p>
+                        <p className="text-xs text-muted">{action.description}</p>
                     </div>
                 </button>
             ))}

@@ -140,7 +140,7 @@ export function HotelSettingsPanel() {
         <div className="space-y-6">
             {/* Hotel Info */}
             <div className="card p-4">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                     <Building size={18} />
                     Hotel Information
                 </h3>
@@ -158,11 +158,11 @@ export function HotelSettingsPanel() {
                                     <img
                                         src={logoPreview || hotel?.logo_url}
                                         alt="Hotel Logo"
-                                        className="w-24 h-24 object-contain bg-slate-700 rounded-lg border border-slate-600"
+                                        className="w-24 h-24 object-contain bg-surface-raised rounded-lg border border-border-strong"
                                     />
                                     <button
                                         onClick={handleRemoveLogo}
-                                        className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
+                                        className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full text-heading hover:bg-red-600"
                                     >
                                         <X size={12} />
                                     </button>
@@ -170,10 +170,10 @@ export function HotelSettingsPanel() {
                             ) : (
                                 <div
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="w-24 h-24 flex flex-col items-center justify-center bg-slate-700/50 rounded-lg border border-dashed border-slate-500 cursor-pointer hover:border-primary-400 transition-colors"
+                                    className="w-24 h-24 flex flex-col items-center justify-center bg-surface-raised/50 rounded-lg border border-dashed border-border-subtle0 cursor-pointer hover:border-primary-400 transition-colors"
                                 >
-                                    <Upload size={20} className="text-slate-400" />
-                                    <span className="text-xs text-slate-400 mt-1">Upload</span>
+                                    <Upload size={20} className="text-muted" />
+                                    <span className="text-xs text-muted mt-1">Upload</span>
                                 </div>
                             )}
                             <input
@@ -183,7 +183,7 @@ export function HotelSettingsPanel() {
                                 onChange={handleLogoUpload}
                                 className="hidden"
                             />
-                            <div className="text-xs text-slate-500">
+                            <div className="text-xs text-muted">
                                 <p>Recommended: Square image (e.g., 200x200px)</p>
                                 <p>Max size: 500KB</p>
                                 <p>Formats: PNG, JPG, GIF</p>
@@ -238,7 +238,7 @@ export function HotelSettingsPanel() {
 
             {/* System Settings */}
             <div className="card p-4">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                     <Clock size={18} />
                     System Settings
                 </h3>
@@ -273,7 +273,7 @@ export function HotelSettingsPanel() {
                             onChange={(e) => setSettings(s => s ? { ...s, short_rest_enabled: e.target.checked } : null)}
                             className="w-4 h-4"
                         />
-                        <label htmlFor="short_rest_enabled" className="text-slate-400">Enable Short Rest bookings</label>
+                        <label htmlFor="short_rest_enabled" className="text-muted">Enable Short Rest bookings</label>
                     </div>
 
                     {settings?.short_rest_enabled && (
@@ -304,7 +304,7 @@ export function HotelSettingsPanel() {
                     )}
 
                     {/* Credit Limit Settings */}
-                    <div className="border-t border-slate-700 pt-4 mt-4">
+                    <div className="border-t border-border pt-4 mt-4">
                         <div className="flex items-center gap-3">
                             <input
                                 type="checkbox"
@@ -313,9 +313,9 @@ export function HotelSettingsPanel() {
                                 onChange={(e) => setSettings(s => s ? { ...s, credit_limit_enabled: e.target.checked } : null)}
                                 className="w-4 h-4"
                             />
-                            <label htmlFor="credit_limit_enabled" className="text-slate-400">Enable Credit Limit Warnings</label>
+                            <label htmlFor="credit_limit_enabled" className="text-muted">Enable Credit Limit Warnings</label>
                         </div>
-                        <p className="text-xs text-slate-500 mt-1 ml-7">
+                        <p className="text-xs text-muted mt-1 ml-7">
                             Warn staff when guest balance exceeds the limit
                         </p>
 
@@ -323,7 +323,7 @@ export function HotelSettingsPanel() {
                             <div className="mt-3 pl-7">
                                 <label className="label">Credit Limit Amount</label>
                                 <div className="relative max-w-xs">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">₦</span>
                                     <input
                                         type="number"
                                         value={settings?.credit_limit_amount ?? 50000}

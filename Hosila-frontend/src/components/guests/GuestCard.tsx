@@ -47,12 +47,12 @@ export function GuestCard({ guest, onClick }: GuestCardProps) {
             onClick={onClick}
             className={`w-full text-left rounded-xl p-4 transition-all hover:scale-[1.01] ${hasActiveStay
                 ? 'bg-primary-500/10 border border-primary-500/30'
-                : 'bg-slate-800 border border-slate-700 hover:border-slate-600'
+                : 'bg-surface-card border border-border hover:border-border-strong'
                 }`}
         >
             <div className="flex items-start gap-4">
                 {/* Avatar */}
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${hasActiveStay ? 'bg-primary-500/30 text-primary-400' : 'bg-slate-700 text-slate-300'
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${hasActiveStay ? 'bg-primary-500/30 text-primary-400' : 'bg-surface-raised text-muted'
                     }`}>
                     {guest.name.charAt(0).toUpperCase()}
                 </div>
@@ -60,7 +60,7 @@ export function GuestCard({ guest, onClick }: GuestCardProps) {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-white font-semibold truncate">{guest.name}</h3>
+                        <h3 className="text-heading font-semibold truncate">{guest.name}</h3>
                         {guest.is_vip && (
                             <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs rounded-full flex items-center gap-1">
                                 <Star size={10} /> VIP
@@ -73,7 +73,7 @@ export function GuestCard({ guest, onClick }: GuestCardProps) {
                         )}
                     </div>
 
-                    <div className="space-y-1 text-sm text-slate-400">
+                    <div className="space-y-1 text-sm text-muted">
                         {guest.phone && (
                             <div className="flex items-center gap-2">
                                 <Phone size={12} />
@@ -90,12 +90,12 @@ export function GuestCard({ guest, onClick }: GuestCardProps) {
 
                     {/* Active stay info */}
                     {hasActiveStay && activeBooking && room && (
-                        <div className="mt-2 pt-2 border-t border-slate-700/50 text-sm">
+                        <div className="mt-2 pt-2 border-t border-border/50 text-sm">
                             <div className="flex items-center gap-2 text-primary-400">
                                 <MapPin size={12} />
                                 <span>Room {room.room_number}</span>
-                                <span className="text-slate-500">•</span>
-                                <span className="text-slate-400">
+                                <span className="text-muted">•</span>
+                                <span className="text-muted">
                                     {activeBooking.booking_type === 'short_rest' ? 'Short Rest' : 'Night Stay'}
                                 </span>
                             </div>
@@ -110,7 +110,7 @@ export function GuestCard({ guest, onClick }: GuestCardProps) {
 
                     {/* Lifetime stats - show if guest has history */}
                     {!hasActiveStay && (guest.lifetime_stays || guest.lifetime_spend) && (
-                        <div className="mt-2 pt-2 border-t border-slate-700/50 text-xs text-slate-500 flex items-center gap-3">
+                        <div className="mt-2 pt-2 border-t border-border/50 text-xs text-muted flex items-center gap-3">
                             {guest.lifetime_stays && guest.lifetime_stays > 0 && (
                                 <span className="flex items-center gap-1">
                                     <Calendar size={10} />
@@ -127,7 +127,7 @@ export function GuestCard({ guest, onClick }: GuestCardProps) {
                     )}
                 </div>
 
-                <ChevronRight size={20} className="text-slate-500 mt-4" />
+                <ChevronRight size={20} className="text-muted mt-4" />
             </div>
         </button>
     );

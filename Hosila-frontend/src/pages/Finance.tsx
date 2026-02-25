@@ -73,14 +73,14 @@ export function FinancePage() {
             {/* Tab Navigation + Date Filters + Export in same row */}
             <div className="flex flex-wrap items-center justify-between gap-4">
                 {/* Left: Tab buttons */}
-                <div className="flex rounded-lg overflow-hidden border border-slate-700 w-fit">
+                <div className="flex rounded-lg overflow-hidden border border-border w-fit">
                     {tabs.map((tab) => (
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
                             className={`px-4 py-2.5 flex items-center gap-2 font-medium transition-all text-sm ${activeTab === tab.key
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                                ? 'bg-primary-500 text-heading'
+                                : 'bg-surface-card text-muted hover:text-heading hover:bg-surface-raised'
                                 }`}
                         >
                             <tab.icon size={16} />
@@ -92,15 +92,15 @@ export function FinancePage() {
                 {/* Right: Date Filter + Export */}
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2">
-                        <Calendar size={16} className="text-slate-400" />
-                        <div className="flex rounded-lg overflow-hidden border border-slate-700 text-sm">
+                        <Calendar size={16} className="text-muted" />
+                        <div className="flex rounded-lg overflow-hidden border border-border text-sm">
                             {(Object.keys(filterLabels) as DateFilter[]).map((filter) => (
                                 <button
                                     key={filter}
                                     onClick={() => setDateFilter(filter)}
                                     className={`px-3 py-2 font-medium transition-all ${dateFilter === filter
-                                        ? 'bg-primary-500 text-white'
-                                        : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                                        ? 'bg-primary-500 text-heading'
+                                        : 'bg-surface-card text-muted hover:text-heading hover:bg-surface-raised'
                                         }`}
                                 >
                                     {filterLabels[filter]}
@@ -120,8 +120,8 @@ export function FinancePage() {
 
             {/* Custom Date Range Picker (shared across all tabs) */}
             {dateFilter === 'custom' && (
-                <div className="flex items-center gap-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-                    <Calendar size={18} className="text-slate-400" />
+                <div className="flex items-center gap-4 p-4 bg-surface-card/50 rounded-lg border border-border">
+                    <Calendar size={18} className="text-muted" />
                     <div className="flex items-center gap-2">
                         <input
                             type="date"
@@ -129,7 +129,7 @@ export function FinancePage() {
                             onChange={(e) => setCustomStart(e.target.value)}
                             className="input py-1.5"
                         />
-                        <span className="text-slate-400">to</span>
+                        <span className="text-muted">to</span>
                         <input
                             type="date"
                             value={customEnd}
@@ -137,7 +137,7 @@ export function FinancePage() {
                             className="input py-1.5"
                         />
                     </div>
-                    <span className="text-sm text-slate-500">
+                    <span className="text-sm text-muted">
                         {format(dateRange.start, 'MMM d, yyyy')} — {format(dateRange.end, 'MMM d, yyyy')}
                     </span>
                 </div>
@@ -165,7 +165,7 @@ export function FinancePage() {
                 <div className="space-y-4">
                     {/* Add Expense Button */}
                     <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold text-white">Expense Records</h3>
+                        <h3 className="text-lg font-semibold text-heading">Expense Records</h3>
                         <button
                             onClick={() => setShowExpenseForm(true)}
                             className="btn bg-red-500 hover:bg-red-600"
@@ -202,15 +202,15 @@ export function FinancePage() {
             {/* Export Modal */}
             {showExportModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md overflow-hidden">
-                        <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-                            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <div className="bg-surface-card rounded-xl border border-border w-full max-w-md overflow-hidden">
+                        <div className="p-4 border-b border-border flex justify-between items-center">
+                            <h3 className="text-lg font-semibold text-heading flex items-center gap-2">
                                 <Download size={20} />
                                 Export Financial Report
                             </h3>
                             <button
                                 onClick={() => setShowExportModal(false)}
-                                className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                                className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                             >
                                 ✕
                             </button>

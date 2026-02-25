@@ -80,8 +80,8 @@ export function GuestHistory() {
     if (!recentBookings || recentBookings.length === 0) {
         return (
             <div className="card p-8 text-center">
-                <History size={48} className="mx-auto mb-4 text-slate-500 opacity-50" />
-                <p className="text-slate-400">No checkout history in the last 30 days</p>
+                <History size={48} className="mx-auto mb-4 text-muted opacity-50" />
+                <p className="text-muted">No checkout history in the last 30 days</p>
             </div>
         );
     }
@@ -89,11 +89,11 @@ export function GuestHistory() {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-heading flex items-center gap-2">
                     <History size={20} />
                     Guest History (Last 30 Days)
                 </h3>
-                <span className="text-sm text-slate-400">{recentBookings.length} records</span>
+                <span className="text-sm text-muted">{recentBookings.length} records</span>
             </div>
 
             <div className="space-y-2">
@@ -106,19 +106,19 @@ export function GuestHistory() {
                         <div key={booking.id} className="card overflow-hidden">
                             {/* Main Row */}
                             <div
-                                className="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-700/50 transition-colors"
+                                className="p-4 flex items-center justify-between cursor-pointer hover:bg-surface-raised transition-colors"
                                 onClick={() => setExpandedBookingId(isExpanded ? null : booking.id)}
                             >
                                 <div className="flex items-center gap-4 flex-1 min-w-0">
                                     {/* Guest Avatar */}
-                                    <div className="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <User size={20} className="text-slate-400" />
+                                    <div className="w-10 h-10 bg-surface-raised rounded-full flex items-center justify-center flex-shrink-0">
+                                        <User size={20} className="text-muted" />
                                     </div>
 
                                     {/* Guest Info */}
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-white font-medium truncate">{guest?.name ?? 'Unknown Guest'}</p>
-                                        <div className="flex items-center gap-2 text-xs text-slate-400">
+                                        <p className="text-heading font-medium truncate">{guest?.name ?? 'Unknown Guest'}</p>
+                                        <div className="flex items-center gap-2 text-xs text-muted">
                                             <span>Room {room?.room_number ?? 'N/A'}</span>
                                             <span>•</span>
                                             <span>{format(new Date(booking.check_out_time!), 'MMM d, yyyy')}</span>
@@ -127,7 +127,7 @@ export function GuestHistory() {
 
                                     {/* Amount */}
                                     <div className="text-right flex-shrink-0">
-                                        <p className="text-white font-medium">₦{booking.total_charged?.toLocaleString() ?? 0}</p>
+                                        <p className="text-heading font-medium">₦{booking.total_charged?.toLocaleString() ?? 0}</p>
                                         <p className={`text-xs ${booking.balance > 0 ? 'text-amber-400' : 'text-green-400'}`}>
                                             {booking.balance > 0 ? `₦${booking.balance.toLocaleString()} unpaid` : 'Paid'}
                                         </p>
@@ -135,38 +135,38 @@ export function GuestHistory() {
                                 </div>
 
                                 {/* Expand/Collapse */}
-                                <div className="ml-4 text-slate-400">
+                                <div className="ml-4 text-muted">
                                     {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                                 </div>
                             </div>
 
                             {/* Expanded Details */}
                             {isExpanded && (
-                                <div className="px-4 pb-4 pt-2 border-t border-slate-700">
+                                <div className="px-4 pb-4 pt-2 border-t border-border">
                                     {/* Stay Details */}
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
                                         <div>
-                                            <p className="text-slate-400">Check-in</p>
-                                            <p className="text-white">{format(new Date(booking.check_in_time), 'MMM d, h:mm a')}</p>
+                                            <p className="text-muted">Check-in</p>
+                                            <p className="text-heading">{format(new Date(booking.check_in_time), 'MMM d, h:mm a')}</p>
                                         </div>
                                         <div>
-                                            <p className="text-slate-400">Check-out</p>
-                                            <p className="text-white">{format(new Date(booking.check_out_time!), 'MMM d, h:mm a')}</p>
+                                            <p className="text-muted">Check-out</p>
+                                            <p className="text-heading">{format(new Date(booking.check_out_time!), 'MMM d, h:mm a')}</p>
                                         </div>
                                         <div>
-                                            <p className="text-slate-400">Total Paid</p>
+                                            <p className="text-muted">Total Paid</p>
                                             <p className="text-green-400">₦{booking.total_paid?.toLocaleString() ?? 0}</p>
                                         </div>
                                         <div>
-                                            <p className="text-slate-400">Booking Type</p>
-                                            <p className="text-white capitalize">{booking.booking_type.replace('_', ' ')}</p>
+                                            <p className="text-muted">Booking Type</p>
+                                            <p className="text-heading capitalize">{booking.booking_type.replace('_', ' ')}</p>
                                         </div>
                                     </div>
 
                                     {/* Service Orders */}
                                     {serviceOrders && serviceOrders.length > 0 && (
                                         <div className="mb-4">
-                                            <p className="text-xs text-slate-500 mb-2 flex items-center gap-1">
+                                            <p className="text-xs text-muted mb-2 flex items-center gap-1">
                                                 <UtensilsCrossed size={12} />
                                                 Items Ordered During Stay
                                             </p>
@@ -177,11 +177,11 @@ export function GuestHistory() {
                                                         ? order.notes
                                                         : service?.name ?? 'Item';
                                                     return (
-                                                        <div key={order.id} className="flex justify-between text-sm py-1 px-2 bg-slate-700/50 rounded">
-                                                            <span className="text-slate-300">
+                                                        <div key={order.id} className="flex justify-between text-sm py-1 px-2 bg-surface-raised/50 rounded">
+                                                            <span className="text-muted">
                                                                 {displayName} {order.service_id !== 'extension' && `× ${order.quantity}`}
                                                             </span>
-                                                            <span className="text-white">₦{order.total_price.toLocaleString()}</span>
+                                                            <span className="text-heading">₦{order.total_price.toLocaleString()}</span>
                                                         </div>
                                                     );
                                                 })}

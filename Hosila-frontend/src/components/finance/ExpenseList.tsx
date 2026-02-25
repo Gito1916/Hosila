@@ -32,7 +32,7 @@ const categoryColors: Record<ExpenseCategory, string> = {
     caution_refund: 'bg-amber-500/20 text-amber-400',
     cancellation_refund: 'bg-red-500/20 text-red-400',
     caution_deposit_refund: 'bg-amber-500/20 text-amber-400',
-    other: 'bg-slate-500/20 text-slate-400',
+    other: 'bg-surface-inset0/20 text-muted',
 };
 
 const methodBadge: Record<string, string> = {
@@ -92,7 +92,7 @@ export function ExpenseList() {
     if (isLoading) {
         return (
             <div className="card p-8 flex items-center justify-center">
-                <Loader2 size={24} className="animate-spin text-slate-400" />
+                <Loader2 size={24} className="animate-spin text-muted" />
             </div>
         );
     }
@@ -100,9 +100,9 @@ export function ExpenseList() {
     if (!expenses || expenses.length === 0) {
         return (
             <div className="card p-8 text-center">
-                <Receipt size={40} className="mx-auto text-slate-500 mb-3" />
-                <p className="text-slate-400 font-medium">No expenses recorded yet</p>
-                <p className="text-sm text-slate-500 mt-1">Expenses you record will appear here as a table</p>
+                <Receipt size={40} className="mx-auto text-muted mb-3" />
+                <p className="text-muted font-medium">No expenses recorded yet</p>
+                <p className="text-sm text-muted mt-1">Expenses you record will appear here as a table</p>
             </div>
         );
     }
@@ -111,14 +111,14 @@ export function ExpenseList() {
         <>
             <div className="card">
                 {/* Header */}
-                <div className="px-4 py-3 border-b border-slate-700 flex items-center justify-between">
-                    <h3 className="font-semibold text-white">Expenses</h3>
-                    <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer select-none">
+                <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+                    <h3 className="font-semibold text-heading">Expenses</h3>
+                    <label className="flex items-center gap-2 text-xs text-muted cursor-pointer select-none">
                         <input
                             type="checkbox"
                             checked={showVoided}
                             onChange={() => setShowVoided(!showVoided)}
-                            className="rounded border-slate-600 bg-slate-700 text-primary-500 focus:ring-primary-500/30"
+                            className="rounded border-border-strong bg-surface-raised text-primary-500 focus:ring-primary-500/30"
                         />
                         Show voided
                     </label>
@@ -128,7 +128,7 @@ export function ExpenseList() {
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="border-b border-slate-700/50 text-slate-400 text-xs uppercase tracking-wider">
+                            <tr className="border-b border-border/50 text-muted text-xs uppercase tracking-wider">
                                 <th className="text-left py-3 px-4 font-medium">Date</th>
                                 <th className="text-left py-3 px-4 font-medium">Category</th>
                                 <th className="text-left py-3 px-4 font-medium">Vendor/Payee</th>
@@ -138,20 +138,20 @@ export function ExpenseList() {
                                 <th className="text-center py-3 px-4 font-medium">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-700/30">
+                        <tbody className="divide-y divide-border/30">
                             {filtered.map((expense) => {
                                 const isVoided = expense.status === 'voided';
                                 return (
                                     <tr
                                         key={expense.id}
-                                        className={`transition-colors hover:bg-slate-700/20 ${isVoided ? 'opacity-50' : ''}`}
+                                        className={`transition-colors hover:bg-surface-raised/20 ${isVoided ? 'opacity-50' : ''}`}
                                     >
                                         {/* Date */}
                                         <td className="py-3 px-4 whitespace-nowrap">
-                                            <span className={`text-slate-300 ${isVoided ? 'line-through' : ''}`}>
+                                            <span className={`text-muted ${isVoided ? 'line-through' : ''}`}>
                                                 {format(new Date(expense.date), 'MMM d')}
                                             </span>
-                                            <span className="block text-xs text-slate-500">
+                                            <span className="block text-xs text-muted">
                                                 {format(new Date(expense.date), 'h:mm a')}
                                             </span>
                                         </td>
@@ -159,10 +159,10 @@ export function ExpenseList() {
                                         {/* Category */}
                                         <td className="py-3 px-4">
                                             <div className="flex items-center gap-2">
-                                                <span className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 ${categoryColors[expense.category as ExpenseCategory] || 'bg-slate-500/20 text-slate-400'}`}>
+                                                <span className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 ${categoryColors[expense.category as ExpenseCategory] || 'bg-surface-inset0/20 text-muted'}`}>
                                                     {categoryIcons[expense.category as ExpenseCategory] || <MoreHorizontal size={14} />}
                                                 </span>
-                                                <span className={`text-slate-200 capitalize ${isVoided ? 'line-through' : ''}`}>
+                                                <span className={`text-body capitalize ${isVoided ? 'line-through' : ''}`}>
                                                     {formatCategory(expense.category)}
                                                 </span>
                                             </div>
@@ -170,14 +170,14 @@ export function ExpenseList() {
 
                                         {/* Vendor/Payee */}
                                         <td className="py-3 px-4">
-                                            <span className={`text-slate-300 ${isVoided ? 'line-through' : ''}`}>
+                                            <span className={`text-muted ${isVoided ? 'line-through' : ''}`}>
                                                 {expense.vendor_name || '—'}
                                             </span>
                                         </td>
 
                                         {/* Description */}
                                         <td className="py-3 px-4 max-w-[200px]">
-                                            <span className={`text-slate-400 text-xs truncate block ${isVoided ? 'line-through' : ''}`}>
+                                            <span className={`text-muted text-xs truncate block ${isVoided ? 'line-through' : ''}`}>
                                                 {expense.description || '—'}
                                             </span>
                                         </td>
@@ -191,7 +191,7 @@ export function ExpenseList() {
 
                                         {/* Amount */}
                                         <td className="py-3 px-4 text-right whitespace-nowrap">
-                                            <span className={`font-semibold ${isVoided ? 'text-slate-500 line-through' : 'text-red-400'}`}>
+                                            <span className={`font-semibold ${isVoided ? 'text-muted line-through' : 'text-red-400'}`}>
                                                 -₦{expense.amount.toLocaleString()}
                                             </span>
                                             {isVoided && (
@@ -205,21 +205,21 @@ export function ExpenseList() {
                                                 <div className="flex items-center justify-center gap-1">
                                                     <button
                                                         onClick={() => setEditingExpense(expense)}
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
+                                                        className="p-1.5 rounded-md text-muted hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
                                                         title="Edit expense"
                                                     >
                                                         <Pencil size={14} />
                                                     </button>
                                                     <button
                                                         onClick={() => setVoidingId(expense.id)}
-                                                        className="p-1.5 rounded-md text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                                        className="p-1.5 rounded-md text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
                                                         title="Void expense"
                                                     >
                                                         <Ban size={14} />
                                                     </button>
                                                 </div>
                                             ) : (
-                                                <span className="text-xs text-slate-500" title={expense.voided_reason || ''}>
+                                                <span className="text-xs text-muted" title={expense.voided_reason || ''}>
                                                     Voided
                                                 </span>
                                             )}
@@ -232,7 +232,7 @@ export function ExpenseList() {
                 </div>
 
                 {/* Summary row */}
-                <div className="px-4 py-3 border-t border-slate-700/50 flex items-center justify-between text-xs text-slate-400">
+                <div className="px-4 py-3 border-t border-border/50 flex items-center justify-between text-xs text-muted">
                     <span>{filtered.length} expense{filtered.length !== 1 ? 's' : ''}</span>
                     <span className="font-semibold text-red-400">
                         Total: -₦{filtered
@@ -265,8 +265,8 @@ export function ExpenseList() {
                                 <AlertTriangle size={20} className="text-red-400" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-white">Void Expense</h3>
-                                <p className="text-xs text-slate-400">
+                                <h3 className="font-semibold text-heading">Void Expense</h3>
+                                <p className="text-xs text-muted">
                                     This expense will be excluded from financial reports
                                 </p>
                             </div>

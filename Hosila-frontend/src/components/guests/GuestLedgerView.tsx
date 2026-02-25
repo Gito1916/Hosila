@@ -297,30 +297,30 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
             )}
 
             {/* Header Section */}
-            <div className="card p-5 bg-slate-800 border border-slate-700">
+            <div className="card p-5 bg-surface-card border border-border">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     {/* Left: Room & Guest Info */}
                     <div>
                         <div className="flex items-center gap-3 mb-1">
-                            <h1 className="text-2xl font-bold text-white">Room {room?.room_number ?? '?'} Ledger</h1>
+                            <h1 className="text-2xl font-bold text-heading">Room {room?.room_number ?? '?'} Ledger</h1>
                             <span className="px-2 py-0.5 rounded text-xs font-bold bg-status-occupied/20 text-status-occupied border border-status-occupied/50">
                                 ACTIVE
                             </span>
                         </div>
-                        <div className="flex items-center gap-4 text-slate-400 text-sm">
+                        <div className="flex items-center gap-4 text-muted text-sm">
                             <span className="flex items-center gap-1">
-                                <User size={14} /> Guest: <span className="text-white font-medium">{guest.name}</span>
+                                <User size={14} /> Guest: <span className="text-heading font-medium">{guest.name}</span>
                             </span>
                             <span className="flex items-center gap-1">
-                                <Clock size={14} /> Check-out: <span className="text-white font-medium">{format(new Date(booking.planned_checkout), 'MMM d, yyyy')}</span>
+                                <Clock size={14} /> Check-out: <span className="text-heading font-medium">{format(new Date(booking.planned_checkout), 'MMM d, yyyy')}</span>
                             </span>
                         </div>
                     </div>
 
                     {/* Right: Balance & Pay Action */}
-                    <div className="flex items-center gap-6 bg-slate-700/30 p-3 rounded-xl border border-slate-700">
+                    <div className="flex items-center gap-6 bg-surface-raised/30 p-3 rounded-xl border border-border">
                         <div className="text-right">
-                            <p className="text-xs text-slate-400 uppercase font-semibold">Outstanding Balance</p>
+                            <p className="text-xs text-muted uppercase font-semibold">Outstanding Balance</p>
                             <p className={`text-2xl font-bold ${folio.balance > 0 ? 'text-status-dirty' : 'text-status-available'}`}>
                                 {formatCurrency(folio.balance)}
                             </p>
@@ -330,7 +330,7 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                                 setPaymentAmount(folio.balance);
                                 setShowPayment(true);
                             }}
-                            className="btn bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2 shadow-lg shadow-green-900/20"
+                            className="btn bg-green-600 hover:bg-green-700 text-heading font-bold py-3 px-6 rounded-lg flex items-center gap-2 shadow-lg shadow-green-900/20"
                         >
                             <CreditCard size={20} />
                             Take Payment
@@ -344,13 +344,13 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
 
                 {/* Left Column: Transaction History Table */}
                 <div className="lg:col-span-2 card p-0 overflow-hidden flex flex-col h-full">
-                    <div className="p-4 border-b border-slate-700 bg-slate-800/50">
-                        <h3 className="font-semibold text-white">Transaction History</h3>
+                    <div className="p-4 border-b border-border bg-surface-card/50">
+                        <h3 className="font-semibold text-heading">Transaction History</h3>
                     </div>
 
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                            <thead className="bg-slate-700/50 text-slate-400 uppercase text-xs">
+                            <thead className="bg-surface-raised/50 text-muted uppercase text-xs">
                                 <tr>
                                     <th className="p-3">Date</th>
                                     <th className="p-3">Description</th>
@@ -359,14 +359,14 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                                     <th className="p-3 text-center">Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-700">
+                            <tbody className="divide-y divide-border">
                                 {/* FIFO Charges */}
                                 {folio.charges.map((charge) => (
-                                    <tr key={charge.id} className="hover:bg-slate-800/50 transition-colors">
-                                        <td className="p-3 text-slate-400 whitespace-nowrap">
+                                    <tr key={charge.id} className="hover:bg-surface-card/50 transition-colors">
+                                        <td className="p-3 text-muted whitespace-nowrap">
                                             {format(charge.date, 'MMM d, h:mm a')}
                                         </td>
-                                        <td className="p-3 text-white">
+                                        <td className="p-3 text-heading">
                                             {charge.description}
                                         </td>
                                         <td className="p-3">
@@ -377,7 +377,7 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                                                 {charge.type}
                                             </span>
                                         </td>
-                                        <td className="p-3 text-right font-medium text-white">
+                                        <td className="p-3 text-right font-medium text-heading">
                                             {formatCurrency(charge.amount)}
                                         </td>
                                         <td className="p-3 text-center">
@@ -394,10 +394,10 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                                 {/* Payments */}
                                 {folio.payments.map((payment) => (
                                     <tr key={payment.id} className="bg-green-500/5 hover:bg-green-500/10 transition-colors">
-                                        <td className="p-3 text-slate-400 whitespace-nowrap">
+                                        <td className="p-3 text-muted whitespace-nowrap">
                                             {format(new Date(payment.payment_time), 'MMM d, h:mm a')}
                                         </td>
-                                        <td className="p-3 text-white italic">
+                                        <td className="p-3 text-heading italic">
                                             Payment Received ({payment.payment_method})
                                         </td>
                                         <td className="p-3">
@@ -408,7 +408,7 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                                         <td className="p-3 text-right font-bold text-green-400">
                                             -{formatCurrency(payment.amount)}
                                         </td>
-                                        <td className="p-3 text-center text-slate-500">
+                                        <td className="p-3 text-center text-muted">
                                             -
                                         </td>
                                     </tr>
@@ -416,7 +416,7 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
 
                                 {folio.charges.length === 0 && folio.payments.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className="p-8 text-center text-slate-500">
+                                        <td colSpan={5} className="p-8 text-center text-muted">
                                             No transactions yet
                                         </td>
                                     </tr>
@@ -430,44 +430,44 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                 <div className="space-y-4">
                     {/* Guest Actions */}
                     <div className="card p-0 overflow-hidden">
-                        <div className="p-3 border-b border-slate-700 bg-slate-800/50">
-                            <h3 className="font-semibold text-white text-sm uppercase">Guest Actions</h3>
+                        <div className="p-3 border-b border-border bg-surface-card/50">
+                            <h3 className="font-semibold text-heading text-sm uppercase">Guest Actions</h3>
                         </div>
                         <div className="p-3 flex flex-col gap-2">
                             <button
                                 onClick={() => setShowExtend(true)}
-                                className="btn btn-secondary justify-start text-left border-slate-700 hover:border-primary-500 hover:text-primary-400 group"
+                                className="btn btn-secondary justify-start text-left border-border hover:border-primary-500 hover:text-primary-400 group"
                             >
-                                <Plus size={18} className="mr-2 text-slate-400 group-hover:text-primary-500" />
+                                <Plus size={18} className="mr-2 text-muted group-hover:text-primary-500" />
                                 Extend Stay
                             </button>
                             <button
                                 onClick={() => setShowAddService(true)}
-                                className="btn btn-secondary justify-start text-left border-slate-700 hover:border-purple-500 hover:text-purple-400 group"
+                                className="btn btn-secondary justify-start text-left border-border hover:border-purple-500 hover:text-purple-400 group"
                             >
-                                <ShoppingBag size={18} className="mr-2 text-slate-400 group-hover:text-purple-500" />
+                                <ShoppingBag size={18} className="mr-2 text-muted group-hover:text-purple-500" />
                                 Add Service
                             </button>
                             <button
                                 onClick={() => setShowAmenities(true)}
-                                className="btn btn-secondary justify-start text-left border-slate-700 hover:border-amber-500 hover:text-amber-400 group"
+                                className="btn btn-secondary justify-start text-left border-border hover:border-amber-500 hover:text-amber-400 group"
                             >
-                                <Sparkles size={18} className="mr-2 text-slate-400 group-hover:text-amber-500" />
+                                <Sparkles size={18} className="mr-2 text-muted group-hover:text-amber-500" />
                                 Issue Amenities
                             </button>
                             <button
                                 onClick={() => navigate('/restaurant')}
-                                className="btn btn-secondary justify-start text-left border-slate-700 hover:border-orange-500 hover:text-orange-400 group"
+                                className="btn btn-secondary justify-start text-left border-border hover:border-orange-500 hover:text-orange-400 group"
                             >
-                                <Utensils size={18} className="mr-2 text-slate-400 group-hover:text-orange-500" />
+                                <Utensils size={18} className="mr-2 text-muted group-hover:text-orange-500" />
                                 Order Meals
                             </button>
-                            <hr className="border-slate-700 my-1" />
+                            <hr className="border-border my-1" />
                             <button
                                 onClick={handleCheckOut}
-                                className="btn btn-secondary justify-start text-left border-slate-700 hover:border-red-500 hover:bg-red-500/10 hover:text-red-400 group"
+                                className="btn btn-secondary justify-start text-left border-border hover:border-red-500 hover:bg-red-500/10 hover:text-red-400 group"
                             >
-                                <LogOut size={18} className="mr-2 text-slate-400 group-hover:text-red-500" />
+                                <LogOut size={18} className="mr-2 text-muted group-hover:text-red-500" />
                                 Check Out Guest
                             </button>
                         </div>
@@ -475,14 +475,14 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
 
                     {/* Room Info Summary */}
                     <div className="card p-4">
-                        <h3 className="font-semibold text-white text-sm uppercase mb-3 text-slate-400">Booking Summary</h3>
+                        <h3 className="font-semibold text-heading text-sm uppercase mb-3 text-muted">Booking Summary</h3>
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between items-start">
-                                <span className="text-slate-400">Room Charges</span>
+                                <span className="text-muted">Room Charges</span>
                                 <div className="text-right">
-                                    <span className="text-white block">{formatCurrency(folio.room_charges)}</span>
+                                    <span className="text-heading block">{formatCurrency(folio.room_charges)}</span>
                                     {folio.room_tax > 0 && (
-                                        <span className="text-xs text-slate-500 block">Inc. {formatCurrency(folio.room_tax)} Tax</span>
+                                        <span className="text-xs text-muted block">Inc. {formatCurrency(folio.room_tax)} Tax</span>
                                     )}
                                 </div>
                             </div>
@@ -490,13 +490,13 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                             {(folio.service_charges > 0 || folio.service_tax > 0) && (
                                 <>
                                     <div className="flex justify-between">
-                                        <span className="text-slate-400">Service Charges</span>
-                                        <span className="text-white">{formatCurrency(folio.service_charges)}</span>
+                                        <span className="text-muted">Service Charges</span>
+                                        <span className="text-heading">{formatCurrency(folio.service_charges)}</span>
                                     </div>
                                     {folio.service_tax > 0 && (
                                         <div className="flex justify-between">
-                                            <span className="text-slate-400">Service Breakdown</span>
-                                            <div className="text-right text-xs text-slate-500">
+                                            <span className="text-muted">Service Breakdown</span>
+                                            <div className="text-right text-xs text-muted">
                                                 <span>Tax: {formatCurrency(folio.service_tax)}</span>
                                             </div>
                                         </div>
@@ -504,17 +504,17 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                                 </>
                             )}
 
-                            <div className="border-t border-slate-700 pt-2 flex justify-between font-bold">
-                                <span className="text-white">Total</span>
-                                <span className="text-white">{formatCurrency(folio.total_charges)}</span>
+                            <div className="border-t border-border pt-2 flex justify-between font-bold">
+                                <span className="text-heading">Total</span>
+                                <span className="text-heading">{formatCurrency(folio.total_charges)}</span>
                             </div>
 
                             <div className="flex justify-between">
-                                <span className="text-slate-400">Total Paid</span>
+                                <span className="text-muted">Total Paid</span>
                                 <span className="text-green-400">{formatCurrency(folio.total_paid)}</span>
                             </div>
-                            <div className="border-t border-slate-700 pt-2 flex justify-between font-bold">
-                                <span className="text-white">Balance</span>
+                            <div className="border-t border-border pt-2 flex justify-between font-bold">
+                                <span className="text-heading">Balance</span>
                                 <span className={folio.balance > 0 ? 'text-status-dirty' : 'text-status-available'}>
                                     {formatCurrency(folio.balance)}
                                 </span>
@@ -528,13 +528,13 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
             {/* Payment Modal */}
             {showPayment && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-sm p-4 space-y-4 animate-scale-up">
-                        <h3 className="text-lg font-bold text-white">Record Payment</h3>
+                    <div className="bg-surface-card rounded-xl border border-border w-full max-w-sm p-4 space-y-4 animate-scale-up">
+                        <h3 className="text-lg font-bold text-heading">Record Payment</h3>
 
                         <div>
                             <label className="label">Amount</label>
                             <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">₦</span>
                                 <input
                                     type="number"
                                     value={paymentAmount || ''}
@@ -588,8 +588,8 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
             {/* Extend Stay Modal */}
             {showExtend && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-sm p-4 space-y-4 animate-scale-up">
-                        <h3 className="text-lg font-bold text-white">Extend Stay</h3>
+                    <div className="bg-surface-card rounded-xl border border-border w-full max-w-sm p-4 space-y-4 animate-scale-up">
+                        <h3 className="text-lg font-bold text-heading">Extend Stay</h3>
 
                         <div>
                             <label className="label">{isShortRest ? 'Additional Hours' : 'Additional Nights'}</label>
@@ -600,7 +600,7 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                                 >
                                     <Minus size={16} />
                                 </button>
-                                <span className="text-2xl font-bold text-white flex-1 text-center">
+                                <span className="text-2xl font-bold text-heading flex-1 text-center">
                                     {extendUnits}
                                 </span>
                                 <button
@@ -615,7 +615,7 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                         <div>
                             <label className="label">Rate per {isShortRest ? 'hour' : 'night'}</label>
                             <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">₦</span>
                                 <input
                                     type="number"
                                     value={extendRate || ''}
@@ -625,9 +625,9 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                             </div>
                         </div>
 
-                        <div className="bg-slate-700/50 rounded-lg p-3 text-center">
-                            <p className="text-sm text-slate-400">Total Extension Cost</p>
-                            <p className="text-xl font-bold text-white">
+                        <div className="bg-surface-raised/50 rounded-lg p-3 text-center">
+                            <p className="text-sm text-muted">Total Extension Cost</p>
+                            <p className="text-xl font-bold text-heading">
                                 ₦{(extendUnits * extendRate).toLocaleString()}
                             </p>
                         </div>
@@ -654,8 +654,8 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
             {/* Add Service Modal */}
             {showAddService && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-sm p-4 space-y-4 animate-scale-up">
-                        <h3 className="text-lg font-bold text-white">Add Service Charge</h3>
+                    <div className="bg-surface-card rounded-xl border border-border w-full max-w-sm p-4 space-y-4 animate-scale-up">
+                        <h3 className="text-lg font-bold text-heading">Add Service Charge</h3>
 
                         <div className="grid grid-cols-2 gap-2">
                             {manualServices.map(svc => (
@@ -667,11 +667,11 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                                     }}
                                     className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition-colors ${selectedService === svc.id
                                         ? 'border-primary-500 bg-primary-500/20'
-                                        : 'border-slate-700 hover:border-slate-600'
+                                        : 'border-border hover:border-border-strong'
                                         }`}
                                 >
-                                    <svc.icon size={20} className="text-slate-300" />
-                                    <span className="text-sm text-white">{svc.name}</span>
+                                    <svc.icon size={20} className="text-muted" />
+                                    <span className="text-sm text-heading">{svc.name}</span>
                                 </button>
                             ))}
                         </div>
@@ -679,7 +679,7 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                         <div>
                             <label className="label">Amount</label>
                             <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">₦</span>
                                 <input
                                     type="number"
                                     value={serviceAmount || ''}
@@ -697,10 +697,10 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                             const svcTotal = Math.round((serviceAmount + svcTaxAmount) * 100) / 100;
                             return (
                                 <>
-                                    <div className="flex items-center justify-between bg-slate-700/50 rounded-lg p-3">
+                                    <div className="flex items-center justify-between bg-surface-raised/50 rounded-lg p-3">
                                         <div>
-                                            <label className="text-sm text-white font-medium">Taxable</label>
-                                            <p className="text-xs text-slate-400">
+                                            <label className="text-sm text-heading font-medium">Taxable</label>
+                                            <p className="text-xs text-muted">
                                                 {svcTaxRate > 0 ? `Add ${svcTaxRate}% tax` : 'No tax rate configured'}
                                             </p>
                                         </div>
@@ -712,23 +712,23 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                                                 disabled={svcTaxRate <= 0}
                                                 className="sr-only peer"
                                             />
-                                            <div className="w-11 h-6 bg-slate-600 peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500 peer-disabled:opacity-50"></div>
+                                            <div className="w-11 h-6 bg-surface-card peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500 peer-disabled:opacity-50"></div>
                                         </label>
                                     </div>
                                     {/* Tax Preview */}
                                     {serviceTaxable && svcTaxRate > 0 && serviceAmount > 0 && (
                                         <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 space-y-1">
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-slate-300">Base Amount</span>
-                                                <span className="text-white">₦{serviceAmount.toLocaleString()}</span>
+                                                <span className="text-muted">Base Amount</span>
+                                                <span className="text-heading">₦{serviceAmount.toLocaleString()}</span>
                                             </div>
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-amber-400">Tax ({svcTaxRate}%)</span>
                                                 <span className="text-amber-400">₦{svcTaxAmount.toLocaleString()}</span>
                                             </div>
                                             <div className="flex justify-between text-sm font-bold border-t border-amber-500/30 pt-1">
-                                                <span className="text-white">Total</span>
-                                                <span className="text-white">₦{svcTotal.toLocaleString()}</span>
+                                                <span className="text-heading">Total</span>
+                                                <span className="text-heading">₦{svcTotal.toLocaleString()}</span>
                                             </div>
                                         </div>
                                     )}
@@ -775,8 +775,8 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
             {/* Amenities Modal */}
             {showAmenities && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md p-4 space-y-4 max-h-[80vh] overflow-y-auto animate-scale-up">
-                        <h3 className="text-lg font-bold text-white">Issue Amenities</h3>
+                    <div className="bg-surface-card rounded-xl border border-border w-full max-w-md p-4 space-y-4 max-h-[80vh] overflow-y-auto animate-scale-up">
+                        <h3 className="text-lg font-bold text-heading">Issue Amenities</h3>
 
                         <AmenitiesSelection onSelectionChange={handleAmenityChange} />
 
@@ -805,9 +805,9 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
             {/* Checkout Reconciliation Modal */}
             {showReconciliation && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-lg p-4 space-y-4 max-h-[80vh] overflow-y-auto animate-scale-up">
-                        <h3 className="text-lg font-bold text-white">Return Amenities Before Checkout</h3>
-                        <p className="text-sm text-slate-400">Please confirm the status of items issued to this guest.</p>
+                    <div className="bg-surface-card rounded-xl border border-border w-full max-w-lg p-4 space-y-4 max-h-[80vh] overflow-y-auto animate-scale-up">
+                        <h3 className="text-lg font-bold text-heading">Return Amenities Before Checkout</h3>
+                        <p className="text-sm text-muted">Please confirm the status of items issued to this guest.</p>
                         <CheckoutReconciliation
                             bookingId={booking.id}
                             performedBy={user?.id ?? ''}

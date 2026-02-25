@@ -70,16 +70,16 @@ export function CancellationModal({ reservation, guest, onClose, onSuccess, onMo
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-md">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                <div className="flex items-center justify-between p-4 border-b border-border">
                     <div className="flex items-center gap-2 text-red-400">
                         <AlertTriangle size={20} />
-                        <h2 className="text-xl font-bold text-white">Cancel Reservation</h2>
+                        <h2 className="text-xl font-bold text-heading">Cancel Reservation</h2>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                     >
                         <X size={20} />
                     </button>
@@ -88,9 +88,9 @@ export function CancellationModal({ reservation, guest, onClose, onSuccess, onMo
                 {/* Content */}
                 <div className="p-4 space-y-4">
                     {/* Reservation Info */}
-                    <div className="bg-slate-700/50 rounded-lg p-3 space-y-1">
-                        <p className="text-white font-medium">{guest.name}</p>
-                        <p className="text-sm text-slate-400">
+                    <div className="bg-surface-raised/50 rounded-lg p-3 space-y-1">
+                        <p className="text-heading font-medium">{guest.name}</p>
+                        <p className="text-sm text-muted">
                             {format(new Date(reservation.check_in_date), 'MMM d')} - {format(new Date(reservation.check_out_date), 'MMM d, yyyy')}
                             {' • '}{reservation.nights} nights
                         </p>
@@ -126,7 +126,7 @@ export function CancellationModal({ reservation, guest, onClose, onSuccess, onMo
                                 What happens to the deposit?
                             </label>
                             <div className="space-y-2">
-                                <label className="flex items-start gap-3 p-3 rounded-lg border border-slate-600 cursor-pointer hover:border-primary-500 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10">
+                                <label className="flex items-start gap-3 p-3 rounded-lg border border-border-strong cursor-pointer hover:border-primary-500 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10">
                                     <input
                                         type="radio"
                                         name="refund"
@@ -136,12 +136,12 @@ export function CancellationModal({ reservation, guest, onClose, onSuccess, onMo
                                         className="mt-1 accent-primary-500"
                                     />
                                     <div>
-                                        <p className="text-white font-medium">Full Refund</p>
-                                        <p className="text-xs text-slate-400">Refund ₦{depositPaid.toLocaleString()} to guest</p>
+                                        <p className="text-heading font-medium">Full Refund</p>
+                                        <p className="text-xs text-muted">Refund ₦{depositPaid.toLocaleString()} to guest</p>
                                     </div>
                                 </label>
 
-                                <label className="flex items-start gap-3 p-3 rounded-lg border border-slate-600 cursor-pointer hover:border-primary-500 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10">
+                                <label className="flex items-start gap-3 p-3 rounded-lg border border-border-strong cursor-pointer hover:border-primary-500 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10">
                                     <input
                                         type="radio"
                                         name="refund"
@@ -151,11 +151,11 @@ export function CancellationModal({ reservation, guest, onClose, onSuccess, onMo
                                         className="mt-1 accent-primary-500"
                                     />
                                     <div className="flex-1">
-                                        <p className="text-white font-medium">Partial Refund</p>
+                                        <p className="text-heading font-medium">Partial Refund</p>
                                         {refundOption === 'partial' && (
                                             <div className="mt-2">
                                                 <div className="relative">
-                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">₦</span>
                                                     <input
                                                         type="number"
                                                         value={partialAmount}
@@ -170,7 +170,7 @@ export function CancellationModal({ reservation, guest, onClose, onSuccess, onMo
                                     </div>
                                 </label>
 
-                                <label className="flex items-start gap-3 p-3 rounded-lg border border-slate-600 cursor-pointer hover:border-primary-500 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10">
+                                <label className="flex items-start gap-3 p-3 rounded-lg border border-border-strong cursor-pointer hover:border-primary-500 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10">
                                     <input
                                         type="radio"
                                         name="refund"
@@ -180,8 +180,8 @@ export function CancellationModal({ reservation, guest, onClose, onSuccess, onMo
                                         className="mt-1 accent-primary-500"
                                     />
                                     <div>
-                                        <p className="text-white font-medium">No Refund</p>
-                                        <p className="text-xs text-slate-400">Guest forfeits deposit per policy</p>
+                                        <p className="text-heading font-medium">No Refund</p>
+                                        <p className="text-xs text-muted">Guest forfeits deposit per policy</p>
                                     </div>
                                 </label>
                             </div>
@@ -191,7 +191,7 @@ export function CancellationModal({ reservation, guest, onClose, onSuccess, onMo
                     {/* Modify Option */}
                     <button
                         onClick={onModify}
-                        className="w-full p-3 flex items-center justify-center gap-2 rounded-lg border border-dashed border-slate-600 text-slate-400 hover:text-white hover:border-primary-500 transition-colors"
+                        className="w-full p-3 flex items-center justify-center gap-2 rounded-lg border border-dashed border-border-strong text-muted hover:text-heading hover:border-primary-500 transition-colors"
                     >
                         <Edit3 size={16} />
                         <span>Modify reservation instead (change dates/room)</span>
@@ -199,7 +199,7 @@ export function CancellationModal({ reservation, guest, onClose, onSuccess, onMo
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-3 p-4 border-t border-slate-700">
+                <div className="flex gap-3 p-4 border-t border-border">
                     <button onClick={onClose} className="btn btn-secondary flex-1">
                         Cancel
                     </button>

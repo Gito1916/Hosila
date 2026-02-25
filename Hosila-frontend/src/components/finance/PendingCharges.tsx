@@ -54,7 +54,7 @@ export function PendingCharges() {
                     </div>
                     <div className="text-left">
                         <h3 className="font-semibold text-amber-400">Pending Room Tab Charges</h3>
-                        <p className="text-sm text-slate-400">
+                        <p className="text-sm text-muted">
                             {pendingTransactions.length} order{pendingTransactions.length > 1 ? 's' : ''} awaiting payment
                         </p>
                     </div>
@@ -64,9 +64,9 @@ export function PendingCharges() {
                         ₦{totalPending.toLocaleString()}
                     </span>
                     {isExpanded ? (
-                        <ChevronUp size={20} className="text-slate-400" />
+                        <ChevronUp size={20} className="text-muted" />
                     ) : (
-                        <ChevronDown size={20} className="text-slate-400" />
+                        <ChevronDown size={20} className="text-muted" />
                     )}
                 </div>
             </button>
@@ -80,14 +80,14 @@ export function PendingCharges() {
                         const bookingTotal = txns.reduce((sum, t) => sum + t.amount, 0);
 
                         return (
-                            <div key={bookingId} className="bg-slate-700/50 rounded-lg p-3">
+                            <div key={bookingId} className="bg-surface-raised/50 rounded-lg p-3">
                                 <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center gap-2">
-                                        <span className="font-medium text-white">
+                                        <span className="font-medium text-heading">
                                             Room {room?.room_number ?? '?'}
                                         </span>
-                                        <span className="text-slate-400">-</span>
-                                        <span className="text-slate-300">{guest?.name ?? 'Unknown'}</span>
+                                        <span className="text-muted">-</span>
+                                        <span className="text-muted">{guest?.name ?? 'Unknown'}</span>
                                     </div>
                                     <span className="font-semibold text-amber-400">
                                         ₦{bookingTotal.toLocaleString()}
@@ -96,15 +96,15 @@ export function PendingCharges() {
                                 <div className="space-y-1">
                                     {txns.map(txn => (
                                         <div key={txn.id} className="flex items-center justify-between text-sm">
-                                            <div className="flex items-center gap-2 text-slate-400">
+                                            <div className="flex items-center gap-2 text-muted">
                                                 <UtensilsCrossed size={14} />
                                                 <span className="truncate max-w-[200px]" title={txn.description}>
                                                     {txn.description.replace('Room Tab: ', '').replace(/Room \d+ Tab: /, '')}
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-3 text-slate-500">
+                                            <div className="flex items-center gap-3 text-muted">
                                                 <span>{format(new Date(txn.date), 'MMM d, HH:mm')}</span>
-                                                <span className="text-slate-300">₦{txn.amount.toLocaleString()}</span>
+                                                <span className="text-muted">₦{txn.amount.toLocaleString()}</span>
                                             </div>
                                         </div>
                                     ))}
@@ -112,7 +112,7 @@ export function PendingCharges() {
                             </div>
                         );
                     })}
-                    <p className="text-xs text-slate-500 text-center pt-2">
+                    <p className="text-xs text-muted text-center pt-2">
                         These charges will be added to restaurant revenue when payment is received
                     </p>
                 </div>

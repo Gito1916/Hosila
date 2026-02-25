@@ -204,16 +204,16 @@ export function OtherIncomeForm({ onClose, onSuccess }: OtherIncomeFormProps) {
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-md">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                <div className="flex items-center justify-between p-4 border-b border-border">
                     <div className="flex items-center gap-2">
                         <Building2 size={20} className="text-status-available" />
-                        <h2 className="text-xl font-bold text-white">Record Other Income</h2>
+                        <h2 className="text-xl font-bold text-heading">Record Other Income</h2>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                     >
                         <X size={20} />
                     </button>
@@ -255,10 +255,10 @@ export function OtherIncomeForm({ onClose, onSuccess }: OtherIncomeFormProps) {
                     </div>
 
                     {/* Taxable Toggle */}
-                    <div className="flex items-center justify-between bg-slate-700/50 rounded-lg p-3">
+                    <div className="flex items-center justify-between bg-surface-raised/50 rounded-lg p-3">
                         <div>
-                            <label className="text-sm text-white font-medium">Taxable</label>
-                            <p className="text-xs text-slate-400">
+                            <label className="text-sm text-heading font-medium">Taxable</label>
+                            <p className="text-xs text-muted">
                                 {taxRate > 0 ? `Add ${taxRate}% tax to the amount` : 'No tax rate configured'}
                             </p>
                         </div>
@@ -269,7 +269,7 @@ export function OtherIncomeForm({ onClose, onSuccess }: OtherIncomeFormProps) {
                                 disabled={taxRate <= 0}
                                 className="sr-only peer"
                             />
-                            <div className="w-11 h-6 bg-slate-600 peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500 peer-disabled:opacity-50"></div>
+                            <div className="w-11 h-6 bg-surface-card peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500 peer-disabled:opacity-50"></div>
                         </label>
                     </div>
 
@@ -277,16 +277,16 @@ export function OtherIncomeForm({ onClose, onSuccess }: OtherIncomeFormProps) {
                     {watchTaxable && taxRate > 0 && baseAmount > 0 && (
                         <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 space-y-1">
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-300">Base Amount</span>
-                                <span className="text-white">₦{baseAmount.toLocaleString()}</span>
+                                <span className="text-muted">Base Amount</span>
+                                <span className="text-heading">₦{baseAmount.toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-amber-400">Tax ({taxRate}%)</span>
                                 <span className="text-amber-400">₦{taxAmount.toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between text-sm font-bold border-t border-amber-500/30 pt-1">
-                                <span className="text-white">Total</span>
-                                <span className="text-white">₦{totalAmount.toLocaleString()}</span>
+                                <span className="text-heading">Total</span>
+                                <span className="text-heading">₦{totalAmount.toLocaleString()}</span>
                             </div>
                         </div>
                     )}

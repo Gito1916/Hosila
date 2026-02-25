@@ -40,7 +40,7 @@ export function OfflineIndicator() {
     // Show reconnected message briefly
     if (showReconnected) {
         return (
-            <div className="fixed top-0 left-0 right-0 bg-status-available text-white px-4 py-2 flex items-center justify-center gap-2 z-[60] text-sm font-medium animate-fade-in">
+            <div className="fixed top-0 left-0 right-0 bg-status-available text-heading px-4 py-2 flex items-center justify-center gap-2 z-[60] text-sm font-medium animate-fade-in">
                 <Wifi size={16} />
                 <span>Back online</span>
             </div>

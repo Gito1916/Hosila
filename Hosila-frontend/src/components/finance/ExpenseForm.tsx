@@ -105,16 +105,16 @@ export function ExpenseForm({ onClose, onSuccess, expense }: ExpenseFormProps) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="card w-full max-w-md">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                <div className="flex items-center justify-between p-4 border-b border-border">
                     <div className="flex items-center gap-2">
                         <Receipt size={20} className="text-red-400" />
-                        <h2 className="text-xl font-bold text-white">
+                        <h2 className="text-xl font-bold text-heading">
                             {isEditing ? 'Edit Expense' : 'Record Expense'}
                         </h2>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                     >
                         <X size={20} />
                     </button>
@@ -129,7 +129,7 @@ export function ExpenseForm({ onClose, onSuccess, expense }: ExpenseFormProps) {
                                 <p className="text-sm font-medium text-amber-300">
                                     Editing this expense will update financial reports.
                                 </p>
-                                <p className="text-xs text-slate-400 mt-1">
+                                <p className="text-xs text-muted mt-1">
                                     This change will be logged in the audit trail. Continue?
                                 </p>
                                 <div className="flex gap-2 mt-3">

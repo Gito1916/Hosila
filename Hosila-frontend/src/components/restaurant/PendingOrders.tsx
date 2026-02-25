@@ -593,29 +593,29 @@ export function PendingOrders() {
             {/* Summary */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="card p-3 border-l-4 border-amber-500">
-                    <p className="text-sm text-slate-400">New Orders</p>
+                    <p className="text-sm text-muted">New Orders</p>
                     <p className="text-2xl font-bold text-amber-400">{pendingCount}</p>
                 </div>
                 <div className="card p-3 border-l-4 border-primary-500">
-                    <p className="text-sm text-slate-400">Preparing</p>
+                    <p className="text-sm text-muted">Preparing</p>
                     <p className="text-2xl font-bold text-primary-400">{preparingCount}</p>
                 </div>
                 <div className="card p-3 border-l-4 border-status-available">
-                    <p className="text-sm text-slate-400">Delivered Today</p>
+                    <p className="text-sm text-muted">Delivered Today</p>
                     <p className="text-2xl font-bold text-status-available">{deliveredCount}</p>
                 </div>
                 <div className="card p-3">
-                    <p className="text-sm text-slate-400">Total Tickets</p>
-                    <p className="text-2xl font-bold text-white">{groupedOrders?.length ?? 0}</p>
+                    <p className="text-sm text-muted">Total Tickets</p>
+                    <p className="text-2xl font-bold text-heading">{groupedOrders?.length ?? 0}</p>
                 </div>
             </div>
 
             {/* Orders List */}
             {!groupedOrders || groupedOrders.length === 0 ? (
-                <div className="text-center py-12 text-slate-400">
+                <div className="text-center py-12 text-muted">
                     <Package size={48} className="mx-auto mb-3 opacity-50" />
                     <p>No orders yet</p>
-                    <p className="text-sm text-slate-500 mt-1">Orders will appear here as kitchen tickets</p>
+                    <p className="text-sm text-muted mt-1">Orders will appear here as kitchen tickets</p>
                 </div>
             ) : (
                 <div className="space-y-3">
@@ -629,38 +629,38 @@ export function PendingOrders() {
                         return (
                             <div
                                 key={order.orderNumber}
-                                className={`bg-slate-800 border rounded-xl overflow-hidden transition-all ${config.color.split(' ')[0]} border-slate-700`}
+                                className={`bg-surface-card border rounded-xl overflow-hidden transition-all ${config.color.split(' ')[0]} border-border`}
                             >
                                 {/* Order Header */}
                                 <div
                                     onClick={() => toggleExpand(order.orderNumber)}
-                                    className="p-4 cursor-pointer hover:bg-slate-700/30 transition-colors"
+                                    className="p-4 cursor-pointer hover:bg-surface-raised/30 transition-colors"
                                 >
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-start gap-3">
-                                            <div className="text-slate-400 mt-1">
+                                            <div className="text-muted mt-1">
                                                 {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <h3 className="text-white font-bold font-mono">
+                                                    <h3 className="text-heading font-bold font-mono">
                                                         #{order.orderNumber.split('-')[1] || order.orderNumber}
                                                     </h3>
                                                     <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${config.color}`}>
                                                         {config.icon}
                                                         {config.label}
                                                     </span>
-                                                    <span className="text-xs text-slate-500 bg-slate-700 px-2 py-0.5 rounded">
+                                                    <span className="text-xs text-muted bg-surface-raised px-2 py-0.5 rounded">
                                                         {order.items.length} item{order.items.length !== 1 ? 's' : ''}
                                                     </span>
                                                 </div>
-                                                <div className="flex items-center gap-2 text-sm text-slate-400">
+                                                <div className="flex items-center gap-2 text-sm text-muted">
                                                     <MapPin size={14} />
                                                     <span>{order.isWalkIn ? 'Walk-in' : `Room ${order.roomNumber}`}</span>
                                                     <span>•</span>
                                                     <span>{order.guestName}</span>
                                                 </div>
-                                                <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
+                                                <div className="flex items-center gap-3 text-xs text-muted mt-1">
                                                     <span className="flex items-center gap-1">
                                                         <Clock size={10} />
                                                         {formatDistanceToNow(new Date(order.orderedAt), { addSuffix: true })}
@@ -676,7 +676,7 @@ export function PendingOrders() {
 
                                         {/* Right side - Total & Actions */}
                                         <div className="text-right" onClick={(e) => e.stopPropagation()}>
-                                            <p className="text-lg font-bold text-white mb-2">
+                                            <p className="text-lg font-bold text-heading mb-2">
                                                 ₦{order.totalAmount.toLocaleString()}
                                             </p>
 
@@ -715,7 +715,7 @@ export function PendingOrders() {
                                 {/* Expanded Items List */}
                                 {
                                     isExpanded && (
-                                        <div className="border-t border-slate-700 bg-slate-900/50 p-4">
+                                        <div className="border-t border-border bg-surface-base/50 p-4">
                                             <div className="space-y-2">
                                                 {order.items.map((item) => {
                                                     const isItemMutating = (quantityMutation.isPending && (quantityMutation.variables as any)?.item?.id === item.id)
@@ -724,7 +724,7 @@ export function PendingOrders() {
                                                     return (
                                                         <div
                                                             key={item.id}
-                                                            className={`flex items-center justify-between py-2 px-3 rounded-lg transition-all ${item.status === 'cancelled' ? 'bg-red-900/20 opacity-50 line-through' : 'bg-slate-800/50'
+                                                            className={`flex items-center justify-between py-2 px-3 rounded-lg transition-all ${item.status === 'cancelled' ? 'bg-red-900/20 opacity-50 line-through' : 'bg-surface-card/50'
                                                                 }`}
                                                         >
                                                             <div className="flex items-center gap-3">
@@ -732,14 +732,14 @@ export function PendingOrders() {
                                                                     ×{item.quantity}
                                                                 </span>
                                                                 <div>
-                                                                    <p className="text-white font-medium">{item.serviceName}</p>
+                                                                    <p className="text-heading font-medium">{item.serviceName}</p>
                                                                     {item.notes && (
-                                                                        <p className="text-xs text-slate-500 italic">"{item.notes}"</p>
+                                                                        <p className="text-xs text-muted italic">"{item.notes}"</p>
                                                                     )}
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-slate-400 font-medium mr-2">
+                                                                <span className="text-muted font-medium mr-2">
                                                                     ₦{item.totalPrice.toLocaleString()}
                                                                 </span>
 
@@ -748,7 +748,7 @@ export function PendingOrders() {
                                                                         <button
                                                                             onClick={() => quantityMutation.mutate({ item, order, delta: -1 })}
                                                                             disabled={isItemMutating || item.quantity <= 1}
-                                                                            className="w-7 h-7 flex items-center justify-center rounded bg-slate-700 hover:bg-slate-600 text-slate-300 disabled:opacity-30 transition-colors"
+                                                                            className="w-7 h-7 flex items-center justify-center rounded bg-surface-raised hover:bg-surface-card text-muted disabled:opacity-30 transition-colors"
                                                                             title="Decrease quantity"
                                                                         >
                                                                             <Minus size={12} />
@@ -756,7 +756,7 @@ export function PendingOrders() {
                                                                         <button
                                                                             onClick={() => quantityMutation.mutate({ item, order, delta: 1 })}
                                                                             disabled={isItemMutating}
-                                                                            className="w-7 h-7 flex items-center justify-center rounded bg-slate-700 hover:bg-slate-600 text-slate-300 disabled:opacity-30 transition-colors"
+                                                                            className="w-7 h-7 flex items-center justify-center rounded bg-surface-raised hover:bg-surface-card text-muted disabled:opacity-30 transition-colors"
                                                                             title="Increase quantity"
                                                                         >
                                                                             <Plus size={12} />
@@ -779,7 +779,7 @@ export function PendingOrders() {
 
                                             {/* Add Item Section */}
                                             {isEditable && (
-                                                <div className="mt-3 pt-3 border-t border-slate-700">
+                                                <div className="mt-3 pt-3 border-t border-border">
                                                     {!isAddingItem ? (
                                                         <button
                                                             onClick={() => { setAddingToOrder(order.orderNumber); setAddItemSearch(''); }}
@@ -792,26 +792,26 @@ export function PendingOrders() {
                                                         <div className="space-y-2">
                                                             <div className="flex items-center gap-2">
                                                                 <div className="relative flex-1">
-                                                                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                                                                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                                                                     <input
                                                                         type="text"
                                                                         placeholder="Search menu items..."
                                                                         value={addItemSearch}
                                                                         onChange={(e) => setAddItemSearch(e.target.value)}
-                                                                        className="w-full bg-slate-800 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-primary-500"
+                                                                        className="w-full bg-surface-card border border-border-strong rounded-lg pl-9 pr-3 py-2 text-sm text-heading placeholder-slate-500 focus:outline-none focus:border-primary-500"
                                                                         autoFocus
                                                                     />
                                                                 </div>
                                                                 <button
                                                                     onClick={() => setAddingToOrder(null)}
-                                                                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-400"
+                                                                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-raised hover:bg-surface-card text-muted"
                                                                 >
                                                                     <X size={14} />
                                                                 </button>
                                                             </div>
-                                                            <div className="max-h-48 overflow-y-auto space-y-1 rounded-lg bg-slate-800/50 p-2">
+                                                            <div className="max-h-48 overflow-y-auto space-y-1 rounded-lg bg-surface-card/50 p-2">
                                                                 {filteredMenuItems.length === 0 ? (
-                                                                    <p className="text-sm text-slate-500 text-center py-4">No items found</p>
+                                                                    <p className="text-sm text-muted text-center py-4">No items found</p>
                                                                 ) : (
                                                                     filteredMenuItems.map(menuItem => (
                                                                         <button
@@ -820,11 +820,11 @@ export function PendingOrders() {
                                                                                 addItemMutation.mutate({ order, menuItem });
                                                                                 setAddingToOrder(null);
                                                                             }}
-                                                                            className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-slate-700/50 transition-colors text-left"
+                                                                            className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-surface-raised transition-colors text-left"
                                                                         >
                                                                             <div>
-                                                                                <p className="text-sm text-white font-medium">{menuItem.name}</p>
-                                                                                <p className="text-xs text-slate-500 capitalize">{menuItem.category}</p>
+                                                                                <p className="text-sm text-heading font-medium">{menuItem.name}</p>
+                                                                                <p className="text-xs text-muted capitalize">{menuItem.category}</p>
                                                                             </div>
                                                                             <span className="text-sm text-primary-400 font-medium">₦{menuItem.price.toLocaleString()}</span>
                                                                         </button>
@@ -837,9 +837,9 @@ export function PendingOrders() {
                                             )}
 
                                             {/* Order Total */}
-                                            <div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-700">
-                                                <span className="text-slate-400 font-medium">Order Total</span>
-                                                <span className="text-white font-bold text-lg">
+                                            <div className="flex justify-between items-center mt-3 pt-3 border-t border-border">
+                                                <span className="text-muted font-medium">Order Total</span>
+                                                <span className="text-heading font-bold text-lg">
                                                     ₦{order.totalAmount.toLocaleString()}
                                                 </span>
                                             </div>

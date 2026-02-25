@@ -142,10 +142,10 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
                         if (ofFloor.length === 0) return null;
                         return (
                             <div key={floor}>
-                                <h3 className="text-sm font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                <h3 className="text-sm font-semibold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
                                     <Building2 size={14} />
                                     Floor {floor}
-                                    <span className="text-xs font-normal text-gray-400 dark:text-slate-500 normal-case">
+                                    <span className="text-xs font-normal text-muted normal-case">
                                         ({ofFloor.length} room{ofFloor.length !== 1 ? 's' : ''})
                                     </span>
                                 </h3>
@@ -177,19 +177,19 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
             <div className="grid grid-cols-4 gap-3">
                 <div className="card p-3 text-center">
                     <p className="text-2xl font-bold text-status-available">{statusCounts.available}</p>
-                    <p className="text-xs text-slate-400">Vacant</p>
+                    <p className="text-xs text-muted">Vacant</p>
                 </div>
                 <div className="card p-3 text-center">
                     <p className="text-2xl font-bold text-status-occupied">{statusCounts.occupied}</p>
-                    <p className="text-xs text-slate-400">Occupied</p>
+                    <p className="text-xs text-muted">Occupied</p>
                 </div>
                 <div className="card p-3 text-center">
                     <p className="text-2xl font-bold text-status-dirty">{statusCounts.dirty}</p>
-                    <p className="text-xs text-slate-400">Dirty</p>
+                    <p className="text-xs text-muted">Dirty</p>
                 </div>
                 <div className="card p-3 text-center">
                     <p className="text-2xl font-bold text-status-maintenance">{statusCounts.maintenance}</p>
-                    <p className="text-xs text-slate-400">Maintenance</p>
+                    <p className="text-xs text-muted">Maintenance</p>
                 </div>
             </div>
 
@@ -197,13 +197,13 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
             <div className="flex items-center gap-2 justify-between flex-wrap">
                 {/* Filters — compact pill style */}
                 <div className="flex items-center gap-2">
-                    <Filter size={14} className="text-gray-400 dark:text-slate-500" />
+                    <Filter size={14} className="text-muted />
 
                     {/* Status filter */}
                     <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value as RoomStatus | 'all')}
-                        className="text-sm px-3 py-1.5 rounded-lg border border-gray-200 bg-white dark:bg-navy-800 dark:border-navy-600 dark:text-slate-300 focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
+                        className="text-sm px-3 py-1.5 rounded-lg border border-border bg-surface-card focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
                         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
                     >
                         {statusOptions.map((opt) => (
@@ -218,7 +218,7 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
                         <select
                             value={filterType}
                             onChange={(e) => setFilterType(e.target.value)}
-                            className="text-sm px-3 py-1.5 rounded-lg border border-gray-200 bg-white dark:bg-navy-800 dark:border-navy-600 dark:text-slate-300 focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
+                            className="text-sm px-3 py-1.5 rounded-lg border border-border bg-surface-card focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
                             style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
                         >
                             <option value="all">All Types</option>
@@ -237,8 +237,8 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
                     <button
                         onClick={cycleGroupBy}
                         className={`text-sm flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors ${groupBy !== 'none'
-                            ? 'bg-primary-50 text-primary-600 border-primary-200 dark:bg-primary-500/10 dark:text-primary-400 dark:border-primary-500/20'
-                            : 'text-gray-400 border-gray-200 hover:text-gray-600 hover:border-gray-300 dark:text-slate-500 dark:border-navy-600 dark:hover:text-slate-300 dark:hover:border-navy-500'
+                            ? 'bg-primary-50 text-primary-600 border-primary-200 dark:text-primary-400 dark:border-primary-500/20'
+                            : 'text-muted border-border hover:text-body hover:border-border-strong dark:hover:text-muted dark:hover:border-border-strong'
                             }`}
                         title="Toggle grouping"
                     >
@@ -247,20 +247,20 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
                     </button>
 
                     {/* Grid / List toggle */}
-                    <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-navy-600">
+                    <div className="flex rounded-lg overflow-hidden border border-border
                         <button
                             onClick={() => setViewMode('grid')}
                             className={`p-2 ${viewMode === 'grid'
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-white text-gray-400 hover:text-gray-600 dark:bg-navy-800 dark:text-slate-500 dark:hover:text-slate-300'}`}
+                                ? 'bg-primary-500 text-heading'
+                                : 'bg-surface-card text-muted hover:text-body dark:hover:text-muted'}`}
                         >
                             <Grid3X3 size={18} />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
                             className={`p-2 ${viewMode === 'list'
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-white text-gray-400 hover:text-gray-600 dark:bg-navy-800 dark:text-slate-500 dark:hover:text-slate-300'}`}
+                                ? 'bg-primary-500 text-heading'
+                                : 'bg-surface-card text-muted hover:text-body dark:hover:text-muted'}`}
                         >
                             <List size={18} />
                         </button>
@@ -269,7 +269,7 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
             </div>
 
             {/* Room count */}
-            <div className="text-sm text-gray-400 dark:text-slate-500">
+            <div className="text-sm text-muted
                 Showing {filteredRooms.length} of {rooms?.length ?? 0} rooms
             </div>
 
@@ -278,7 +278,7 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
 
             {/* Empty State */}
             {filteredRooms.length === 0 && (
-                <div className="text-center py-12 text-slate-400">
+                <div className="text-center py-12 text-muted">
                     <p>No rooms match your filters</p>
                 </div>
             )}

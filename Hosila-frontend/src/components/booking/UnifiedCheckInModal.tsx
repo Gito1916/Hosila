@@ -208,18 +208,18 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700 sticky top-0 bg-slate-800 z-10">
+                <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-surface-card z-10">
                     <div>
-                        <h2 className="text-xl font-bold text-white">Check In</h2>
-                        <p className="text-sm text-slate-400">
+                        <h2 className="text-xl font-bold text-heading">Check In</h2>
+                        <p className="text-sm text-muted">
                             Room {room.room_number} • {room.room_type}
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                     >
                         <X size={20} />
                     </button>
@@ -302,7 +302,7 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                         <button
                             type="button"
                             onClick={() => setShowVehicle(!showVehicle)}
-                            className="flex items-center gap-2 text-sm text-slate-400 hover:text-white"
+                            className="flex items-center gap-2 text-sm text-muted hover:text-heading"
                         >
                             <Car size={16} />
                             {showVehicle ? 'Hide' : 'Add'} Vehicle Info (Optional)
@@ -355,7 +355,7 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                                 }}
                                 className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${bookingType === 'night'
                                     ? 'border-primary-500 bg-primary-500/20 text-primary-400'
-                                    : 'border-slate-700 bg-slate-700/50 text-slate-300 hover:border-slate-600'
+                                    : 'border-border bg-surface-raised/50 text-muted hover:border-border-strong'
                                     }`}
                             >
                                 Night Stay
@@ -370,7 +370,7 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                                 }}
                                 className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${bookingType === 'short_rest'
                                     ? 'border-status-shortRest bg-status-shortRest/20 text-status-shortRest'
-                                    : 'border-slate-700 bg-slate-700/50 text-slate-300 hover:border-slate-600'
+                                    : 'border-border bg-surface-raised/50 text-muted hover:border-border-strong'
                                     }`}
                             >
                                 Short Rest
@@ -388,12 +388,12 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                                         type="button"
                                         onClick={decrementNights}
                                         disabled={numNights <= 1}
-                                        className="w-10 h-10 rounded-lg border border-slate-700 bg-slate-700/50 text-slate-300 hover:bg-slate-600 disabled:opacity-50 flex items-center justify-center"
+                                        className="w-10 h-10 rounded-lg border border-border bg-surface-raised/50 text-muted hover:bg-surface-card disabled:opacity-50 flex items-center justify-center"
                                     >
                                         <Minus size={16} />
                                     </button>
                                     <div className="flex-1 text-center">
-                                        <span className="text-2xl font-bold text-white">{numNights}</span>
+                                        <span className="text-2xl font-bold text-heading">{numNights}</span>
                                     </div>
                                     <button
                                         type="button"
@@ -404,12 +404,12 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                                         <Plus size={16} />
                                     </button>
                                 </div>
-                                <p className="text-xs text-slate-500 mt-1">Checkout: {format(checkoutDate, 'MMM d')} 12pm</p>
+                                <p className="text-xs text-muted mt-1">Checkout: {format(checkoutDate, 'MMM d')} 12pm</p>
                             </div>
                             <div>
                                 <label className="label">Rate (₦{room.night_rate.toLocaleString()}/night)</label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">₦</span>
                                     <input
                                         type="number"
                                         {...register('customRate', { valueAsNumber: true, min: 0 })}
@@ -442,7 +442,7 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                                             }}
                                             className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all ${durationHours === pkg.hours
                                                 ? 'border-status-shortRest bg-status-shortRest/20 text-status-shortRest'
-                                                : 'border-slate-700 bg-slate-700/50 text-slate-300 hover:border-slate-600'
+                                                : 'border-border bg-surface-raised/50 text-muted hover:border-border-strong'
                                                 }`}
                                         >
                                             {pkg.label}
@@ -453,7 +453,7 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                             <div>
                                 <label className="label">Rate (Suggested: ₦{suggestedRate.toLocaleString()})</label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">₦</span>
                                     <input
                                         {...register('customRate', { valueAsNumber: true, min: 0 })}
                                         type="number"
@@ -469,32 +469,32 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                     )}
 
                     {/* Total Breakdown with Tax */}
-                    <div className="bg-slate-700/50 rounded-lg p-4 space-y-2">
+                    <div className="bg-surface-raised/50 rounded-lg p-4 space-y-2">
                         <div className="flex justify-between text-sm">
-                            <span className="text-slate-400">Room Rate:</span>
-                            <span className="text-white">₦{subtotal.toLocaleString()}</span>
+                            <span className="text-muted">Room Rate:</span>
+                            <span className="text-heading">₦{subtotal.toLocaleString()}</span>
                         </div>
                         {scAmount > 0 && (
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">Service Charge:</span>
-                                <span className="text-white">₦{scAmount.toLocaleString()}</span>
+                                <span className="text-muted">Service Charge:</span>
+                                <span className="text-heading">₦{scAmount.toLocaleString()}</span>
                             </div>
                         )}
                         {vatAmount > 0 && (
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">VAT:</span>
-                                <span className="text-white">₦{vatAmount.toLocaleString()}</span>
+                                <span className="text-muted">VAT:</span>
+                                <span className="text-heading">₦{vatAmount.toLocaleString()}</span>
                             </div>
                         )}
                         {tdlAmount > 0 && (
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">TDL:</span>
-                                <span className="text-white">₦{tdlAmount.toLocaleString()}</span>
+                                <span className="text-muted">TDL:</span>
+                                <span className="text-heading">₦{tdlAmount.toLocaleString()}</span>
                             </div>
                         )}
-                        <div className="border-t border-slate-600 pt-2 flex justify-between">
-                            <span className="text-slate-300 font-medium">Total Due:</span>
-                            <span className="text-white font-bold text-lg">₦{totalWithTax.toLocaleString()}</span>
+                        <div className="border-t border-border-strong pt-2 flex justify-between">
+                            <span className="text-muted font-medium">Total Due:</span>
+                            <span className="text-heading font-bold text-lg">₦{totalWithTax.toLocaleString()}</span>
                         </div>
                     </div>
 
@@ -511,7 +511,7 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                         <div>
                             <label className="label">Amount Paid</label>
                             <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">₦</span>
                                 <input
                                     {...register('amountPaid', { valueAsNumber: true, min: 0 })}
                                     type="number"
@@ -522,8 +522,8 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                     </div>
 
                     {/* Balance Display */}
-                    <div className="bg-slate-700/50 rounded-lg p-3 flex justify-between items-center">
-                        <span className="text-slate-400">Balance:</span>
+                    <div className="bg-surface-raised/50 rounded-lg p-3 flex justify-between items-center">
+                        <span className="text-muted">Balance:</span>
                         <span className={`font-bold text-lg ${balance > 0 ? 'text-status-dirty' : 'text-status-available'}`}>
                             ₦{balance.toLocaleString()}
                         </span>

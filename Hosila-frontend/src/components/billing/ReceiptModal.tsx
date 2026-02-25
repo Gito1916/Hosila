@@ -230,9 +230,9 @@ export function ReceiptModal({ bookingId, onClose }: ReceiptModalProps) {
     if (loading) {
         return (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                <div className="bg-slate-800 rounded-xl border border-slate-700 p-8 text-center">
+                <div className="bg-surface-card rounded-xl border border-border p-8 text-center">
                     <div className="animate-spin w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                    <p className="text-slate-400">Loading receipt...</p>
+                    <p className="text-muted">Loading receipt...</p>
                 </div>
             </div>
         );
@@ -250,16 +250,16 @@ export function ReceiptModal({ bookingId, onClose }: ReceiptModalProps) {
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                <div className="flex items-center justify-between p-4 border-b border-border">
                     <div className="flex items-center gap-2">
                         <FileText size={20} className="text-primary-400" />
-                        <h2 className="text-xl font-bold text-white">Receipt</h2>
+                        <h2 className="text-xl font-bold text-heading">Receipt</h2>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                     >
                         <X size={20} />
                     </button>
@@ -268,28 +268,28 @@ export function ReceiptModal({ bookingId, onClose }: ReceiptModalProps) {
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     {/* Guest Info */}
-                    <div className="bg-slate-700/50 rounded-lg p-3">
-                        <p className="text-white font-medium">{guest?.name}</p>
-                        <p className="text-sm text-slate-400">
+                    <div className="bg-surface-raised/50 rounded-lg p-3">
+                        <p className="text-heading font-medium">{guest?.name}</p>
+                        <p className="text-sm text-muted">
                             Room {room?.room_number} • {room?.room_type}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted">
                             {booking && format(new Date(booking.check_in_time), 'MMM d, yyyy')}
                         </p>
                     </div>
 
                     {/* Accommodation */}
                     <div>
-                        <h4 className="text-sm font-medium text-slate-400 mb-2">Accommodation</h4>
-                        <div className="bg-slate-700/30 rounded-lg p-3 space-y-2">
+                        <h4 className="text-sm font-medium text-muted mb-2">Accommodation</h4>
+                        <div className="bg-surface-raised/30 rounded-lg p-3 space-y-2">
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-300">
+                                <span className="text-muted">
                                     {room?.room_type} - {booking?.booking_type === 'night' ? 'Night Stay' : `${booking?.duration_hours}h Short Rest`}
                                 </span>
-                                <span className="text-white font-medium">₦{accommodationSubtotal.toLocaleString()}</span>
+                                <span className="text-heading font-medium">₦{accommodationSubtotal.toLocaleString()}</span>
                             </div>
                             {taxRates.accommodation > 0 && (
-                                <div className="flex justify-between text-xs text-slate-500">
+                                <div className="flex justify-between text-xs text-muted">
                                     <span>Tax ({taxRates.accommodation}%)</span>
                                     <span>₦{accommodationTax.toLocaleString()}</span>
                                 </div>
@@ -300,21 +300,21 @@ export function ReceiptModal({ bookingId, onClose }: ReceiptModalProps) {
                     {/* Services */}
                     {serviceOrders.length > 0 && (
                         <div>
-                            <h4 className="text-sm font-medium text-slate-400 mb-2">Services</h4>
-                            <div className="bg-slate-700/30 rounded-lg p-3 space-y-2">
+                            <h4 className="text-sm font-medium text-muted mb-2">Services</h4>
+                            <div className="bg-surface-raised/30 rounded-lg p-3 space-y-2">
                                 {serviceOrders.map((order, idx) => (
                                     <div key={idx} className="flex justify-between text-sm">
-                                        <span className="text-slate-300 flex items-center gap-1">
+                                        <span className="text-muted flex items-center gap-1">
                                             {order.serviceName} x{order.quantity}
                                             {order.status !== 'delivered' && (
                                                 <Clock size={12} className="text-amber-400" />
                                             )}
                                         </span>
-                                        <span className="text-white font-medium">₦{order.total.toLocaleString()}</span>
+                                        <span className="text-heading font-medium">₦{order.total.toLocaleString()}</span>
                                     </div>
                                 ))}
                                 {taxRates.services > 0 && (
-                                    <div className="flex justify-between text-xs text-slate-500 border-t border-slate-600 pt-2">
+                                    <div className="flex justify-between text-xs text-muted border-t border-border-strong pt-2">
                                         <span>Tax ({taxRates.services}%)</span>
                                         <span>₦{servicesTax.toLocaleString()}</span>
                                     </div>
@@ -326,11 +326,11 @@ export function ReceiptModal({ bookingId, onClose }: ReceiptModalProps) {
                     {/* Payments */}
                     {payments.length > 0 && (
                         <div>
-                            <h4 className="text-sm font-medium text-slate-400 mb-2">Payments</h4>
-                            <div className="bg-slate-700/30 rounded-lg p-3 space-y-2">
+                            <h4 className="text-sm font-medium text-muted mb-2">Payments</h4>
+                            <div className="bg-surface-raised/30 rounded-lg p-3 space-y-2">
                                 {payments.map((p, idx) => (
                                     <div key={idx} className="flex justify-between text-sm">
-                                        <span className="text-slate-300 flex items-center gap-1">
+                                        <span className="text-muted flex items-center gap-1">
                                             <Check size={12} className="text-status-available" />
                                             {format(p.time, 'MMM d')} - {p.method}
                                         </span>
@@ -343,26 +343,26 @@ export function ReceiptModal({ bookingId, onClose }: ReceiptModalProps) {
                 </div>
 
                 {/* Totals */}
-                <div className="border-t border-slate-700 p-4 space-y-2">
+                <div className="border-t border-border p-4 space-y-2">
                     <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Subtotal</span>
-                        <span className="text-white">₦{subtotal.toLocaleString()}</span>
+                        <span className="text-muted">Subtotal</span>
+                        <span className="text-heading">₦{subtotal.toLocaleString()}</span>
                     </div>
                     {totalTax > 0 && (
                         <div className="flex justify-between text-sm">
-                            <span className="text-slate-400">Tax</span>
-                            <span className="text-white">₦{totalTax.toLocaleString()}</span>
+                            <span className="text-muted">Tax</span>
+                            <span className="text-heading">₦{totalTax.toLocaleString()}</span>
                         </div>
                     )}
                     <div className="flex justify-between font-bold">
-                        <span className="text-white">Total</span>
-                        <span className="text-white">₦{total.toLocaleString()}</span>
+                        <span className="text-heading">Total</span>
+                        <span className="text-heading">₦{total.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Paid</span>
+                        <span className="text-muted">Paid</span>
                         <span className="text-status-available">₦{totalPaid.toLocaleString()}</span>
                     </div>
-                    <div className={`flex justify-between font-bold text-lg pt-2 border-t border-slate-700 ${balance > 0 ? 'text-red-400' : 'text-status-available'}`}>
+                    <div className={`flex justify-between font-bold text-lg pt-2 border-t border-border ${balance > 0 ? 'text-red-400' : 'text-status-available'}`}>
                         <span>Balance</span>
                         <span>₦{balance.toLocaleString()}</span>
                     </div>

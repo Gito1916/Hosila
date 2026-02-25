@@ -127,7 +127,7 @@ export function DashboardPage() {
             <div className="flex justify-end">
                 <button
                     onClick={() => navigate('/bookings')}
-                    className="btn bg-primary-400 hover:bg-primary-500 text-white rounded-full px-6 shadow-sm shadow-primary-400/20 transition-all font-medium"
+                    className="btn bg-primary-400 hover:bg-primary-500 text-heading rounded-full px-6 shadow-sm shadow-primary-400/20 transition-all font-medium"
                 >
                     + New Booking
                 </button>
@@ -165,10 +165,10 @@ export function DashboardPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Revenue Analytics Chart (Takes up 2/3 width on large screens) */}
-                <div className="lg:col-span-2 bg-slate-800 rounded-xl shadow-sm border border-slate-700 p-5">
+                <div className="lg:col-span-2 bg-surface-card rounded-xl shadow-sm border border-border p-5">
                     <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-base font-semibold text-white">Revenue Analytics</h3>
-                        <span className="text-xs text-slate-400">Last 7 Days</span>
+                        <h3 className="text-base font-semibold text-heading">Revenue Analytics</h3>
+                        <span className="text-xs text-muted">Last 7 Days</span>
                     </div>
                     <div className="h-[300px] w-full">
                         {hasChartData ? (
@@ -186,18 +186,18 @@ export function DashboardPage() {
                             </ResponsiveContainer>
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center text-center">
-                                <DollarSign size={40} className="text-slate-600 mb-3" />
-                                <p className="text-slate-400 text-sm">No revenue data yet</p>
-                                <p className="text-slate-500 text-xs mt-1">Revenue will appear here as payments are recorded</p>
+                                <DollarSign size={40} className="text-muted mb-3" />
+                                <p className="text-muted text-sm">No revenue data yet</p>
+                                <p className="text-muted text-xs mt-1">Revenue will appear here as payments are recorded</p>
                             </div>
                         )}
                     </div>
                 </div>
 
                 {/* Today's Activity / Recent Activity */}
-                <div className="lg:col-span-1 bg-slate-800 rounded-xl shadow-sm border border-slate-700 p-0 overflow-hidden flex flex-col">
-                    <div className="p-5 border-b border-slate-700 flex items-center justify-between">
-                        <h3 className="text-base font-semibold text-white flex items-center gap-2">
+                <div className="lg:col-span-1 bg-surface-card rounded-xl shadow-sm border border-border p-0 overflow-hidden flex flex-col">
+                    <div className="p-5 border-b border-border flex items-center justify-between">
+                        <h3 className="text-base font-semibold text-heading flex items-center gap-2">
                             <Calendar size={18} className="text-primary-400" />
                             Recent Activity
                         </h3>

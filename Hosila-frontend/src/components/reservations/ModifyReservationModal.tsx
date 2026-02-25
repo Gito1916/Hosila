@@ -120,16 +120,16 @@ export function ModifyReservationModal({ reservation, onClose, onSuccess }: Modi
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-lg">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-lg">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                <div className="flex items-center justify-between p-4 border-b border-border">
                     <div className="flex items-center gap-2">
                         <Calendar size={20} className="text-primary-400" />
-                        <h2 className="text-xl font-bold text-white">Modify Reservation</h2>
+                        <h2 className="text-xl font-bold text-heading">Modify Reservation</h2>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                     >
                         <X size={20} />
                     </button>
@@ -138,8 +138,8 @@ export function ModifyReservationModal({ reservation, onClose, onSuccess }: Modi
                 {/* Content */}
                 <div className="p-4 space-y-4">
                     {/* Current Info */}
-                    <div className="bg-slate-700/50 rounded-lg p-3 text-sm">
-                        <p className="text-slate-400">Current: {currentRoom?.room_number} • {format(new Date(reservation.check_in_date), 'MMM d')} - {format(new Date(reservation.check_out_date), 'MMM d, yyyy')}</p>
+                    <div className="bg-surface-raised/50 rounded-lg p-3 text-sm">
+                        <p className="text-muted">Current: {currentRoom?.room_number} • {format(new Date(reservation.check_in_date), 'MMM d')} - {format(new Date(reservation.check_out_date), 'MMM d, yyyy')}</p>
                     </div>
 
                     {error && (
@@ -172,7 +172,7 @@ export function ModifyReservationModal({ reservation, onClose, onSuccess }: Modi
                     </div>
 
                     {isValidDates && (
-                        <p className="text-sm text-slate-400">
+                        <p className="text-sm text-muted">
                             {nights} night{nights !== 1 ? 's' : ''}
                         </p>
                     )}
@@ -205,7 +205,7 @@ export function ModifyReservationModal({ reservation, onClose, onSuccess }: Modi
 
                     {/* Conflict Warning */}
                     {isChecking ? (
-                        <div className="flex items-center gap-2 text-sm text-slate-400">
+                        <div className="flex items-center gap-2 text-sm text-muted">
                             <Loader2 size={14} className="animate-spin" />
                             Checking availability...
                         </div>
@@ -223,7 +223,7 @@ export function ModifyReservationModal({ reservation, onClose, onSuccess }: Modi
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-3 p-4 border-t border-slate-700">
+                <div className="flex gap-3 p-4 border-t border-border">
                     <button onClick={onClose} className="btn btn-secondary flex-1">
                         Cancel
                     </button>

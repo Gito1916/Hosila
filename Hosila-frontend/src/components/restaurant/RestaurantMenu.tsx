@@ -151,12 +151,12 @@ export function RestaurantMenu() {
             <div className="flex-1 space-y-4">
                 {/* View Toggle */}
                 <div className="flex items-center justify-between gap-3">
-                    <div className="flex rounded-lg overflow-hidden border border-slate-700">
+                    <div className="flex rounded-lg overflow-hidden border border-border">
                         <button
                             onClick={() => setViewMode('menu')}
                             className={`px-4 py-2 flex items-center gap-2 ${viewMode === 'menu'
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-slate-800 text-slate-400 hover:text-white'
+                                ? 'bg-primary-500 text-heading'
+                                : 'bg-surface-card text-muted hover:text-heading'
                                 }`}
                         >
                             <LayoutGrid size={18} />
@@ -166,8 +166,8 @@ export function RestaurantMenu() {
                             <button
                                 onClick={() => setViewMode('orders')}
                                 className={`px-4 py-2 flex items-center gap-2 ${viewMode === 'orders'
-                                    ? 'bg-primary-500 text-white'
-                                    : 'bg-slate-800 text-slate-400 hover:text-white'
+                                    ? 'bg-primary-500 text-heading'
+                                    : 'bg-surface-card text-muted hover:text-heading'
                                     }`}
                             >
                                 <ClipboardList size={18} />
@@ -177,8 +177,8 @@ export function RestaurantMenu() {
                         <button
                             onClick={() => setViewMode('history')}
                             className={`px-4 py-2 flex items-center gap-2 ${viewMode === 'history'
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-slate-800 text-slate-400 hover:text-white'
+                                ? 'bg-primary-500 text-heading'
+                                : 'bg-surface-card text-muted hover:text-heading'
                                 }`}
                         >
                             <History size={18} />
@@ -191,15 +191,15 @@ export function RestaurantMenu() {
                         <button
                             onClick={() => setShowMobileCart(true)}
                             className={`lg:hidden relative px-4 py-2 rounded-lg flex items-center gap-2 transition-all ${cartItemCount > 0
-                                ? 'bg-status-available text-white'
-                                : 'bg-slate-800 text-slate-400 border border-slate-700'
+                                ? 'bg-status-available text-heading'
+                                : 'bg-surface-card text-muted border border-border'
                                 }`}
                         >
                             <ShoppingCart size={18} />
                             {cartItemCount > 0 && (
                                 <>
                                     <span className="font-bold">₦{cartTotal.toLocaleString()}</span>
-                                    <span className="absolute -top-2 -right-2 bg-primary-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                                    <span className="absolute -top-2 -right-2 bg-primary-500 text-heading text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
                                         {cartItemCount}
                                     </span>
                                 </>
@@ -217,8 +217,8 @@ export function RestaurantMenu() {
                                     key={cat.value}
                                     onClick={() => setSelectedCategory(cat.value)}
                                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${selectedCategory === cat.value
-                                        ? 'bg-primary-500 text-white'
-                                        : 'bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700'
+                                        ? 'bg-primary-500 text-heading'
+                                        : 'bg-surface-card text-muted hover:text-heading hover:bg-surface-raised'
                                         }`}
                                 >
                                     {cat.icon}
@@ -233,7 +233,7 @@ export function RestaurantMenu() {
                             <div className="space-y-6">
                                 {(Object.entries(groupedServices) as [string, Service[]][]).map(([category, services]) => (
                                     <div key={category}>
-                                        <h3 className="text-lg font-semibold text-white mb-3 capitalize">
+                                        <h3 className="text-lg font-semibold text-heading mb-3 capitalize">
                                             {category === 'food' ? 'Food' : 'Beverages'}
                                         </h3>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
@@ -264,7 +264,7 @@ export function RestaurantMenu() {
                         )}
 
                         {filteredServices.length === 0 && (
-                            <div className="text-center py-12 text-slate-400">
+                            <div className="text-center py-12 text-muted">
                                 <Utensils size={48} className="mx-auto mb-4 opacity-50" />
                                 <p>No items found in this category</p>
                             </div>
@@ -302,7 +302,7 @@ export function RestaurantMenu() {
                         onClick={() => setShowMobileCart(false)}
                     />
                     {/* Bottom Sheet */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-slate-800 rounded-t-xl max-h-[85vh] overflow-y-auto animate-slide-up">
+                    <div className="absolute bottom-0 left-0 right-0 bg-surface-card rounded-t-xl max-h-[85vh] overflow-y-auto animate-slide-up">
                         <RestaurantCart
                             cart={cart}
                             onUpdateQuantity={updateQuantity}

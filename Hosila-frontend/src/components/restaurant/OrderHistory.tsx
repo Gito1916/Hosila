@@ -208,9 +208,9 @@ export function OrderHistory() {
     if (!groupedOrders || groupedOrders.length === 0) {
         return (
             <div className="text-center py-12">
-                <Receipt size={48} className="mx-auto text-slate-600 mb-4" />
-                <h3 className="text-lg font-semibold text-slate-400 mb-2">No Order History</h3>
-                <p className="text-sm text-slate-500">Completed orders from the last 7 days will appear here.</p>
+                <Receipt size={48} className="mx-auto text-muted mb-4" />
+                <h3 className="text-lg font-semibold text-muted mb-2">No Order History</h3>
+                <p className="text-sm text-muted">Completed orders from the last 7 days will appear here.</p>
             </div>
         );
     }
@@ -237,12 +237,12 @@ export function OrderHistory() {
             <div className="card p-4 bg-gradient-to-r from-cyan-500/20 to-green-500/20 border-cyan-500/30">
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-sm text-slate-400">Last 7 Days Revenue</p>
-                        <p className="text-2xl font-bold text-white">₦{totalRevenue.toLocaleString()}</p>
+                        <p className="text-sm text-muted">Last 7 Days Revenue</p>
+                        <p className="text-2xl font-bold text-heading">₦{totalRevenue.toLocaleString()}</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-sm text-slate-400">Orders</p>
-                        <p className="text-lg font-bold text-white">{totalOrders}</p>
+                        <p className="text-sm text-muted">Orders</p>
+                        <p className="text-lg font-bold text-heading">{totalOrders}</p>
                     </div>
                 </div>
             </div>
@@ -250,9 +250,9 @@ export function OrderHistory() {
             {/* Orders by Date */}
             {Object.entries(groupedByDate).map(([dateKey, dayOrders]) => (
                 <div key={dateKey}>
-                    <h3 className="text-sm font-semibold text-slate-400 mb-3">
+                    <h3 className="text-sm font-semibold text-muted mb-3">
                         {format(new Date(dateKey), 'EEEE, MMM d')}
-                        <span className="text-slate-500 ml-2">
+                        <span className="text-muted ml-2">
                             ({dayOrders.length} order{dayOrders.length !== 1 ? 's' : ''})
                         </span>
                     </h3>
@@ -265,10 +265,10 @@ export function OrderHistory() {
                                     {/* Order Header - Clickable to expand */}
                                     <div
                                         onClick={() => toggleExpand(order.orderNumber)}
-                                        className="p-3 flex items-center gap-3 cursor-pointer hover:bg-slate-700/50 transition-colors"
+                                        className="p-3 flex items-center gap-3 cursor-pointer hover:bg-surface-raised transition-colors"
                                     >
                                         {/* Expand Icon */}
-                                        <div className="text-slate-400">
+                                        <div className="text-muted">
                                             {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                                         </div>
 
@@ -287,12 +287,12 @@ export function OrderHistory() {
                                         {/* Order Info */}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2">
-                                                <p className="text-white font-bold font-mono">#{order.orderNumber}</p>
-                                                <span className="text-xs text-slate-500 bg-slate-700 px-2 py-0.5 rounded">
+                                                <p className="text-heading font-bold font-mono">#{order.orderNumber}</p>
+                                                <span className="text-xs text-muted bg-surface-raised px-2 py-0.5 rounded">
                                                     {order.items.length} item{order.items.length !== 1 ? 's' : ''}
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-2 text-xs text-slate-400">
+                                            <div className="flex items-center gap-2 text-xs text-muted">
                                                 <Clock size={12} />
                                                 <span>{format(new Date(order.orderedAt), 'h:mm a')}</span>
                                                 <span>•</span>
@@ -309,7 +309,7 @@ export function OrderHistory() {
 
                                         {/* Total & Actions */}
                                         <div className="text-right flex flex-col items-end gap-1">
-                                            <p className="text-white font-bold text-lg">₦{order.totalAmount.toLocaleString()}</p>
+                                            <p className="text-heading font-bold text-lg">₦{order.totalAmount.toLocaleString()}</p>
                                             <div className="flex flex-col items-end text-xs gap-0.5">
                                                 <div className={`flex items-center gap-1 ${order.status === 'delivered' ? 'text-green-400' : 'text-red-400'
                                                     }`}>
@@ -333,7 +333,7 @@ export function OrderHistory() {
                                                     e.stopPropagation();
                                                     handlePrintReceipt(order);
                                                 }}
-                                                className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 transition-colors ml-2"
+                                                className="p-2 bg-surface-raised hover:bg-surface-card rounded-lg text-muted transition-colors ml-2"
                                             >
                                                 <Printer size={16} />
                                             </button>
@@ -342,21 +342,21 @@ export function OrderHistory() {
 
                                     {/* Expanded Items */}
                                     {isExpanded && (
-                                        <div className="border-t border-slate-700 bg-slate-800/50">
+                                        <div className="border-t border-border bg-surface-card/50">
                                             <div className="p-3 space-y-2">
                                                 {order.items.map((item, idx) => (
                                                     <div key={idx} className="flex items-center gap-3 text-sm">
-                                                        <div className={`w-8 h-8 rounded flex items-center justify-center bg-slate-700`}>
-                                                            <UtensilsCrossed size={14} className="text-slate-400" />
+                                                        <div className={`w-8 h-8 rounded flex items-center justify-center bg-surface-raised`}>
+                                                            <UtensilsCrossed size={14} className="text-muted" />
                                                         </div>
                                                         <div className="flex-1">
-                                                            <span className="text-white">{item.name}</span>
+                                                            <span className="text-heading">{item.name}</span>
                                                             {item.quantity > 1 && (
-                                                                <span className="text-slate-500 ml-1">×{item.quantity}</span>
+                                                                <span className="text-muted ml-1">×{item.quantity}</span>
                                                             )}
                                                         </div>
-                                                        <span className="text-slate-400">₦{item.price.toLocaleString()}</span>
-                                                        <span className="text-white font-medium w-24 text-right">
+                                                        <span className="text-muted">₦{item.price.toLocaleString()}</span>
+                                                        <span className="text-heading font-medium w-24 text-right">
                                                             ₦{item.total.toLocaleString()}
                                                         </span>
                                                     </div>

@@ -182,15 +182,15 @@ export function ReservationForm({ reservation, onClose, onSuccess, prefilledGues
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
-                    <h2 className="text-xl font-bold text-white">
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                    <h2 className="text-xl font-bold text-heading">
                         {reservation ? 'Edit Reservation' : 'New Reservation'}
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                     >
                         <X size={20} />
                     </button>
@@ -315,10 +315,10 @@ export function ReservationForm({ reservation, onClose, onSuccess, prefilledGues
 
                     {/* Nights summary */}
                     {nights > 0 && selectedRoom && (
-                        <div className="bg-slate-700/50 rounded-lg p-3 text-sm">
+                        <div className="bg-surface-raised/50 rounded-lg p-3 text-sm">
                             <div className="flex justify-between">
-                                <span className="text-slate-400">{nights} night{nights !== 1 ? 's' : ''} × ₦{selectedRoom.night_rate.toLocaleString()}</span>
-                                <span className="text-white font-medium">₦{totalAmount.toLocaleString()}</span>
+                                <span className="text-muted">{nights} night{nights !== 1 ? 's' : ''} × ₦{selectedRoom.night_rate.toLocaleString()}</span>
+                                <span className="text-heading font-medium">₦{totalAmount.toLocaleString()}</span>
                             </div>
                         </div>
                     )}
@@ -339,7 +339,7 @@ export function ReservationForm({ reservation, onClose, onSuccess, prefilledGues
                     <div>
                         <label className="label">Deposit Paid</label>
                         <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">₦</span>
                             <input
                                 {...register('depositPaid', { valueAsNumber: true, min: 0 })}
                                 type="number"

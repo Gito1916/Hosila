@@ -62,14 +62,14 @@ export function BookingsPage() {
         <div className="space-y-4">
             {/* Tab Navigation + Action Buttons */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
-                <div className="flex gap-1 bg-slate-800 p-1 rounded-lg w-fit">
+                <div className="flex gap-1 bg-surface-card p-1 rounded-lg w-fit">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${activeTab === tab.id
-                                ? 'bg-primary-500 text-white'
-                                : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                                ? 'bg-primary-500 text-heading'
+                                : 'text-muted hover:text-heading hover:bg-surface-raised'
                                 }`}
                         >
                             <tab.icon size={18} />
@@ -162,17 +162,17 @@ export function BookingsPage() {
             {
                 showCheckInModal && !selectedRoom && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md p-4">
-                            <h3 className="text-lg font-bold text-white mb-4">Select Room for Check-in</h3>
+                        <div className="bg-surface-card rounded-xl border border-border w-full max-w-md p-4">
+                            <h3 className="text-lg font-bold text-heading mb-4">Select Room for Check-in</h3>
                             <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
                                 {availableRooms?.map(room => (
                                     <button
                                         key={room.id}
                                         onClick={() => setSelectedRoom(room)}
-                                        className="p-3 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-left"
+                                        className="p-3 bg-surface-raised/50 hover:bg-surface-raised rounded-lg text-left"
                                     >
-                                        <p className="font-medium text-white">Room {room.room_number}</p>
-                                        <p className="text-xs text-slate-400">{room.room_type}</p>
+                                        <p className="font-medium text-heading">Room {room.room_number}</p>
+                                        <p className="text-xs text-muted">{room.room_type}</p>
                                         <p className="text-xs text-green-400">₦{room.night_rate.toLocaleString()}/night</p>
                                     </button>
                                 ))}

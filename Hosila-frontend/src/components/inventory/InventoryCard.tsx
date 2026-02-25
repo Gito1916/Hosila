@@ -31,7 +31,7 @@ const categoryColors: Record<InventoryCategory, string> = {
     food: 'bg-orange-500/20 text-orange-400',
     housekeeping: 'bg-pink-500/20 text-pink-400',
     maintenance: 'bg-yellow-500/20 text-yellow-400',
-    front_office: 'bg-slate-500/20 text-slate-400',
+    front_office: 'bg-surface-inset0/20 text-muted',
     beverages: 'bg-purple-500/20 text-purple-400',
     laundry: 'bg-blue-500/20 text-blue-400',
     amenities: 'bg-cyan-500/20 text-cyan-400',
@@ -46,7 +46,7 @@ export function InventoryCard({ item, onClick }: InventoryCardProps) {
             onClick={onClick}
             className={`w-full text-left rounded-xl p-4 transition-all hover:scale-[1.01] ${isLowStock
                 ? 'bg-red-500/10 border-2 border-red-500/30'
-                : 'bg-slate-800 border border-slate-700 hover:border-slate-600'
+                : 'bg-surface-card border border-border hover:border-border-strong'
                 }`}
         >
             <div className="flex items-start justify-between">
@@ -57,17 +57,17 @@ export function InventoryCard({ item, onClick }: InventoryCardProps) {
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h3 className="text-white font-medium">{item.name}</h3>
+                            <h3 className="text-heading font-medium">{item.name}</h3>
                             {isLowStock && (
                                 <AlertTriangle size={16} className="text-red-400" />
                             )}
                         </div>
-                        <p className="text-sm text-slate-400 capitalize">{item.category.replace('_', ' ')}</p>
+                        <p className="text-sm text-muted capitalize">{item.category.replace('_', ' ')}</p>
                         {/* Behavior & Amenity badges */}
                         <div className="flex items-center gap-1.5 mt-1">
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${isReturnable
                                 ? 'bg-blue-500/20 text-blue-400'
-                                : 'bg-slate-600/50 text-slate-400'
+                                : 'bg-surface-card/50 text-muted'
                                 }`}>
                                 {isReturnable ? <RotateCcw size={10} /> : <Package size={10} />}
                                 {isReturnable ? 'Returnable' : 'Consumable'}
@@ -84,10 +84,10 @@ export function InventoryCard({ item, onClick }: InventoryCardProps) {
 
                 {/* Stock info */}
                 <div className="text-right flex-shrink-0 ml-2">
-                    <p className={`text-2xl font-bold ${isLowStock ? 'text-red-400' : 'text-white'}`}>
+                    <p className={`text-2xl font-bold ${isLowStock ? 'text-red-400' : 'text-heading'}`}>
                         {item.current_stock}
                     </p>
-                    <p className="text-xs text-slate-500">{item.unit_type}</p>
+                    <p className="text-xs text-muted">{item.unit_type}</p>
                     {isLowStock && (
                         <p className="text-xs text-red-400 mt-1">
                             Below min ({item.min_stock_level})
@@ -97,9 +97,9 @@ export function InventoryCard({ item, onClick }: InventoryCardProps) {
             </div>
 
             {/* Value */}
-            <div className="mt-3 pt-3 border-t border-slate-700/50 flex justify-between text-sm">
-                <span className="text-slate-400">Unit Cost</span>
-                <span className="text-white">₦{item.unit_cost.toLocaleString()}</span>
+            <div className="mt-3 pt-3 border-t border-border/50 flex justify-between text-sm">
+                <span className="text-muted">Unit Cost</span>
+                <span className="text-heading">₦{item.unit_cost.toLocaleString()}</span>
             </div>
         </button>
     );

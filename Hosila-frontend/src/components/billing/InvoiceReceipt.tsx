@@ -180,28 +180,28 @@ export function InvoiceView({ invoice, onClose, onPaymentClick }: InvoiceViewPro
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-sm my-4 flex flex-col shadow-2xl">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-sm my-4 flex flex-col shadow-2xl">
                 {/* Modal Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700 bg-slate-900/50">
+                <div className="flex items-center justify-between p-4 border-b border-border bg-surface-base/50">
                     <div className="flex items-center gap-2">
                         <FileText size={20} className="text-blue-400" />
-                        <h2 className="text-lg font-bold text-white">Invoice</h2>
+                        <h2 className="text-lg font-bold text-heading">Invoice</h2>
                     </div>
                     <div className="flex items-center gap-2">
                         <button onClick={handlePrint} className="btn btn-secondary text-sm">
                             <Printer size={16} className="mr-1" /> Print
                         </button>
-                        <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg">
+                        <button onClick={onClose} className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg">
                             <X size={20} />
                         </button>
                     </div>
                 </div>
 
                 {/* Invoice Content - 80mm Thermal Style */}
-                <div className="p-4 bg-slate-800 overflow-y-auto max-h-[75vh]">
+                <div className="p-4 bg-surface-card overflow-y-auto max-h-[75vh]">
                     <div
                         ref={printRef}
-                        className="bg-white text-black p-5 mx-auto shadow-md"
+                        className="bg-surface-card text-black p-5 mx-auto shadow-md"
                         style={{
                             maxWidth: '300px',
                             fontFamily: "'Courier New', Courier, 'Lucida Console', Monaco, monospace",
@@ -218,8 +218,8 @@ export function InvoiceView({ invoice, onClose, onPaymentClick }: InvoiceViewPro
                                 />
                             )}
                             <div className="font-bold text-base uppercase">{hotel?.name ?? 'HOTEL'}</div>
-                            <div className="text-[10px] text-gray-600">{hotel?.address}</div>
-                            <div className="text-[10px] text-gray-600">Tel: {hotel?.phone}</div>
+                            <div className="text-[10px] text-body">{hotel?.address}</div>
+                            <div className="text-[10px] text-body">Tel: {hotel?.phone}</div>
                         </div>
 
                         {/* Divider */}
@@ -243,7 +243,7 @@ export function InvoiceView({ invoice, onClose, onPaymentClick }: InvoiceViewPro
 
                         {/* Guest Info */}
                         <div className="text-[11px] mb-3">
-                            <div className="text-gray-600 mb-1">Guest:</div>
+                            <div className="text-body mb-1">Guest:</div>
                             <div className="font-medium">{invoice.guest_name}</div>
                             {invoice.guest_phone && <div>{invoice.guest_phone}</div>}
                         </div>
@@ -287,7 +287,7 @@ export function InvoiceView({ invoice, onClose, onPaymentClick }: InvoiceViewPro
 
                         {/* Tax Breakdown */}
                         <div className="text-[10px] space-y-0.5">
-                            <div className="text-gray-600 font-medium">TAX BREAKDOWN</div>
+                            <div className="text-body font-medium">TAX BREAKDOWN</div>
                             {accommodationTax > 0 && (
                                 <div className="flex justify-between">
                                     <span>Accommodation Tax (7.5%)</span>
@@ -321,7 +321,7 @@ export function InvoiceView({ invoice, onClose, onPaymentClick }: InvoiceViewPro
                         <div className="border-t border-dashed border-black my-2"></div>
 
                         {/* Footer */}
-                        <div className="text-center text-[10px] text-gray-500 mt-4 pt-2 border-t border-dashed border-gray-300">
+                        <div className="text-center text-[10px] text-muted mt-4 pt-2 border-t border-dashed border-border-strong">
                             <p className="font-medium">Payment due on checkout</p>
                             <p className="mt-3">Powered by HotelFlow PMS</p>
                         </div>
@@ -333,7 +333,7 @@ export function InvoiceView({ invoice, onClose, onPaymentClick }: InvoiceViewPro
 
                 {/* Action Buttons */}
                 {invoice.status !== 'paid' && onPaymentClick && (
-                    <div className="p-4 border-t border-slate-700">
+                    <div className="p-4 border-t border-border">
                         <button onClick={onPaymentClick} className="btn btn-primary w-full">
                             <CheckCircle size={18} className="mr-2" />
                             Record Payment
@@ -453,28 +453,28 @@ export function ReceiptView({ receipt, onClose }: ReceiptViewProps) {
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-sm my-4 flex flex-col shadow-2xl">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-sm my-4 flex flex-col shadow-2xl">
                 {/* Modal Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700 bg-slate-900/50">
+                <div className="flex items-center justify-between p-4 border-b border-border bg-surface-base/50">
                     <div className="flex items-center gap-2">
                         <CheckCircle size={20} className="text-green-400" />
-                        <h2 className="text-lg font-bold text-white">Receipt</h2>
+                        <h2 className="text-lg font-bold text-heading">Receipt</h2>
                     </div>
                     <div className="flex items-center gap-2">
                         <button onClick={handlePrint} className="btn btn-secondary text-sm">
                             <Printer size={16} className="mr-1" /> Print
                         </button>
-                        <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg">
+                        <button onClick={onClose} className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg">
                             <X size={20} />
                         </button>
                     </div>
                 </div>
 
                 {/* Receipt Content - 80mm Thermal Style */}
-                <div className="p-4 bg-slate-800 overflow-y-auto max-h-[75vh]">
+                <div className="p-4 bg-surface-card overflow-y-auto max-h-[75vh]">
                     <div
                         ref={printRef}
-                        className="bg-white text-black p-5 mx-auto shadow-md"
+                        className="bg-surface-card text-black p-5 mx-auto shadow-md"
                         style={{
                             maxWidth: '300px',
                             fontFamily: "'Courier New', Courier, 'Lucida Console', Monaco, monospace",
@@ -491,8 +491,8 @@ export function ReceiptView({ receipt, onClose }: ReceiptViewProps) {
                                 />
                             )}
                             <div className="font-bold text-base uppercase">{hotel?.name ?? 'HOTEL'}</div>
-                            <div className="text-[10px] text-gray-600">{hotel?.address}</div>
-                            <div className="text-[10px] text-gray-600">Tel: {hotel?.phone}</div>
+                            <div className="text-[10px] text-body">{hotel?.address}</div>
+                            <div className="text-[10px] text-body">Tel: {hotel?.phone}</div>
                         </div>
 
                         {/* Divider */}
@@ -516,7 +516,7 @@ export function ReceiptView({ receipt, onClose }: ReceiptViewProps) {
 
                         {/* Customer Info */}
                         <div className="text-[11px] mb-3">
-                            <div className="text-gray-600 mb-1">Customer:</div>
+                            <div className="text-body mb-1">Customer:</div>
                             <div className="font-medium">{receipt.guest_name}</div>
                         </div>
 
@@ -528,8 +528,8 @@ export function ReceiptView({ receipt, onClose }: ReceiptViewProps) {
                             <>
                                 {/* Room Info */}
                                 <div className="text-[11px] mb-2">
-                                    <div className="text-gray-600 mb-1">Room {bookingDetails.room.room_number} - {bookingDetails.room.room_type}</div>
-                                    <div className="text-[10px] text-gray-500">
+                                    <div className="text-body mb-1">Room {bookingDetails.room.room_number} - {bookingDetails.room.room_type}</div>
+                                    <div className="text-[10px] text-muted">
                                         {format(new Date(bookingDetails.booking.check_in_time), 'dd MMM HH:mm')} - {format(new Date(bookingDetails.booking.check_out_time), 'dd MMM HH:mm')}
                                     </div>
                                 </div>
@@ -573,7 +573,7 @@ export function ReceiptView({ receipt, onClose }: ReceiptViewProps) {
                                         <span>{subtotal.toLocaleString()}</span>
                                     </div>
                                     {receipt.amount_paid > subtotal && (
-                                        <div className="flex justify-between text-[10px] text-gray-600">
+                                        <div className="flex justify-between text-[10px] text-body">
                                             <span>Includes Tax</span>
                                             <span>{(receipt.amount_paid - subtotal).toLocaleString()}</span>
                                         </div>
@@ -585,7 +585,7 @@ export function ReceiptView({ receipt, onClose }: ReceiptViewProps) {
                             </>
                         ) : (
                             /* No booking details - simple receipt */
-                            <div className="text-[11px] text-gray-600 mb-2">
+                            <div className="text-[11px] text-body mb-2">
                                 Payment for services
                             </div>
                         )}
@@ -596,7 +596,7 @@ export function ReceiptView({ receipt, onClose }: ReceiptViewProps) {
                                 <span>Amount Paid</span>
                                 <span>₦{receipt.amount_paid.toLocaleString()}</span>
                             </div>
-                            <div className="flex justify-between text-[10px] text-gray-600">
+                            <div className="flex justify-between text-[10px] text-body">
                                 <span>Payment Method:</span>
                                 <span>{paymentMethodLabels[receipt.payment_method] ?? receipt.payment_method}</span>
                             </div>
@@ -606,7 +606,7 @@ export function ReceiptView({ receipt, onClose }: ReceiptViewProps) {
                         <div className="border-t border-dashed border-black my-2"></div>
 
                         {/* Footer */}
-                        <div className="text-center text-[10px] text-gray-500 mt-4 pt-2 border-t border-dashed border-gray-300">
+                        <div className="text-center text-[10px] text-muted mt-4 pt-2 border-t border-dashed border-border-strong">
                             <p className="font-medium">Thank you for your patronage</p>
                             <p>No refund after payment</p>
                             <p className="mt-3">Powered by HotelFlow PMS</p>

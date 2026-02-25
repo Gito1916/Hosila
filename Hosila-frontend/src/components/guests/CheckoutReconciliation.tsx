@@ -129,10 +129,10 @@ export function CheckoutReconciliation({
     if (unresolvedReturnables && unresolvedReturnables.length === 0) {
         return (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md p-6 text-center">
+                <div className="bg-surface-card rounded-xl border border-border w-full max-w-md p-6 text-center">
                     <Check size={48} className="mx-auto text-green-400 mb-4" />
-                    <h3 className="text-lg font-bold text-white mb-2">No Items to Return</h3>
-                    <p className="text-slate-400 mb-4">
+                    <h3 className="text-lg font-bold text-heading mb-2">No Items to Return</h3>
+                    <p className="text-muted mb-4">
                         No returnable items were issued for this booking.
                     </p>
                     <button onClick={onComplete} className="btn btn-primary w-full">
@@ -147,9 +147,9 @@ export function CheckoutReconciliation({
     if (!unresolvedReturnables || items.length === 0 && unresolvedReturnables.length > 0) {
         return (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md p-6 text-center">
+                <div className="bg-surface-card rounded-xl border border-border w-full max-w-md p-6 text-center">
                     <Loader2 size={32} className="mx-auto animate-spin text-primary-400" />
-                    <p className="text-slate-400 mt-4">Loading returnables...</p>
+                    <p className="text-muted mt-4">Loading returnables...</p>
                 </div>
             </div>
         );
@@ -160,16 +160,16 @@ export function CheckoutReconciliation({
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                <div className="flex items-center justify-between p-4 border-b border-border">
                     <div className="flex items-center gap-2">
                         <RotateCcw size={20} className="text-blue-400" />
-                        <h2 className="text-xl font-bold text-white">Return Items</h2>
+                        <h2 className="text-xl font-bold text-heading">Return Items</h2>
                     </div>
                     <button
                         onClick={onCancel}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                     >
                         <X size={20} />
                     </button>
@@ -183,7 +183,7 @@ export function CheckoutReconciliation({
                         </div>
                     )}
 
-                    <p className="text-slate-400 text-sm">
+                    <p className="text-muted text-sm">
                         Confirm the status of returnable items issued to this guest.
                     </p>
 
@@ -196,15 +196,15 @@ export function CheckoutReconciliation({
                                         ? 'border-red-500/50 bg-red-500/10'
                                         : item.status === 'returned'
                                             ? 'border-green-500/50 bg-green-500/10'
-                                            : 'border-slate-600 bg-slate-700/30'
+                                            : 'border-border-strong bg-surface-raised/30'
                                     }`}
                             >
                                 <div className="flex items-center justify-between mb-2">
                                     <div>
-                                        <p className="font-medium text-white">
+                                        <p className="font-medium text-heading">
                                             {item.issuedAmenity.item_name}
                                         </p>
-                                        <p className="text-xs text-slate-400">
+                                        <p className="text-xs text-muted">
                                             Issued: {item.issuedAmenity.quantity_issued} •
                                             Value: ₦{(item.issuedAmenity.quantity_issued * item.unitCost).toLocaleString()}
                                         </p>
@@ -217,8 +217,8 @@ export function CheckoutReconciliation({
                                         type="button"
                                         onClick={() => updateItemStatus(index, 'returned')}
                                         className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${item.status === 'returned' || (item.returnedQty === item.issuedAmenity.quantity_issued && item.status !== 'lost')
-                                                ? 'bg-green-500 text-white'
-                                                : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                                                ? 'bg-green-500 text-heading'
+                                                : 'bg-surface-card text-muted hover:bg-surface-inset0'
                                             }`}
                                     >
                                         <Check size={14} className="inline mr-1" />
@@ -228,8 +228,8 @@ export function CheckoutReconciliation({
                                         type="button"
                                         onClick={() => updateItemStatus(index, 'lost')}
                                         className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${item.status === 'lost' && item.lostQty === item.issuedAmenity.quantity_issued
-                                                ? 'bg-red-500 text-white'
-                                                : 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                                                ? 'bg-red-500 text-heading'
+                                                : 'bg-surface-card text-muted hover:bg-surface-inset0'
                                             }`}
                                     >
                                         <AlertTriangle size={14} className="inline mr-1" />
@@ -240,16 +240,16 @@ export function CheckoutReconciliation({
                                 {/* Partial loss input */}
                                 {item.issuedAmenity.quantity_issued > 1 && (
                                     <div className="mt-2 flex items-center gap-2">
-                                        <span className="text-xs text-slate-400">Lost qty:</span>
+                                        <span className="text-xs text-muted">Lost qty:</span>
                                         <input
                                             type="number"
                                             value={item.lostQty}
                                             onChange={(e) => updateLostQty(index, parseInt(e.target.value) || 0)}
                                             min="0"
                                             max={item.issuedAmenity.quantity_issued}
-                                            className="w-16 text-center bg-slate-700 border-none rounded text-sm text-white py-1"
+                                            className="w-16 text-center bg-surface-raised border-none rounded text-sm text-heading py-1"
                                         />
-                                        <span className="text-xs text-slate-400">
+                                        <span className="text-xs text-muted">
                                             of {item.issuedAmenity.quantity_issued}
                                         </span>
                                         {item.lostQty > 0 && (
@@ -271,7 +271,7 @@ export function CheckoutReconciliation({
                                     <AlertTriangle size={16} />
                                     Total Loss Charge:
                                 </span>
-                                <span className="text-white font-bold">
+                                <span className="text-heading font-bold">
                                     ₦{totalLossCharge.toLocaleString()}
                                 </span>
                             </div>
@@ -283,7 +283,7 @@ export function CheckoutReconciliation({
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-slate-700 flex gap-3">
+                <div className="p-4 border-t border-border flex gap-3">
                     <button
                         type="button"
                         onClick={onCancel}

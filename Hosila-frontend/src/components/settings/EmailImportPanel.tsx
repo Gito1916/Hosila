@@ -116,25 +116,25 @@ export function EmailImportPanel() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-heading flex items-center gap-2">
                     <Mail size={20} className="text-primary-400" />
                     Email Import
                 </h3>
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="text-sm text-muted mt-1">
                     Automatically import reservations from Booking.com and Airbnb confirmation emails.
                 </p>
             </div>
 
             {/* Connection Status */}
-            <div className="bg-slate-700/50 rounded-xl p-5 border border-slate-600/50">
+            <div className="bg-surface-raised/50 rounded-xl p-5 border border-border-strong/50">
                 {!connected ? (
                     <div className="text-center space-y-4">
-                        <div className="w-16 h-16 bg-slate-600/50 rounded-full flex items-center justify-center mx-auto">
-                            <Mail size={32} className="text-slate-400" />
+                        <div className="w-16 h-16 bg-surface-card/50 rounded-full flex items-center justify-center mx-auto">
+                            <Mail size={32} className="text-muted" />
                         </div>
                         <div>
-                            <h4 className="text-white font-medium">Connect Gmail</h4>
-                            <p className="text-sm text-slate-400 mt-1">
+                            <h4 className="text-heading font-medium">Connect Gmail</h4>
+                            <p className="text-sm text-muted mt-1">
                                 Connect the Gmail account where you receive OTA booking confirmation emails.
                             </p>
                         </div>
@@ -183,8 +183,8 @@ export function EmailImportPanel() {
                                     <MailCheck size={20} className="text-emerald-400" />
                                 </div>
                                 <div>
-                                    <p className="text-white font-medium">Gmail Connected</p>
-                                    <p className="text-sm text-slate-400">{tokenInfo?.email}</p>
+                                    <p className="text-heading font-medium">Gmail Connected</p>
+                                    <p className="text-sm text-muted">{tokenInfo?.email}</p>
                                 </div>
                             </div>
                             <button
@@ -209,11 +209,11 @@ export function EmailImportPanel() {
             {/* Scan Controls */}
             {connected && (
                 <>
-                    <div className="bg-slate-700/50 rounded-xl p-5 border border-slate-600/50 space-y-4">
+                    <div className="bg-surface-raised/50 rounded-xl p-5 border border-border-strong/50 space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h4 className="text-white font-medium">Scan for Reservations</h4>
-                                <p className="text-xs text-slate-400 mt-1">
+                                <h4 className="text-heading font-medium">Scan for Reservations</h4>
+                                <p className="text-xs text-muted mt-1">
                                     {lastScan
                                         ? `Last scanned: ${lastScan.toLocaleString()}`
                                         : 'Never scanned'}
@@ -239,25 +239,25 @@ export function EmailImportPanel() {
                         </div>
 
                         {/* Auto-scan toggle */}
-                        <div className="border-t border-slate-600/50 pt-4">
+                        <div className="border-t border-border-strong/50 pt-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-white text-sm font-medium">Auto-Scan</p>
-                                    <p className="text-xs text-slate-400">Periodically check for new booking emails</p>
+                                    <p className="text-heading text-sm font-medium">Auto-Scan</p>
+                                    <p className="text-xs text-muted">Periodically check for new booking emails</p>
                                 </div>
                                 <button
                                     onClick={toggleAutoScan}
-                                    className={`relative w-11 h-6 rounded-full transition-colors ${autoScanEnabled ? 'bg-primary-500' : 'bg-slate-600'
+                                    className={`relative w-11 h-6 rounded-full transition-colors ${autoScanEnabled ? 'bg-primary-500' : 'bg-surface-card'
                                         }`}
                                 >
-                                    <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${autoScanEnabled ? 'translate-x-5' : 'translate-x-0.5'
+                                    <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-surface-card transition-transform ${autoScanEnabled ? 'translate-x-5' : 'translate-x-0.5'
                                         }`} />
                                 </button>
                             </div>
 
                             {autoScanEnabled && (
                                 <div className="mt-3 flex items-center gap-2">
-                                    <span className="text-sm text-slate-400">Check every</span>
+                                    <span className="text-sm text-muted">Check every</span>
                                     <select
                                         value={autoScanInterval}
                                         onChange={e => handleIntervalChange(parseInt(e.target.value))}
@@ -275,25 +275,25 @@ export function EmailImportPanel() {
 
                     {/* Last Scan Result */}
                     {lastResult && (
-                        <div className="bg-slate-700/50 rounded-xl p-5 border border-slate-600/50">
-                            <h4 className="text-white font-medium mb-3">Last Scan Results</h4>
+                        <div className="bg-surface-raised/50 rounded-xl p-5 border border-border-strong/50">
+                            <h4 className="text-heading font-medium mb-3">Last Scan Results</h4>
 
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                                <div className="bg-slate-800/50 rounded-lg p-3 text-center">
-                                    <p className="text-2xl font-bold text-white">{lastResult.total}</p>
-                                    <p className="text-xs text-slate-400">Emails Found</p>
+                                <div className="bg-surface-card/50 rounded-lg p-3 text-center">
+                                    <p className="text-2xl font-bold text-heading">{lastResult.total}</p>
+                                    <p className="text-xs text-muted">Emails Found</p>
                                 </div>
                                 <div className="bg-emerald-500/10 rounded-lg p-3 text-center">
                                     <p className="text-2xl font-bold text-emerald-400">{lastResult.imported}</p>
-                                    <p className="text-xs text-slate-400">Imported</p>
+                                    <p className="text-xs text-muted">Imported</p>
                                 </div>
                                 <div className="bg-amber-500/10 rounded-lg p-3 text-center">
                                     <p className="text-2xl font-bold text-amber-400">{lastResult.duplicates}</p>
-                                    <p className="text-xs text-slate-400">Duplicates</p>
+                                    <p className="text-xs text-muted">Duplicates</p>
                                 </div>
                                 <div className="bg-red-500/10 rounded-lg p-3 text-center">
                                     <p className="text-2xl font-bold text-red-400">{lastResult.failed}</p>
-                                    <p className="text-xs text-slate-400">Failed</p>
+                                    <p className="text-xs text-muted">Failed</p>
                                 </div>
                             </div>
 
@@ -306,27 +306,27 @@ export function EmailImportPanel() {
                                             className={`flex items-center gap-3 p-3 rounded-lg text-sm ${result.status === 'imported' ? 'bg-emerald-500/10' :
                                                 result.status === 'duplicate' ? 'bg-amber-500/10' :
                                                     result.status === 'failed' ? 'bg-red-500/10' :
-                                                        'bg-slate-800/50'
+                                                        'bg-surface-card/50'
                                                 }`}
                                         >
                                             {result.status === 'imported' && <Check size={16} className="text-emerald-400 shrink-0" />}
                                             {result.status === 'duplicate' && <FileText size={16} className="text-amber-400 shrink-0" />}
                                             {result.status === 'failed' && <MailX size={16} className="text-red-400 shrink-0" />}
-                                            {result.status === 'unrecognized' && <Mail size={16} className="text-slate-400 shrink-0" />}
+                                            {result.status === 'unrecognized' && <Mail size={16} className="text-muted shrink-0" />}
 
                                             <div className="flex-1 min-w-0">
                                                 {result.reservation ? (
                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                        <span className="text-white font-medium">{result.reservation.guestName}</span>
-                                                        <span className="text-slate-400">•</span>
-                                                        <span className="text-slate-400">{result.reservation.source}</span>
-                                                        <span className="text-slate-400">•</span>
-                                                        <span className="text-slate-400">
+                                                        <span className="text-heading font-medium">{result.reservation.guestName}</span>
+                                                        <span className="text-muted">•</span>
+                                                        <span className="text-muted">{result.reservation.source}</span>
+                                                        <span className="text-muted">•</span>
+                                                        <span className="text-muted">
                                                             {result.reservation.checkIn.toLocaleDateString()} - {result.reservation.checkOut.toLocaleDateString()}
                                                         </span>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-slate-400">
+                                                    <span className="text-muted">
                                                         {result.status === 'unrecognized' ? 'Unknown OTA format' : result.error}
                                                     </span>
                                                 )}
@@ -335,7 +335,7 @@ export function EmailImportPanel() {
                                             <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${result.status === 'imported' ? 'bg-emerald-500/20 text-emerald-400' :
                                                 result.status === 'duplicate' ? 'bg-amber-500/20 text-amber-400' :
                                                     result.status === 'failed' ? 'bg-red-500/20 text-red-400' :
-                                                        'bg-slate-600/50 text-slate-400'
+                                                        'bg-surface-card/50 text-muted'
                                                 }`}>
                                                 {result.status}
                                             </span>
@@ -345,7 +345,7 @@ export function EmailImportPanel() {
                             )}
 
                             {lastResult.total === 0 && (
-                                <p className="text-sm text-slate-400 text-center py-2">
+                                <p className="text-sm text-muted text-center py-2">
                                     No new OTA booking emails found.
                                 </p>
                             )}
@@ -354,15 +354,15 @@ export function EmailImportPanel() {
 
                     {/* Import History */}
                     {importLog.length > 1 && (
-                        <div className="bg-slate-700/50 rounded-xl p-5 border border-slate-600/50">
-                            <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-                                <Clock size={16} className="text-slate-400" />
+                        <div className="bg-surface-raised/50 rounded-xl p-5 border border-border-strong/50">
+                            <h4 className="text-heading font-medium mb-3 flex items-center gap-2">
+                                <Clock size={16} className="text-muted" />
                                 Import History
                             </h4>
                             <div className="space-y-2 max-h-48 overflow-y-auto">
                                 {importLog.slice(1).map((summary, i) => (
-                                    <div key={i} className="flex items-center justify-between text-sm p-2 rounded bg-slate-800/30">
-                                        <span className="text-slate-400">
+                                    <div key={i} className="flex items-center justify-between text-sm p-2 rounded bg-surface-inset">
+                                        <span className="text-muted">
                                             {new Date(summary.scannedAt).toLocaleString()}
                                         </span>
                                         <div className="flex items-center gap-3">
@@ -383,19 +383,19 @@ export function EmailImportPanel() {
             )}
 
             {/* Help info */}
-            <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
-                <h4 className="text-white text-sm font-medium mb-2">Supported OTA Platforms</h4>
+            <div className="bg-surface-card/50 rounded-xl p-4 border border-border/50">
+                <h4 className="text-heading text-sm font-medium mb-2">Supported OTA Platforms</h4>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex items-center gap-2 text-slate-400">
+                    <div className="flex items-center gap-2 text-muted">
                         <Check size={14} className="text-emerald-400" />
                         Booking.com
                     </div>
-                    <div className="flex items-center gap-2 text-slate-400">
+                    <div className="flex items-center gap-2 text-muted">
                         <Check size={14} className="text-emerald-400" />
                         Airbnb
                     </div>
                 </div>
-                <p className="text-xs text-slate-500 mt-3">
+                <p className="text-xs text-muted mt-3">
                     The app reads booking confirmation emails from your Gmail inbox and automatically creates reservations.
                     Parsed emails are marked as read to avoid re-processing.
                 </p>

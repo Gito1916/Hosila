@@ -620,16 +620,16 @@ export function FinanceExport() {
                                 onClick={() => setReportType(type.value)}
                                 className={`p-3 rounded-lg text-left transition-all ${reportType === type.value
                                     ? 'bg-primary-500/20 border-2 border-primary-500'
-                                    : 'bg-slate-800 border border-slate-700 hover:border-slate-600'
+                                    : 'bg-surface-card border border-border hover:border-border-strong'
                                     }`}
                             >
                                 <div className="flex items-center gap-2 mb-1">
-                                    <Icon size={16} className={reportType === type.value ? 'text-primary-400' : 'text-slate-400'} />
-                                    <span className={`font-medium ${reportType === type.value ? 'text-white' : 'text-slate-300'}`}>
+                                    <Icon size={16} className={reportType === type.value ? 'text-primary-400' : 'text-muted'} />
+                                    <span className={`font-medium ${reportType === type.value ? 'text-heading' : 'text-muted'}`}>
                                         {type.label}
                                     </span>
                                 </div>
-                                <p className="text-xs text-slate-500">{type.description}</p>
+                                <p className="text-xs text-muted">{type.description}</p>
                             </button>
                         );
                     })}
@@ -650,8 +650,8 @@ export function FinanceExport() {
                             key={opt.value}
                             onClick={() => setDateRange(opt.value as DateRange)}
                             className={`py-2 px-3 rounded-lg text-sm font-medium ${dateRange === opt.value
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-slate-700/50 text-slate-400 hover:text-white'
+                                ? 'bg-primary-500 text-heading'
+                                : 'bg-surface-raised/50 text-muted hover:text-heading'
                                 }`}
                         >
                             {opt.label}

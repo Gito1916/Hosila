@@ -34,12 +34,12 @@ export function GuestsPage() {
         <div className="space-y-6">
 
             {/* Tab Navigation */}
-            <div className="flex gap-1 bg-slate-800 p-1 rounded-lg w-fit">
+            <div className="flex gap-1 bg-surface-card p-1 rounded-lg w-fit">
                 <button
                     onClick={() => setActiveTab('in_house')}
                     className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${activeTab === 'in_house'
-                        ? 'bg-primary-500 text-white'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                        ? 'bg-primary-500 text-heading'
+                        : 'text-muted hover:text-heading hover:bg-surface-raised'
                         }`}
                 >
                     <BedDouble size={18} />
@@ -48,8 +48,8 @@ export function GuestsPage() {
                 <button
                     onClick={() => setActiveTab('directory')}
                     className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${activeTab === 'directory'
-                        ? 'bg-primary-500 text-white'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                        ? 'bg-primary-500 text-heading'
+                        : 'text-muted hover:text-heading hover:bg-surface-raised'
                         }`}
                 >
                     <Users size={18} />
@@ -58,8 +58,8 @@ export function GuestsPage() {
                 <button
                     onClick={() => setActiveTab('history')}
                     className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${activeTab === 'history'
-                        ? 'bg-primary-500 text-white'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                        ? 'bg-primary-500 text-heading'
+                        : 'text-muted hover:text-heading hover:bg-surface-raised'
                         }`}
                 >
                     <History size={18} />
@@ -77,14 +77,14 @@ export function GuestsPage() {
                             className="card p-4 cursor-pointer hover:border-primary-500 transition-colors flex items-center justify-between"
                         >
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-slate-700 rounded-full flex items-center justify-center">
-                                    <span className="text-lg font-bold text-white">
+                                <div className="w-12 h-12 bg-surface-raised rounded-full flex items-center justify-center">
+                                    <span className="text-lg font-bold text-heading">
                                         {room?.room_number ?? '?'}
                                     </span>
                                 </div>
                                 <div>
-                                    <p className="font-medium text-white">{guest?.name}</p>
-                                    <div className="text-sm text-slate-400 space-x-2">
+                                    <p className="font-medium text-heading">{guest?.name}</p>
+                                    <div className="text-sm text-muted space-x-2">
                                         <span>{room?.room_type}</span>
                                         {guest?.gender && (
                                             <>
@@ -97,17 +97,17 @@ export function GuestsPage() {
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="text-right">
-                                    <p className="text-sm text-slate-400">Checkout</p>
-                                    <p className="font-medium text-white">
+                                    <p className="text-sm text-muted">Checkout</p>
+                                    <p className="font-medium text-heading">
                                         {format(new Date(booking.planned_checkout), 'MMM d, h:mm a')}
                                     </p>
                                 </div>
-                                <ChevronRight size={20} className="text-slate-400" />
+                                <ChevronRight size={20} className="text-muted" />
                             </div>
                         </div>
                     ))}
                     {inHouseGuests?.length === 0 && (
-                        <div className="text-center py-12 text-slate-400">
+                        <div className="text-center py-12 text-muted">
                             <BedDouble size={48} className="mx-auto mb-4 opacity-50" />
                             <p>No guests currently in-house</p>
                         </div>

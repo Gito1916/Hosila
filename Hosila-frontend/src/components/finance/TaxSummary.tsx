@@ -127,65 +127,65 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Receipt size={24} className="text-primary-400" />
-                    <h2 className="text-xl font-bold text-white">Tax Summary</h2>
+                    <h2 className="text-xl font-bold text-heading">Tax Summary</h2>
                 </div>
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-muted">
                     {format(startDate, 'MMM d, yyyy')} — {format(endDate, 'MMM d, yyyy')}
                 </p>
             </div>
 
             {/* ═══ Top KPI Cards — SC / VAT / {tdlName} / Total ═══ */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
+                <div className="bg-surface-card rounded-xl p-5 border border-border">
                     <div className="flex items-center gap-2 mb-1.5">
                         <Percent size={16} className="text-blue-400" />
-                        <span className="text-slate-400 text-sm">Service Charge</span>
+                        <span className="text-muted text-sm">Service Charge</span>
                     </div>
-                    <p className="text-2xl font-bold text-white">{f(taxSummary.totalSC)}</p>
-                    <p className="text-xs text-slate-500 mt-1">{accSettings?.service_charge_rate ?? 10}% rate</p>
+                    <p className="text-2xl font-bold text-heading">{f(taxSummary.totalSC)}</p>
+                    <p className="text-xs text-muted mt-1">{accSettings?.service_charge_rate ?? 10}% rate</p>
                 </div>
-                <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
+                <div className="bg-surface-card rounded-xl p-5 border border-border">
                     <div className="flex items-center gap-2 mb-1.5">
                         <Receipt size={16} className="text-green-400" />
-                        <span className="text-slate-400 text-sm">VAT Collected</span>
+                        <span className="text-muted text-sm">VAT Collected</span>
                     </div>
-                    <p className="text-2xl font-bold text-white">{f(taxSummary.totalVAT)}</p>
-                    <p className="text-xs text-slate-500 mt-1">{accSettings?.vat_rate ?? 7.5}% rate</p>
+                    <p className="text-2xl font-bold text-heading">{f(taxSummary.totalVAT)}</p>
+                    <p className="text-xs text-muted mt-1">{accSettings?.vat_rate ?? 7.5}% rate</p>
                 </div>
-                <div className="bg-slate-800 rounded-xl p-5 border border-slate-700">
+                <div className="bg-surface-card rounded-xl p-5 border border-border">
                     <div className="flex items-center gap-2 mb-1.5">
                         <TrendingUp size={16} className="text-amber-400" />
-                        <span className="text-slate-400 text-sm">{tdlName}</span>
+                        <span className="text-muted text-sm">{tdlName}</span>
                     </div>
-                    <p className="text-2xl font-bold text-white">{f(taxSummary.totalTDL)}</p>
-                    <p className="text-xs text-slate-500 mt-1">{accSettings?.tdl_enabled ? `${accSettings.tdl_rate}%` : 'Disabled'}</p>
+                    <p className="text-2xl font-bold text-heading">{f(taxSummary.totalTDL)}</p>
+                    <p className="text-xs text-muted mt-1">{accSettings?.tdl_enabled ? `${accSettings.tdl_rate}%` : 'Disabled'}</p>
                 </div>
                 <div className="bg-gradient-to-r from-primary-500/20 to-purple-500/20 rounded-xl p-5 border border-primary-500/30">
                     <div className="flex items-center gap-2 mb-1.5">
                         <DollarSign size={16} className="text-primary-400" />
-                        <span className="text-slate-300 text-sm font-medium">Total Tax</span>
+                        <span className="text-muted text-sm font-medium">Total Tax</span>
                     </div>
-                    <p className="text-2xl font-bold text-white">{f(taxSummary.totalTax)}</p>
+                    <p className="text-2xl font-bold text-heading">{f(taxSummary.totalTax)}</p>
                 </div>
             </div>
 
             {/* ═══ Detailed Breakdown Table ═══ */}
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+            <div className="bg-surface-card rounded-xl p-6 border border-border">
                 <div className="flex items-center gap-2 mb-4">
                     <TrendingUp size={20} className="text-primary-400" />
-                    <h3 className="text-lg font-semibold text-white">Tax Breakdown by Department</h3>
+                    <h3 className="text-lg font-semibold text-heading">Tax Breakdown by Department</h3>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-slate-700">
-                                <th className="text-left text-slate-400 text-sm font-medium py-3 pr-4">Department</th>
-                                <th className="text-right text-slate-400 text-sm font-medium py-3 px-4">Base Revenue</th>
+                            <tr className="border-b border-border">
+                                <th className="text-left text-muted text-sm font-medium py-3 pr-4">Department</th>
+                                <th className="text-right text-muted text-sm font-medium py-3 px-4">Base Revenue</th>
                                 <th className="text-right text-blue-400 text-sm font-medium py-3 px-4">SC</th>
                                 <th className="text-right text-green-400 text-sm font-medium py-3 px-4">VAT</th>
                                 <th className="text-right text-amber-400 text-sm font-medium py-3 px-4">{tdlName}</th>
-                                <th className="text-right text-slate-400 text-sm font-medium py-3 pl-4">Total Tax</th>
+                                <th className="text-right text-muted text-sm font-medium py-3 pl-4">Total Tax</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -194,18 +194,18 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
                                 { name: 'Restaurant', ...taxSummary.restaurant },
                                 { name: 'Other Income', ...taxSummary.otherIncome },
                             ].map((row) => (
-                                <tr key={row.name} className="border-b border-slate-700/50">
-                                    <td className="py-3 pr-4"><span className="text-white font-medium">{row.name}</span></td>
-                                    <td className="text-right py-3 px-4 text-slate-300">{f(row.revenue)}</td>
+                                <tr key={row.name} className="border-b border-border/50">
+                                    <td className="py-3 pr-4"><span className="text-heading font-medium">{row.name}</span></td>
+                                    <td className="text-right py-3 px-4 text-muted">{f(row.revenue)}</td>
                                     <td className="text-right py-3 px-4 text-blue-300">{f(row.sc)}</td>
                                     <td className="text-right py-3 px-4 text-green-300">{f(row.vat)}</td>
                                     <td className="text-right py-3 px-4 text-amber-300">{f(row.tdl)}</td>
-                                    <td className="text-right py-3 pl-4 text-white font-medium">{f(row.sc + row.vat + row.tdl)}</td>
+                                    <td className="text-right py-3 pl-4 text-heading font-medium">{f(row.sc + row.vat + row.tdl)}</td>
                                 </tr>
                             ))}
-                            <tr className="bg-slate-700/30">
-                                <td className="py-3 pr-4"><span className="text-white font-bold">Total</span></td>
-                                <td className="text-right py-3 px-4 text-white font-bold">
+                            <tr className="bg-surface-raised/30">
+                                <td className="py-3 pr-4"><span className="text-heading font-bold">Total</span></td>
+                                <td className="text-right py-3 px-4 text-heading font-bold">
                                     {f(taxSummary.accommodation.revenue + taxSummary.restaurant.revenue + taxSummary.otherIncome.revenue)}
                                 </td>
                                 <td className="text-right py-3 px-4 text-blue-300 font-bold">{f(taxSummary.totalSC)}</td>
@@ -219,11 +219,11 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
             </div>
 
             {/* ═══ Tax Remittance Section ═══ */}
-            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 space-y-5">
+            <div className="bg-surface-card rounded-xl p-6 border border-border space-y-5">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <FileText size={20} className="text-emerald-400" />
-                        <h3 className="text-lg font-semibold text-white">Tax Remittance</h3>
+                        <h3 className="text-lg font-semibold text-heading">Tax Remittance</h3>
                     </div>
                     <div className="flex gap-2">
                         <button
@@ -255,8 +255,8 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
 
                 {remittanceLoading ? (
                     <div className="text-center py-6">
-                        <Loader2 className="animate-spin mx-auto text-slate-400" size={24} />
-                        <p className="text-slate-500 text-sm mt-2">Loading remittance data...</p>
+                        <Loader2 className="animate-spin mx-auto text-muted" size={24} />
+                        <p className="text-muted text-sm mt-2">Loading remittance data...</p>
                     </div>
                 ) : (
                     <>
@@ -275,11 +275,11 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
                                         key={tax.type}
                                         className={`p-4 rounded-lg border ${remitted
                                             ? 'bg-emerald-500/10 border-emerald-500/30'
-                                            : 'bg-slate-700/30 border-slate-700'
+                                            : 'bg-surface-raised/30 border-border'
                                             }`}
                                     >
                                         <div className="flex items-center justify-between mb-2">
-                                            <span className="text-sm font-medium text-slate-300">{tax.label}</span>
+                                            <span className="text-sm font-medium text-muted">{tax.label}</span>
                                             {remitted && (
                                                 <span className="flex items-center gap-1 text-xs text-emerald-400">
                                                     <CheckCircle size={12} />
@@ -287,7 +287,7 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
                                                 </span>
                                             )}
                                         </div>
-                                        <p className="text-lg font-bold text-white mb-3">{f(tax.amount)}</p>
+                                        <p className="text-lg font-bold text-heading mb-3">{f(tax.amount)}</p>
                                         {!remitted && tax.amount > 0 && (
                                             <button
                                                 onClick={() => handleMarkRemitted(tax.type)}

@@ -54,7 +54,7 @@ function OfflineBanner() {
     if (isOnline) return null;
 
     return (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-600 text-white px-4 py-2 text-center text-sm font-medium flex items-center justify-center gap-2">
+        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-600 text-heading px-4 py-2 text-center text-sm font-medium flex items-center justify-center gap-2">
             <WifiOff size={16} />
             You are offline. HotelFlow requires an internet connection to work.
         </div>
@@ -78,7 +78,7 @@ function ProtectedRoute() {
 
     if (isLoading || hotelLoading) {
         return (
-            <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+            <div className="min-h-screen bg-surface-base flex items-center justify-center">
                 <Loader2 className="text-primary-500 animate-spin" size={48} />
             </div>
         );
@@ -129,7 +129,7 @@ function AppInner() {
         <ErrorBoundary>
             <OfflineBanner />
             {backendStatus === 'waking' && (
-                <div className="bg-blue-600/90 text-white text-center py-2 px-4 text-sm flex items-center justify-center gap-2 z-50">
+                <div className="bg-blue-600/90 text-heading text-center py-2 px-4 text-sm flex items-center justify-center gap-2 z-50">
                     <Server size={14} className="animate-pulse" />
                     Connecting to server… This may take up to 60 seconds on first visit.
                 </div>

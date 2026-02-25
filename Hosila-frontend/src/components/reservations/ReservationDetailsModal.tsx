@@ -99,13 +99,13 @@ export function ReservationDetailsModal({ reservation, onClose }: ReservationDet
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
-                    <h2 className="text-xl font-bold text-white">Reservation Details</h2>
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                    <h2 className="text-xl font-bold text-heading">Reservation Details</h2>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                     >
                         <X size={20} />
                     </button>
@@ -122,26 +122,26 @@ export function ReservationDetailsModal({ reservation, onClose }: ReservationDet
                             }`}>
                             {reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1).replace('_', ' ')}
                         </span>
-                        <span className="text-sm text-slate-400">
+                        <span className="text-sm text-muted">
                             Source: {reservation.source}
                         </span>
                     </div>
 
                     {/* Guest Info */}
                     <div className="card p-4">
-                        <h3 className="font-medium text-white mb-3 flex items-center gap-2">
+                        <h3 className="font-medium text-heading mb-3 flex items-center gap-2">
                             <User size={16} />
                             Guest Information
                         </h3>
                         <div className="space-y-2 text-sm">
-                            <p className="text-white">{guest?.name ?? 'Loading...'}</p>
+                            <p className="text-heading">{guest?.name ?? 'Loading...'}</p>
                             {guest?.phone && (
-                                <p className="text-slate-400 flex items-center gap-2">
+                                <p className="text-muted flex items-center gap-2">
                                     <Phone size={14} /> {guest.phone}
                                 </p>
                             )}
                             {guest?.email && (
-                                <p className="text-slate-400 flex items-center gap-2">
+                                <p className="text-muted flex items-center gap-2">
                                     <Mail size={14} /> {guest.email}
                                 </p>
                             )}
@@ -150,28 +150,28 @@ export function ReservationDetailsModal({ reservation, onClose }: ReservationDet
 
                     {/* Stay Info */}
                     <div className="card p-4">
-                        <h3 className="font-medium text-white mb-3 flex items-center gap-2">
+                        <h3 className="font-medium text-heading mb-3 flex items-center gap-2">
                             <Calendar size={16} />
                             Stay Details
                         </h3>
                         <div className="space-y-2 text-sm">
                             <div className="flex items-center gap-2">
-                                <MapPin size={14} className="text-slate-500" />
-                                <span className="text-white">
+                                <MapPin size={14} className="text-muted" />
+                                <span className="text-heading">
                                     Room {room?.room_number ?? '...'} - {room?.room_type ?? '...'}
                                 </span>
                             </div>
                             <div className="grid grid-cols-2 gap-4 mt-3">
                                 <div>
-                                    <p className="text-slate-400">Check-in</p>
-                                    <p className="text-white">{format(checkInDate, 'EEE, MMM d, yyyy')}</p>
+                                    <p className="text-muted">Check-in</p>
+                                    <p className="text-heading">{format(checkInDate, 'EEE, MMM d, yyyy')}</p>
                                 </div>
                                 <div>
-                                    <p className="text-slate-400">Check-out</p>
-                                    <p className="text-white">{format(checkOutDate, 'EEE, MMM d, yyyy')}</p>
+                                    <p className="text-muted">Check-out</p>
+                                    <p className="text-heading">{format(checkOutDate, 'EEE, MMM d, yyyy')}</p>
                                 </div>
                             </div>
-                            <p className="text-slate-400 mt-2">
+                            <p className="text-muted mt-2">
                                 {reservation.nights} night{reservation.nights !== 1 ? 's' : ''}
                             </p>
                         </div>
@@ -179,22 +179,22 @@ export function ReservationDetailsModal({ reservation, onClose }: ReservationDet
 
                     {/* Payment Info */}
                     <div className="card p-4">
-                        <h3 className="font-medium text-white mb-3 flex items-center gap-2">
+                        <h3 className="font-medium text-heading mb-3 flex items-center gap-2">
                             <CreditCard size={16} />
                             Payment
                         </h3>
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
-                                <span className="text-slate-400">Total Amount</span>
-                                <span className="text-white">₦{reservation.total_amount.toLocaleString()}</span>
+                                <span className="text-muted">Total Amount</span>
+                                <span className="text-heading">₦{reservation.total_amount.toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-slate-400">Deposit Paid</span>
+                                <span className="text-muted">Deposit Paid</span>
                                 <span className="text-status-available">₦{reservation.deposit_paid.toLocaleString()}</span>
                             </div>
-                            <div className="flex justify-between border-t border-slate-700 pt-2">
-                                <span className="text-slate-300">Balance Due</span>
-                                <span className="text-white font-medium">
+                            <div className="flex justify-between border-t border-border pt-2">
+                                <span className="text-muted">Balance Due</span>
+                                <span className="text-heading font-medium">
                                     ₦{(reservation.total_amount - reservation.deposit_paid).toLocaleString()}
                                 </span>
                             </div>
@@ -204,11 +204,11 @@ export function ReservationDetailsModal({ reservation, onClose }: ReservationDet
                     {/* Notes */}
                     {reservation.notes && (
                         <div className="card p-4">
-                            <h3 className="font-medium text-white mb-2 flex items-center gap-2">
+                            <h3 className="font-medium text-heading mb-2 flex items-center gap-2">
                                 <MessageSquare size={16} />
                                 Notes
                             </h3>
-                            <p className="text-sm text-slate-400 whitespace-pre-wrap">{reservation.notes}</p>
+                            <p className="text-sm text-muted whitespace-pre-wrap">{reservation.notes}</p>
                         </div>
                     )}
 

@@ -40,8 +40,8 @@ export function RoomManagement() {
 
     return (
         <div className="card">
-            <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-                <h3 className="font-semibold text-white flex items-center gap-2">
+            <div className="p-4 border-b border-border flex justify-between items-center">
+                <h3 className="font-semibold text-heading flex items-center gap-2">
                     <DoorOpen size={18} />
                     Room Management
                 </h3>
@@ -56,24 +56,24 @@ export function RoomManagement() {
 
             <div className="overflow-x-auto">
                 <table className="w-full">
-                    <thead className="bg-slate-700/50">
+                    <thead className="bg-surface-raised/50">
                         <tr>
-                            <th className="text-left p-3 text-slate-400 text-sm font-medium">Room</th>
-                            <th className="text-left p-3 text-slate-400 text-sm font-medium">Type</th>
-                            <th className="text-left p-3 text-slate-400 text-sm font-medium">Floor</th>
-                            <th className="text-left p-3 text-slate-400 text-sm font-medium">Capacity</th>
-                            <th className="text-left p-3 text-slate-400 text-sm font-medium">Night Rate</th>
-                            <th className="text-left p-3 text-slate-400 text-sm font-medium">Status</th>
-                            <th className="text-right p-3 text-slate-400 text-sm font-medium">Actions</th>
+                            <th className="text-left p-3 text-muted text-sm font-medium">Room</th>
+                            <th className="text-left p-3 text-muted text-sm font-medium">Type</th>
+                            <th className="text-left p-3 text-muted text-sm font-medium">Floor</th>
+                            <th className="text-left p-3 text-muted text-sm font-medium">Capacity</th>
+                            <th className="text-left p-3 text-muted text-sm font-medium">Night Rate</th>
+                            <th className="text-left p-3 text-muted text-sm font-medium">Status</th>
+                            <th className="text-right p-3 text-muted text-sm font-medium">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-700/50">
+                    <tbody className="divide-y divide-border/50">
                         {rooms?.map((room) => (
-                            <tr key={room.id} className="hover:bg-slate-700/30">
-                                <td className="p-3 text-white font-medium">{room.room_number}</td>
-                                <td className="p-3 text-slate-300">{room.room_type}</td>
-                                <td className="p-3 text-slate-300">{room.floor_number ?? '-'}</td>
-                                <td className="p-3 text-slate-300">{room.max_occupancy}</td>
+                            <tr key={room.id} className="hover:bg-surface-raised/30">
+                                <td className="p-3 text-heading font-medium">{room.room_number}</td>
+                                <td className="p-3 text-muted">{room.room_type}</td>
+                                <td className="p-3 text-muted">{room.floor_number ?? '-'}</td>
+                                <td className="p-3 text-muted">{room.max_occupancy}</td>
                                 <td className="p-3 text-status-available">₦{room.night_rate.toLocaleString()}</td>
                                 <td className="p-3">
                                     <span className={`px-2 py-1 rounded-full text-xs ${room.status === 'available' ? 'bg-status-available/20 text-status-available' :
@@ -87,13 +87,13 @@ export function RoomManagement() {
                                 <td className="p-3 text-right">
                                     <button
                                         onClick={() => handleEdit(room)}
-                                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(room)}
-                                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg"
+                                        className="p-2 text-muted hover:text-red-400 hover:bg-surface-raised rounded-lg"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -179,10 +179,10 @@ function RoomForm({
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md">
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
-                    <h2 className="text-xl font-bold text-white">{room ? 'Edit Room' : 'Add New Room'}</h2>
-                    <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-md">
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                    <h2 className="text-xl font-bold text-heading">{room ? 'Edit Room' : 'Add New Room'}</h2>
+                    <button onClick={onClose} className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg">
                         <X size={20} />
                     </button>
                 </div>

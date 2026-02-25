@@ -11,15 +11,15 @@ export function SessionTimeoutWarning() {
 
     return (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-sm p-6 text-center">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-sm p-6 text-center">
                 <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Clock size={32} className="text-amber-400" />
                 </div>
-                <h2 className="text-xl font-bold text-white mb-2">Session Expiring</h2>
-                <p className="text-slate-400 mb-4">
+                <h2 className="text-xl font-bold text-heading mb-2">Session Expiring</h2>
+                <p className="text-muted mb-4">
                     Your session will expire in <span className="text-amber-400 font-mono font-bold">{formattedTime}</span>
                 </p>
-                <p className="text-sm text-slate-500 mb-6">
+                <p className="text-sm text-muted mb-6">
                     Click any button or interact with the page to stay logged in.
                 </p>
                 <div className="flex gap-3">

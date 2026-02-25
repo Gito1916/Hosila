@@ -211,26 +211,26 @@ export function InventoryList() {
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="card p-4">
-                    <p className="text-sm text-slate-400">Total Items</p>
-                    <p className="text-3xl font-bold text-white">{stats?.totalItems ?? 0}</p>
+                    <p className="text-sm text-muted">Total Items</p>
+                    <p className="text-3xl font-bold text-heading">{stats?.totalItems ?? 0}</p>
                 </div>
                 <div className={`card p-4 ${(lowStockItems?.length ?? 0) > 0 ? 'border-red-500/50' : ''}`}>
-                    <p className="text-sm text-slate-400 flex items-center gap-1">
+                    <p className="text-sm text-muted flex items-center gap-1">
                         <AlertTriangle size={14} />
                         Low Stock
                     </p>
-                    <p className={`text-3xl font-bold ${(lowStockItems?.length ?? 0) > 0 ? 'text-red-400' : 'text-white'}`}>
+                    <p className={`text-3xl font-bold ${(lowStockItems?.length ?? 0) > 0 ? 'text-red-400' : 'text-heading'}`}>
                         {lowStockItems?.length ?? 0}
                     </p>
                 </div>
                 <div className="card p-4">
-                    <p className="text-sm text-slate-400">Categories</p>
+                    <p className="text-sm text-muted">Categories</p>
                     <p className="text-3xl font-bold text-primary-400">
                         {Object.keys(stats?.byCategory ?? {}).length}
                     </p>
                 </div>
                 <div className="card p-4">
-                    <p className="text-sm text-slate-400">Stock Value</p>
+                    <p className="text-sm text-muted">Stock Value</p>
                     <p className="text-3xl font-bold text-status-available">
                         ₦{(stats?.totalValue ?? 0).toLocaleString()}
                     </p>
@@ -258,7 +258,7 @@ export function InventoryList() {
                 {/* Search */}
                 <div className="flex items-center gap-3 flex-1">
                     <div className="relative flex-1 max-w-md">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                         <input
                             type="text"
                             value={searchQuery}
@@ -269,7 +269,7 @@ export function InventoryList() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <Filter size={16} className="text-slate-400" />
+                        <Filter size={16} className="text-muted" />
                         <select
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value as InventoryCategory | 'all' | 'low_stock')}
@@ -285,17 +285,17 @@ export function InventoryList() {
                 </div>
 
                 {/* View Toggle */}
-                <div className="flex border border-slate-700 rounded-lg overflow-hidden">
+                <div className="flex border border-border rounded-lg overflow-hidden">
                     <button
                         onClick={() => setViewMode('cards')}
-                        className={`p-2 ${viewMode === 'cards' ? 'bg-primary-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+                        className={`p-2 ${viewMode === 'cards' ? 'bg-primary-500 text-heading' : 'bg-surface-raised text-muted hover:bg-surface-card'}`}
                         title="Card View"
                     >
                         <LayoutGrid size={18} />
                     </button>
                     <button
                         onClick={() => setViewMode('table')}
-                        className={`p-2 ${viewMode === 'table' ? 'bg-primary-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+                        className={`p-2 ${viewMode === 'table' ? 'bg-primary-500 text-heading' : 'bg-surface-raised text-muted hover:bg-surface-card'}`}
                         title="Table View"
                     >
                         <TableProperties size={18} />
@@ -324,8 +324,8 @@ export function InventoryList() {
                 <button
                     onClick={() => setBehaviorFilter('all')}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${behaviorFilter === 'all'
-                        ? 'bg-primary-500 text-white'
-                        : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                        ? 'bg-primary-500 text-heading'
+                        : 'bg-surface-raised/50 text-muted hover:bg-surface-raised'
                         }`}
                 >
                     All
@@ -333,8 +333,8 @@ export function InventoryList() {
                 <button
                     onClick={() => setBehaviorFilter('consumable')}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${behaviorFilter === 'consumable'
-                        ? 'bg-slate-600 text-white'
-                        : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                        ? 'bg-surface-card text-heading'
+                        : 'bg-surface-raised/50 text-muted hover:bg-surface-raised'
                         }`}
                 >
                     <Package size={14} />
@@ -344,8 +344,8 @@ export function InventoryList() {
                 <button
                     onClick={() => setBehaviorFilter('returnable')}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${behaviorFilter === 'returnable'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                        ? 'bg-blue-500 text-heading'
+                        : 'bg-surface-raised/50 text-muted hover:bg-surface-raised'
                         }`}
                 >
                     <RotateCcw size={14} />
@@ -355,8 +355,8 @@ export function InventoryList() {
                 <button
                     onClick={() => setBehaviorFilter('amenity')}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${behaviorFilter === 'amenity'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                        ? 'bg-green-500 text-heading'
+                        : 'bg-surface-raised/50 text-muted hover:bg-surface-raised'
                         }`}
                 >
                     <CheckSquare size={14} />
@@ -366,7 +366,7 @@ export function InventoryList() {
             </div>
 
             {/* Results count */}
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-muted">
                 Showing {filteredItems.length} items
                 {selectedCategory !== 'all' && ` in ${selectedCategory.replace('_', ' ')}`}
                 {behaviorFilter !== 'all' && ` (${behaviorFilter})`}
@@ -374,7 +374,7 @@ export function InventoryList() {
 
             {/* Items Grid or Table */}
             {filteredItems.length === 0 ? (
-                <div className="text-center py-12 text-slate-400">
+                <div className="text-center py-12 text-muted">
                     <Package size={48} className="mx-auto mb-3 opacity-50" />
                     <p>No items found</p>
                 </div>
@@ -394,50 +394,50 @@ export function InventoryList() {
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="bg-slate-700/50">
-                                    <th className="text-left p-3 text-sm font-medium text-slate-300">Item Name</th>
-                                    <th className="text-left p-3 text-sm font-medium text-slate-300">Category</th>
-                                    <th className="text-center p-3 text-sm font-medium text-slate-300">Current Stock</th>
-                                    <th className="text-center p-3 text-sm font-medium text-slate-300">Min Level</th>
-                                    <th className="text-center p-3 text-sm font-medium text-slate-300">Type</th>
-                                    <th className="text-right p-3 text-sm font-medium text-slate-300">Unit Cost</th>
-                                    <th className="text-center p-3 text-sm font-medium text-slate-300">Status</th>
+                                <tr className="bg-surface-raised/50">
+                                    <th className="text-left p-3 text-sm font-medium text-muted">Item Name</th>
+                                    <th className="text-left p-3 text-sm font-medium text-muted">Category</th>
+                                    <th className="text-center p-3 text-sm font-medium text-muted">Current Stock</th>
+                                    <th className="text-center p-3 text-sm font-medium text-muted">Min Level</th>
+                                    <th className="text-center p-3 text-sm font-medium text-muted">Type</th>
+                                    <th className="text-right p-3 text-sm font-medium text-muted">Unit Cost</th>
+                                    <th className="text-center p-3 text-sm font-medium text-muted">Status</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-700">
+                            <tbody className="divide-y divide-border">
                                 {filteredItems.map((item) => {
                                     const isLow = item.current_stock <= item.min_stock_level;
                                     return (
                                         <tr
                                             key={item.id}
                                             onClick={() => setSelectedItem(item)}
-                                            className="hover:bg-slate-700/50 cursor-pointer transition-colors"
+                                            className="hover:bg-surface-raised cursor-pointer transition-colors"
                                         >
                                             <td className="p-3">
-                                                <p className="text-white font-medium">{item.name}</p>
+                                                <p className="text-heading font-medium">{item.name}</p>
                                                 {item.is_amenity && (
                                                     <span className="text-xs text-primary-400">Amenity</span>
                                                 )}
                                             </td>
-                                            <td className="p-3 text-slate-300 text-sm capitalize">
+                                            <td className="p-3 text-muted text-sm capitalize">
                                                 {item.category.replace('_', ' ')}
                                             </td>
-                                            <td className={`p-3 text-center font-medium ${isLow ? 'text-red-400' : 'text-white'
+                                            <td className={`p-3 text-center font-medium ${isLow ? 'text-red-400' : 'text-heading'
                                                 }`}>
                                                 {item.current_stock}
                                             </td>
-                                            <td className="p-3 text-center text-slate-400">
+                                            <td className="p-3 text-center text-muted">
                                                 {item.min_stock_level}
                                             </td>
                                             <td className="p-3 text-center">
                                                 <span className={`px-2 py-0.5 rounded text-xs ${item.behavior === 'consumable'
-                                                    ? 'bg-slate-600 text-slate-200'
+                                                    ? 'bg-surface-card text-body'
                                                     : 'bg-blue-500/20 text-blue-400'
                                                     }`}>
                                                     {item.behavior === 'consumable' ? 'Consumable' : 'Returnable'}
                                                 </span>
                                             </td>
-                                            <td className="p-3 text-right text-slate-300">
+                                            <td className="p-3 text-right text-muted">
                                                 {item.unit_cost ? `₦${item.unit_cost.toLocaleString()}` : '-'}
                                             </td>
                                             <td className="p-3 text-center">

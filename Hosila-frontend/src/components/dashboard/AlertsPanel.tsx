@@ -31,7 +31,7 @@ export function AlertsPanel({ onViewOverdue, onViewLowStock, onViewUnpaid }: Ale
     if (!hasAlerts) {
         return (
             <div className="card p-4">
-                <p className="text-slate-400 text-sm flex items-center gap-2">
+                <p className="text-muted text-sm flex items-center gap-2">
                     <span className="text-green-400">✓</span>
                     No alerts at this time
                 </p>

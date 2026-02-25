@@ -59,27 +59,27 @@ export function ServiceManagement() {
     return (
         <div className="space-y-6">
             {/* General Settings */}
-            <div className="card p-4 border border-slate-700">
-                <h3 className="font-semibold text-white mb-4">General Settings</h3>
+            <div className="card p-4 border border-border">
+                <h3 className="font-semibold text-heading mb-4">General Settings</h3>
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-white font-medium">Enable Orders Tab</p>
-                        <p className="text-sm text-slate-400">Show the "Orders" tab in the Restaurant section</p>
+                        <p className="text-heading font-medium">Enable Orders Tab</p>
+                        <p className="text-sm text-muted">Show the "Orders" tab in the Restaurant section</p>
                     </div>
                     <button
                         onClick={() => toggleOrdersTab(!hotel?.settings?.enable_restaurant_orders)}
-                        className={`w-12 h-6 rounded-full transition-colors relative ${hotel?.settings?.enable_restaurant_orders ? 'bg-primary-500' : 'bg-slate-700'
+                        className={`w-12 h-6 rounded-full transition-colors relative ${hotel?.settings?.enable_restaurant_orders ? 'bg-primary-500' : 'bg-surface-raised'
                             }`}
                     >
-                        <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${hotel?.settings?.enable_restaurant_orders ? 'translate-x-6' : ''
+                        <div className={`absolute top-1 left-1 w-4 h-4 bg-surface-card rounded-full transition-transform ${hotel?.settings?.enable_restaurant_orders ? 'translate-x-6' : ''
                             }`} />
                     </button>
                 </div>
             </div>
 
             <div className="card">
-                <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-                    <h3 className="font-semibold text-white flex items-center gap-2">
+                <div className="p-4 border-b border-border flex justify-between items-center">
+                    <h3 className="font-semibold text-heading flex items-center gap-2">
                         <UtensilsCrossed size={18} />
                         Restaurant Menu Management
                     </h3>
@@ -94,30 +94,30 @@ export function ServiceManagement() {
 
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-slate-700/50">
+                        <thead className="bg-surface-raised/50">
                             <tr>
-                                <th className="text-left p-3 text-slate-400 text-sm font-medium">Name</th>
-                                <th className="text-left p-3 text-slate-400 text-sm font-medium">Category</th>
-                                <th className="text-left p-3 text-slate-400 text-sm font-medium">Price</th>
-                                <th className="text-left p-3 text-slate-400 text-sm font-medium">Status</th>
-                                <th className="text-right p-3 text-slate-400 text-sm font-medium">Actions</th>
+                                <th className="text-left p-3 text-muted text-sm font-medium">Name</th>
+                                <th className="text-left p-3 text-muted text-sm font-medium">Category</th>
+                                <th className="text-left p-3 text-muted text-sm font-medium">Price</th>
+                                <th className="text-left p-3 text-muted text-sm font-medium">Status</th>
+                                <th className="text-right p-3 text-muted text-sm font-medium">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-700/50">
+                        <tbody className="divide-y divide-border/50">
                             {services?.map((service) => (
-                                <tr key={service.id} className="hover:bg-slate-700/30">
+                                <tr key={service.id} className="hover:bg-surface-raised/30">
                                     <td className="p-3">
-                                        <div className="text-white font-medium">{service.name}</div>
+                                        <div className="text-heading font-medium">{service.name}</div>
                                         {service.description && (
-                                            <div className="text-xs text-slate-400 mt-0.5">{service.description}</div>
+                                            <div className="text-xs text-muted mt-0.5">{service.description}</div>
                                         )}
                                     </td>
-                                    <td className="p-3 text-slate-300">{categoryLabels[service.category]}</td>
+                                    <td className="p-3 text-muted">{categoryLabels[service.category]}</td>
                                     <td className="p-3 text-status-available">₦{service.price.toLocaleString()}</td>
                                     <td className="p-3">
                                         <span className={`px-2 py-1 rounded-full text-xs ${service.is_active
                                             ? 'bg-status-available/20 text-status-available'
-                                            : 'bg-slate-500/20 text-slate-400'
+                                            : 'bg-surface-inset0/20 text-muted'
                                             }`}>
                                             {service.is_active ? 'Active' : 'Inactive'}
                                         </span>
@@ -125,13 +125,13 @@ export function ServiceManagement() {
                                     <td className="p-3 text-right">
                                         <button
                                             onClick={() => handleEdit(service)}
-                                            className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                                            className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                                         >
                                             <Edit2 size={16} />
                                         </button>
                                         <button
                                             onClick={() => handleDelete(service)}
-                                            className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg"
+                                            className="p-2 text-muted hover:text-red-400 hover:bg-surface-raised rounded-lg"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -204,10 +204,10 @@ function ServiceForm({
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md">
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
-                    <h2 className="text-xl font-bold text-white">{service ? 'Edit Menu Item' : 'Add Menu Item'}</h2>
-                    <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-md">
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                    <h2 className="text-xl font-bold text-heading">{service ? 'Edit Menu Item' : 'Add Menu Item'}</h2>
+                    <button onClick={onClose} className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg">
                         <X size={20} />
                     </button>
                 </div>
@@ -268,7 +268,7 @@ function ServiceForm({
                                 onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                                 className="w-4 h-4"
                             />
-                            <label htmlFor="is_active" className="text-slate-400">Active (visible in menu)</label>
+                            <label htmlFor="is_active" className="text-muted">Active (visible in menu)</label>
                         </div>
                     )}
 

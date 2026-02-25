@@ -136,28 +136,28 @@ export function BackupPanel() {
         <div className="space-y-6">
             {/* Demo Mode & Data Reset */}
             <div className="card p-4">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                     <Database size={18} />
                     Data Mode
                 </h3>
 
-                <div className="bg-slate-700/50 rounded-lg p-4 mb-4">
+                <div className="bg-surface-raised/50 rounded-lg p-4 mb-4">
                     <div className="flex items-center justify-between mb-3">
                         <div>
-                            <h4 className="text-white font-medium">Demo Mode</h4>
-                            <p className="text-sm text-slate-400">Enable demo mode for testing and training</p>
+                            <h4 className="text-heading font-medium">Demo Mode</h4>
+                            <p className="text-sm text-muted">Enable demo mode for testing and training</p>
                         </div>
                         <button
                             onClick={handleDemoModeToggle}
-                            className={`transition-colors ${isDemoMode ? 'text-status-available' : 'text-slate-500'}`}
+                            className={`transition-colors ${isDemoMode ? 'text-status-available' : 'text-muted'}`}
                         >
                             {isDemoMode ? <ToggleRight size={28} /> : <ToggleLeft size={28} />}
                         </button>
                     </div>
 
                     {isDemoMode && (
-                        <div className="pt-3 border-t border-slate-600">
-                            <p className="text-sm text-slate-400 mb-3">
+                        <div className="pt-3 border-t border-border-strong">
+                            <p className="text-sm text-muted mb-3">
                                 Demo mode is active.
                             </p>
                         </div>
@@ -167,15 +167,15 @@ export function BackupPanel() {
 
             {/* Backup Section */}
             <div className="card p-4">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                     <Database size={18} />
                     Data Backup & Restore
                 </h3>
 
                 <div className="space-y-4">
-                    <div className="bg-slate-700/50 rounded-lg p-4">
-                        <h4 className="text-white font-medium mb-2">Export Data</h4>
-                        <p className="text-sm text-slate-400 mb-4">
+                    <div className="bg-surface-raised/50 rounded-lg p-4">
+                        <h4 className="text-heading font-medium mb-2">Export Data</h4>
+                        <p className="text-sm text-muted mb-4">
                             Download a complete backup of your hotel data.
                         </p>
                         <button onClick={handleExport} disabled={isExporting} className="btn btn-primary">
@@ -188,9 +188,9 @@ export function BackupPanel() {
                         )}
                     </div>
 
-                    <div className="bg-slate-700/50 rounded-lg p-4">
-                        <h4 className="text-white font-medium mb-2">Restore Data</h4>
-                        <p className="text-sm text-slate-400 mb-4">
+                    <div className="bg-surface-raised/50 rounded-lg p-4">
+                        <h4 className="text-heading font-medium mb-2">Restore Data</h4>
+                        <p className="text-sm text-muted mb-4">
                             Restore from a backup file. <span className="text-amber-400">Warning: This will overwrite current data.</span>
                         </p>
                         <input ref={fileInputRef} type="file" accept=".json" onChange={handleFileSelect} className="hidden" />
@@ -199,7 +199,7 @@ export function BackupPanel() {
                         </button>
                     </div>
 
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-muted">
                         <p>• Backups should be stored in cloud storage</p>
                         <p>• Recommended: Export data at least weekly</p>
                     </div>
@@ -210,23 +210,23 @@ export function BackupPanel() {
             {
                 showRestoreConfirm && (
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md p-6">
+                        <div className="bg-surface-card rounded-xl border border-border w-full max-w-md p-6">
                             <div className="flex items-start gap-3 mb-4">
                                 <div className="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center">
                                     <AlertTriangle size={20} className="text-amber-400" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-semibold text-white">Confirm Restore</h3>
-                                    <p className="text-sm text-slate-400 mt-1">
+                                    <h3 className="text-lg font-semibold text-heading">Confirm Restore</h3>
+                                    <p className="text-sm text-muted mt-1">
                                         This will <strong>permanently replace</strong> all current data.
                                     </p>
                                 </div>
                             </div>
 
                             {restoreFile && (
-                                <div className="bg-slate-700/50 rounded-lg p-3 mb-4">
-                                    <p className="text-sm text-slate-300">File: <span className="font-mono">{restoreFile.name}</span></p>
-                                    <p className="text-xs text-slate-500">Size: {(restoreFile.size / 1024).toFixed(1)} KB</p>
+                                <div className="bg-surface-raised/50 rounded-lg p-3 mb-4">
+                                    <p className="text-sm text-muted">File: <span className="font-mono">{restoreFile.name}</span></p>
+                                    <p className="text-xs text-muted">Size: {(restoreFile.size / 1024).toFixed(1)} KB</p>
                                 </div>
                             )}
 

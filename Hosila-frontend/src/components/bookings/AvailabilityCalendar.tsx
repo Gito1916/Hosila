@@ -120,12 +120,12 @@ export function AvailabilityCalendar({ onReserve, onOpenGuestLedger }: Availabil
             case 'reserved':
                 return 'bg-blue-500/40 hover:bg-blue-500/60 border-blue-500';
             default:
-                return 'bg-slate-700/30 hover:bg-green-500/30 border-slate-600 hover:border-green-500';
+                return 'bg-surface-raised/30 hover:bg-green-500/30 border-border-strong hover:border-green-500';
         }
     };
 
     if (!rooms) {
-        return <div className="text-slate-400 text-center py-8">Loading...</div>;
+        return <div className="text-muted text-center py-8">Loading...</div>;
     }
 
     return (
@@ -138,7 +138,7 @@ export function AvailabilityCalendar({ onReserve, onOpenGuestLedger }: Availabil
                 >
                     <ChevronLeft size={20} />
                 </button>
-                <span className="text-white font-medium">
+                <span className="text-heading font-medium">
                     {format(dates[0], 'MMM d')} - {format(dates[dates.length - 1], 'MMM d, yyyy')}
                 </span>
                 <button
@@ -152,16 +152,16 @@ export function AvailabilityCalendar({ onReserve, onOpenGuestLedger }: Availabil
             {/* Legend */}
             <div className="flex gap-4 text-xs">
                 <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded bg-slate-700/50 border border-slate-600"></div>
-                    <span className="text-slate-400">Vacant</span>
+                    <div className="w-4 h-4 rounded bg-surface-raised/50 border border-border-strong"></div>
+                    <span className="text-muted">Vacant</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded bg-blue-500/40 border border-blue-500"></div>
-                    <span className="text-slate-400">Reserved</span>
+                    <span className="text-muted">Reserved</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded bg-status-occupied/60 border border-status-occupied"></div>
-                    <span className="text-slate-400">Occupied</span>
+                    <span className="text-muted">Occupied</span>
                 </div>
             </div>
 
@@ -170,15 +170,15 @@ export function AvailabilityCalendar({ onReserve, onOpenGuestLedger }: Availabil
                 <table className="w-full border-collapse min-w-max">
                     <thead>
                         <tr>
-                            <th className="sticky left-0 bg-slate-800 z-10 p-2 text-left text-sm text-slate-400 border-b border-slate-700 min-w-[100px]">
+                            <th className="sticky left-0 bg-surface-card z-10 p-2 text-left text-sm text-muted border-b border-border min-w-[100px]">
                                 Room
                             </th>
                             {dates.map(date => (
                                 <th
                                     key={date.toISOString()}
-                                    className={`p-2 text-center text-xs border-b border-slate-700 min-w-[50px] ${isSameDay(date, new Date())
+                                    className={`p-2 text-center text-xs border-b border-border min-w-[50px] ${isSameDay(date, new Date())
                                         ? 'bg-primary-500/20 text-primary-400'
-                                        : 'text-slate-400'
+                                        : 'text-muted'
                                         }`}
                                 >
                                     <div>{format(date, 'EEE')}</div>
@@ -189,17 +189,17 @@ export function AvailabilityCalendar({ onReserve, onOpenGuestLedger }: Availabil
                     </thead>
                     <tbody>
                         {rooms.map(room => (
-                            <tr key={room.id} className="hover:bg-slate-800/50">
-                                <td className="sticky left-0 bg-slate-800 z-10 p-2 border-b border-slate-700">
-                                    <div className="font-medium text-white">{room.room_number}</div>
-                                    <div className="text-xs text-slate-500">{room.room_type}</div>
+                            <tr key={room.id} className="hover:bg-surface-card/50">
+                                <td className="sticky left-0 bg-surface-card z-10 p-2 border-b border-border">
+                                    <div className="font-medium text-heading">{room.room_number}</div>
+                                    <div className="text-xs text-muted">{room.room_type}</div>
                                 </td>
                                 {dates.map(date => {
                                     const cellData = getCellData(room.id, date);
                                     return (
                                         <td
                                             key={date.toISOString()}
-                                            className="p-1 border-b border-slate-700"
+                                            className="p-1 border-b border-border"
                                         >
                                             <button
                                                 onClick={() => handleCellClick(room, date, cellData)}
@@ -213,9 +213,9 @@ export function AvailabilityCalendar({ onReserve, onOpenGuestLedger }: Availabil
                                                 {cellData.state !== 'vacant' && (
                                                     <div className="flex items-center justify-center">
                                                         {cellData.state === 'occupied' ? (
-                                                            <User size={14} className="text-white" />
+                                                            <User size={14} className="text-heading" />
                                                         ) : (
-                                                            <Calendar size={14} className="text-white" />
+                                                            <Calendar size={14} className="text-heading" />
                                                         )}
                                                     </div>
                                                 )}
@@ -231,7 +231,7 @@ export function AvailabilityCalendar({ onReserve, onOpenGuestLedger }: Availabil
 
             {/* Empty state */}
             {rooms.length === 0 && (
-                <div className="text-center py-12 text-slate-400">
+                <div className="text-center py-12 text-muted">
                     <p>No rooms configured</p>
                 </div>
             )}

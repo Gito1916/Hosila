@@ -65,12 +65,12 @@ export function PasswordChangeModal({ onClose }: PasswordChangeModalProps) {
     if (success) {
         return (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md p-6 text-center">
+                <div className="bg-surface-card rounded-xl border border-border w-full max-w-md p-6 text-center">
                     <div className="w-16 h-16 bg-status-available/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <CheckCircle size={32} className="text-status-available" />
                     </div>
-                    <h2 className="text-xl font-bold text-white mb-2">Password Changed</h2>
-                    <p className="text-slate-400">Your password has been updated successfully.</p>
+                    <h2 className="text-xl font-bold text-heading mb-2">Password Changed</h2>
+                    <p className="text-muted">Your password has been updated successfully.</p>
                 </div>
             </div>
         );
@@ -78,13 +78,13 @@ export function PasswordChangeModal({ onClose }: PasswordChangeModalProps) {
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md">
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
-                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-md">
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                    <h2 className="text-xl font-bold text-heading flex items-center gap-2">
                         <Lock size={20} />
                         Change Password
                     </h2>
-                    <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg">
+                    <button onClick={onClose} className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg">
                         <X size={20} />
                     </button>
                 </div>
@@ -112,7 +112,7 @@ export function PasswordChangeModal({ onClose }: PasswordChangeModalProps) {
                             <button
                                 type="button"
                                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-heading"
                             >
                                 {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
@@ -135,7 +135,7 @@ export function PasswordChangeModal({ onClose }: PasswordChangeModalProps) {
                             <button
                                 type="button"
                                 onClick={() => setShowNewPassword(!showNewPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-heading"
                             >
                                 {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>

@@ -56,7 +56,7 @@ export function SystemSettingsPanel() {
         <div className="space-y-6">
             {/* Operations */}
             <div className="card p-4">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                     <Clock size={18} />
                     Operations
                 </h3>
@@ -91,7 +91,7 @@ export function SystemSettingsPanel() {
                             onChange={(e) => setSettings(s => s ? { ...s, short_rest_enabled: e.target.checked } : null)}
                             className="w-4 h-4"
                         />
-                        <label htmlFor="short_rest_enabled" className="text-slate-400">Enable Short Rest bookings</label>
+                        <label htmlFor="short_rest_enabled" className="text-muted">Enable Short Rest bookings</label>
                     </div>
 
                     {settings?.short_rest_enabled && (
@@ -122,7 +122,7 @@ export function SystemSettingsPanel() {
                     )}
 
                     {/* Credit Limit Settings */}
-                    <div className="border-t border-slate-700 pt-4 mt-4">
+                    <div className="border-t border-border pt-4 mt-4">
                         <div className="flex items-center gap-3">
                             <input
                                 type="checkbox"
@@ -131,9 +131,9 @@ export function SystemSettingsPanel() {
                                 onChange={(e) => setSettings(s => s ? { ...s, credit_limit_enabled: e.target.checked } : null)}
                                 className="w-4 h-4"
                             />
-                            <label htmlFor="credit_limit_enabled" className="text-slate-400">Enable Credit Limit Warnings</label>
+                            <label htmlFor="credit_limit_enabled" className="text-muted">Enable Credit Limit Warnings</label>
                         </div>
-                        <p className="text-xs text-slate-500 mt-1 ml-7">
+                        <p className="text-xs text-muted mt-1 ml-7">
                             Warn staff when guest balance exceeds the limit
                         </p>
 
@@ -141,7 +141,7 @@ export function SystemSettingsPanel() {
                             <div className="mt-3 pl-7">
                                 <label className="label">Credit Limit Amount</label>
                                 <div className="relative max-w-xs">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">₦</span>
                                     <input
                                         type="number"
                                         value={settings?.credit_limit_amount ?? 50000}
@@ -159,13 +159,13 @@ export function SystemSettingsPanel() {
 
             {/* Session Timeout */}
             <div className="card p-4">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                     <Timer size={18} />
                     Session Timeout
                 </h3>
 
                 <div className="space-y-3">
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-muted">
                         Automatically log out inactive users after the selected duration. This helps keep the system secure on shared devices.
                     </p>
 
@@ -182,7 +182,7 @@ export function SystemSettingsPanel() {
                         </select>
                     </div>
 
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted">
                         A warning will appear 5 minutes before the session expires.
                     </p>
                 </div>

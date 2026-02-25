@@ -71,21 +71,21 @@ export function GuestDirectory() {
             {/* Summary Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="card p-4">
-                    <p className="text-sm text-slate-400">Currently In-House</p>
+                    <p className="text-sm text-muted">Currently In-House</p>
                     <p className="text-3xl font-bold text-primary-400">{inHouseCount}</p>
                 </div>
                 <div className="card p-4">
-                    <p className="text-sm text-slate-400">Total Guests</p>
-                    <p className="text-3xl font-bold text-white">{totalCount}</p>
+                    <p className="text-sm text-muted">Total Guests</p>
+                    <p className="text-3xl font-bold text-heading">{totalCount}</p>
                 </div>
                 <div className="card p-4">
-                    <p className="text-sm text-slate-400">VIP Guests</p>
+                    <p className="text-sm text-muted">VIP Guests</p>
                     <p className="text-3xl font-bold text-amber-400">
                         {allGuests?.filter(g => g.is_vip).length ?? 0}
                     </p>
                 </div>
                 <div className="card p-4 hidden md:block">
-                    <p className="text-sm text-slate-400">Returning Guests</p>
+                    <p className="text-sm text-muted">Returning Guests</p>
                     <p className="text-3xl font-bold text-status-available">
                         {allGuests?.filter(g => inHouseGuestIds.has(g.id)).length ?? 0}
                     </p>
@@ -97,7 +97,7 @@ export function GuestDirectory() {
                 {/* Search */}
                 <div className="flex items-center gap-3 flex-1">
                     <div className="relative flex-1 max-w-md">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                         <input
                             type="text"
                             value={searchQuery}
@@ -117,7 +117,7 @@ export function GuestDirectory() {
 
                     <button
                         onClick={() => setShowVIPOnly(!showVIPOnly)}
-                        className={`btn ${showVIPOnly ? 'bg-amber-500 text-white hover:bg-amber-600' : 'btn-secondary'}`}
+                        className={`btn ${showVIPOnly ? 'bg-amber-500 text-heading hover:bg-amber-600' : 'btn-secondary'}`}
                     >
                         <Star size={16} className="mr-1" />
                         VIP Only
@@ -138,14 +138,14 @@ export function GuestDirectory() {
             </div>
 
             {/* Results count */}
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-muted">
                 Showing {filteredGuests.length} of {totalCount} guests
                 {showInHouseOnly && ` (In-House only)`}
             </p>
 
             {/* Guest List */}
             {filteredGuests.length === 0 ? (
-                <div className="text-center py-12 text-slate-400">
+                <div className="text-center py-12 text-muted">
                     <Users size={48} className="mx-auto mb-3 opacity-50" />
                     <p>No guests found</p>
                     {searchQuery && (

@@ -299,16 +299,16 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
+                <div className="flex items-center justify-between p-4 border-b border-border">
                     <div>
-                        <h2 className="text-xl font-bold text-white">Room {room.room_number}</h2>
-                        <p className="text-sm text-slate-400">{room.room_type}</p>
+                        <h2 className="text-xl font-bold text-heading">Room {room.room_number}</h2>
+                        <p className="text-sm text-muted">{room.room_type}</p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                     >
                         <X size={20} />
                     </button>
@@ -325,19 +325,19 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                                         <User className="text-primary-400" size={20} />
                                     </div>
                                     <div>
-                                        <p className="text-white font-medium">{guest?.name ?? 'Guest'}</p>
-                                        <p className="text-sm text-slate-400">{guest?.phone ?? 'No phone'}</p>
+                                        <p className="text-heading font-medium">{guest?.name ?? 'Guest'}</p>
+                                        <p className="text-sm text-muted">{guest?.phone ?? 'No phone'}</p>
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3 text-sm">
                                     <div>
-                                        <p className="text-slate-400">Check-in</p>
-                                        <p className="text-white">{format(new Date(room.activeBooking.check_in_time), 'MMM d, h:mm a')}</p>
+                                        <p className="text-muted">Check-in</p>
+                                        <p className="text-heading">{format(new Date(room.activeBooking.check_in_time), 'MMM d, h:mm a')}</p>
                                     </div>
                                     <div>
-                                        <p className="text-slate-400">Checkout</p>
-                                        <p className="text-white">{format(new Date(room.activeBooking.planned_checkout), 'MMM d, h:mm a')}</p>
+                                        <p className="text-muted">Checkout</p>
+                                        <p className="text-heading">{format(new Date(room.activeBooking.planned_checkout), 'MMM d, h:mm a')}</p>
                                     </div>
                                 </div>
 
@@ -345,7 +345,7 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                                 {room.status === 'short_rest' && (
                                     <div className={`mt-3 p-3 rounded-lg ${countdown.isExpiringSoon || countdown.isExpired ? 'bg-status-dirty/20' : 'bg-status-shortRest/20'}`}>
                                         <div className="flex items-center justify-between">
-                                            <span className="text-slate-300">Time Remaining</span>
+                                            <span className="text-muted">Time Remaining</span>
                                             <span className={`font-mono text-lg font-bold ${countdown.isExpiringSoon || countdown.isExpired ? 'text-status-dirty' : 'text-status-shortRest'}`}>
                                                 {countdown.isExpired ? 'OVERTIME' : countdown.timeLeft}
                                             </span>
@@ -362,7 +362,7 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                             {/* Folio Summary */}
                             <div className="card p-4">
                                 <div className="flex items-center justify-between mb-3">
-                                    <h3 className="font-medium text-white flex items-center gap-2">
+                                    <h3 className="font-medium text-heading flex items-center gap-2">
                                         <CreditCard size={18} />
                                         Guest Folio
                                     </h3>
@@ -380,16 +380,16 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                                 <div className="space-y-1 text-sm">
                                     {/* Room charge */}
                                     <div className="flex justify-between py-1">
-                                        <span className="text-slate-300">
+                                        <span className="text-muted">
                                             Room {room.room_number} ({activeBooking?.booking_type === 'night' ? 'Night' : 'Short Rest'})
                                         </span>
-                                        <span className="text-white">₦{(activeBooking?.rate ?? 0).toLocaleString()}</span>
+                                        <span className="text-heading">₦{(activeBooking?.rate ?? 0).toLocaleString()}</span>
                                     </div>
 
                                     {/* Service orders with details */}
                                     {serviceOrders && serviceOrders.length > 0 && (
-                                        <div className="border-t border-slate-700/50 pt-2 mt-2">
-                                            <p className="text-xs text-slate-500 mb-1 flex items-center gap-1">
+                                        <div className="border-t border-border/50 pt-2 mt-2">
+                                            <p className="text-xs text-muted mb-1 flex items-center gap-1">
                                                 <UtensilsCrossed size={12} />
                                                 Services Ordered
                                             </p>
@@ -400,13 +400,13 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                                                     : service?.name ?? 'Service';
                                                 return (
                                                     <div key={order.id} className="flex justify-between py-1 text-xs">
-                                                        <span className="text-slate-400">
+                                                        <span className="text-muted">
                                                             {displayName} {order.service_id !== 'extension' && `× ${order.quantity}`}
                                                             {order.status !== 'delivered' && (
                                                                 <span className="ml-1 text-amber-400">({order.status})</span>
                                                             )}
                                                         </span>
-                                                        <span className="text-slate-300">₦{order.total_price.toLocaleString()}</span>
+                                                        <span className="text-muted">₦{order.total_price.toLocaleString()}</span>
                                                     </div>
                                                 );
                                             })}
@@ -414,27 +414,27 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                                     )}
 
                                     {/* Totals with Tax */}
-                                    <div className="border-t border-slate-700 pt-2 mt-2 space-y-1">
+                                    <div className="border-t border-border pt-2 mt-2 space-y-1">
                                         <div className="flex justify-between text-sm">
-                                            <span className="text-slate-400">Subtotal</span>
-                                            <span className="text-slate-300">₦{((activeBooking?.rate ?? 0) + servicesTotal).toLocaleString()}</span>
+                                            <span className="text-muted">Subtotal</span>
+                                            <span className="text-muted">₦{((activeBooking?.rate ?? 0) + servicesTotal).toLocaleString()}</span>
                                         </div>
                                         {totalTax > 0 && (
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-slate-400">Tax</span>
-                                                <span className="text-slate-300">₦{totalTax.toLocaleString()}</span>
+                                                <span className="text-muted">Tax</span>
+                                                <span className="text-muted">₦{totalTax.toLocaleString()}</span>
                                             </div>
                                         )}
                                         <div className="flex justify-between font-medium">
-                                            <span className="text-slate-300">Total (incl. tax)</span>
-                                            <span className="text-white">₦{totalWithTax.toLocaleString()}</span>
+                                            <span className="text-muted">Total (incl. tax)</span>
+                                            <span className="text-heading">₦{totalWithTax.toLocaleString()}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-slate-400">Total Paid</span>
+                                            <span className="text-muted">Total Paid</span>
                                             <span className="text-status-available">₦{(activeBooking?.total_paid ?? 0).toLocaleString()}</span>
                                         </div>
                                         <div className="flex justify-between font-bold text-lg pt-1">
-                                            <span className="text-white">Balance Due</span>
+                                            <span className="text-heading">Balance Due</span>
                                             <span className={(totalWithTax - (activeBooking?.total_paid ?? 0)) > 0 ? 'text-status-dirty' : 'text-status-available'}>
                                                 ₦{Math.max(0, totalWithTax - (activeBooking?.total_paid ?? 0)).toLocaleString()}
                                             </span>
@@ -444,10 +444,10 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
 
                                 {/* Payments history */}
                                 {payments && payments.length > 0 && (
-                                    <div className="mt-3 pt-3 border-t border-slate-700">
-                                        <p className="text-xs text-slate-500 mb-2">Payment History</p>
+                                    <div className="mt-3 pt-3 border-t border-border">
+                                        <p className="text-xs text-muted mb-2">Payment History</p>
                                         {payments.map((p) => (
-                                            <div key={p.id} className="flex justify-between text-xs text-slate-400 py-0.5">
+                                            <div key={p.id} className="flex justify-between text-xs text-muted py-0.5">
                                                 <span>{format(new Date(p.payment_time), 'MMM d, h:mm a')} • {p.payment_method}</span>
                                                 <span className="text-status-available">₦{p.amount.toLocaleString()}</span>
                                             </div>
@@ -459,7 +459,7 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                             {/* Payment Form */}
                             {showPayment && (
                                 <div className="card p-4">
-                                    <h3 className="font-medium text-white mb-3">Record Payment</h3>
+                                    <h3 className="font-medium text-heading mb-3">Record Payment</h3>
                                     <div className="space-y-3">
                                         <div>
                                             <label className="label">Amount</label>
@@ -498,7 +498,7 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                             {/* Extend Form - Short Rest */}
                             {showExtend && room.status === 'short_rest' && (
                                 <div className="card p-4">
-                                    <h3 className="font-medium text-white mb-3">Extend Short Rest</h3>
+                                    <h3 className="font-medium text-heading mb-3">Extend Short Rest</h3>
                                     <div className="space-y-3">
                                         <div>
                                             <label className="label">Additional Hours</label>
@@ -512,7 +512,7 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                                                 ))}
                                             </select>
                                         </div>
-                                        <p className="text-sm text-slate-400">
+                                        <p className="text-sm text-muted">
                                             Additional charge: ₦{((room.short_rest_hourly_rate ?? room.night_rate * 0.15) * extendHours).toLocaleString()}
                                         </p>
                                         <div className="flex gap-2">
@@ -530,7 +530,7 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                             {/* Extend Form - Night Stay */}
                             {showExtend && room.status === 'occupied' && (
                                 <div className="card p-4">
-                                    <h3 className="font-medium text-white mb-3">Extend Stay</h3>
+                                    <h3 className="font-medium text-heading mb-3">Extend Stay</h3>
                                     <div className="space-y-3">
                                         <div>
                                             <label className="label">Additional Nights</label>
@@ -544,7 +544,7 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                                                 ))}
                                             </select>
                                         </div>
-                                        <p className="text-sm text-slate-400">
+                                        <p className="text-sm text-muted">
                                             Additional charge: ₦{(room.night_rate * extendNights).toLocaleString()}
                                         </p>
                                         <div className="flex gap-2">
@@ -584,8 +584,8 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                         <div className="space-y-4">
                             <div className="text-center py-6">
                                 <Sparkles size={48} className="mx-auto text-status-dirty mb-3" />
-                                <p className="text-white font-medium">Room needs cleaning</p>
-                                <p className="text-sm text-slate-400">Mark as available when cleaned</p>
+                                <p className="text-heading font-medium">Room needs cleaning</p>
+                                <p className="text-sm text-muted">Mark as available when cleaned</p>
                             </div>
                             <div className="flex gap-2">
                                 <button
@@ -605,7 +605,7 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                             {/* Maintenance Form */}
                             {showMaintenanceForm && (
                                 <div className="card p-4 border-amber-500/30 bg-amber-500/5">
-                                    <h4 className="font-medium text-white mb-3 flex items-center gap-2">
+                                    <h4 className="font-medium text-heading mb-3 flex items-center gap-2">
                                         <Wrench size={16} className="text-amber-400" />
                                         Set Room to Maintenance
                                     </h4>
@@ -630,7 +630,7 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                                             <button
                                                 onClick={() => handleStatusChange('maintenance', maintenanceReason)}
                                                 disabled={isLoading}
-                                                className="btn flex-1 bg-amber-500 hover:bg-amber-600 text-white"
+                                                className="btn flex-1 bg-amber-500 hover:bg-amber-600 text-heading"
                                             >
                                                 {isLoading ? <Loader2 size={16} className="animate-spin" /> : 'Confirm'}
                                             </button>
@@ -646,13 +646,13 @@ export function RoomDetailsModal({ room, onClose }: RoomDetailsModalProps) {
                         <div className="space-y-4">
                             <div className="text-center py-6">
                                 <Wrench size={48} className="mx-auto text-status-maintenance mb-3" />
-                                <p className="text-white font-medium">Room under maintenance</p>
+                                <p className="text-heading font-medium">Room under maintenance</p>
                                 {room.maintenance_reason && (
                                     <p className="text-sm text-amber-400 mt-2">
                                         🔧 {room.maintenance_reason}
                                     </p>
                                 )}
-                                <p className="text-sm text-slate-400 mt-2">Mark as available when ready</p>
+                                <p className="text-sm text-muted mt-2">Mark as available when ready</p>
                             </div>
                             <div className="flex gap-2">
                                 <button onClick={() => handleStatusChange('dirty')} disabled={isLoading} className="btn btn-secondary flex-1">

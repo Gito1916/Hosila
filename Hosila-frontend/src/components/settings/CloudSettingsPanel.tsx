@@ -71,14 +71,14 @@ export function CloudSettingsPanel() {
         return (
             <div className="card p-6">
                 <div className="flex items-center gap-3 mb-4">
-                    <CloudOff className="text-slate-400" size={24} />
-                    <h3 className="text-lg font-semibold text-white">Cloud Not Configured</h3>
+                    <CloudOff className="text-muted" size={24} />
+                    <h3 className="text-lg font-semibold text-heading">Cloud Not Configured</h3>
                 </div>
-                <p className="text-slate-400 text-sm">
+                <p className="text-muted text-sm">
                     Cloud sync is not configured. Add your Supabase credentials to the{' '}
                     <code className="text-primary-400">.env</code> file to enable cloud features.
                 </p>
-                <div className="mt-4 p-3 bg-slate-700/50 rounded-lg text-xs font-mono text-slate-400">
+                <div className="mt-4 p-3 bg-surface-raised/50 rounded-lg text-xs font-mono text-muted">
                     VITE_SUPABASE_URL=your_url<br />
                     VITE_SUPABASE_ANON_KEY=your_key
                 </div>
@@ -139,15 +139,15 @@ export function CloudSettingsPanel() {
                             <MailCheck className="text-amber-400" size={24} />
                         </div>
                         <div>
-                            <h3 className="text-lg font-semibold text-white">Check Your Email</h3>
-                            <p className="text-sm text-slate-400">Confirm your account to continue</p>
+                            <h3 className="text-lg font-semibold text-heading">Check Your Email</h3>
+                            <p className="text-sm text-muted">Confirm your account to continue</p>
                         </div>
                     </div>
 
                     <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-4">
                         <p className="text-amber-300 text-sm font-medium mb-1">Confirmation link has been sent</p>
-                        <p className="text-slate-400 text-sm">
-                            We sent a confirmation link to <span className="text-white font-medium">{cloudAccount.email}</span>.
+                        <p className="text-muted text-sm">
+                            We sent a confirmation link to <span className="text-heading font-medium">{cloudAccount.email}</span>.
                             Check your email and click the link before proceeding.
                         </p>
                     </div>
@@ -196,7 +196,7 @@ export function CloudSettingsPanel() {
                             clearPendingConfirmation();
                             logoutCloud();
                         }}
-                        className="w-full mt-3 text-sm text-slate-500 hover:text-slate-300 transition-colors"
+                        className="w-full mt-3 text-sm text-muted hover:text-muted transition-colors"
                     >
                         Cancel and start over
                     </button>
@@ -217,8 +217,8 @@ export function CloudSettingsPanel() {
                                 <Cloud className="text-emerald-400" size={20} />
                             </div>
                             <div>
-                                <h3 className="text-lg font-semibold text-white">Cloud Connected</h3>
-                                <p className="text-sm text-slate-400">Hotel-level sync active</p>
+                                <h3 className="text-lg font-semibold text-heading">Cloud Connected</h3>
+                                <p className="text-sm text-muted">Hotel-level sync active</p>
                             </div>
                         </div>
                         <button
@@ -231,8 +231,8 @@ export function CloudSettingsPanel() {
                     </div>
 
                     {/* Cloud Account display */}
-                    <div className="bg-slate-700/50 rounded-lg p-3 mb-4">
-                        <p className="text-xs text-slate-400 mb-1">Cloud Account</p>
+                    <div className="bg-surface-raised/50 rounded-lg p-3 mb-4">
+                        <p className="text-xs text-muted mb-1">Cloud Account</p>
                         <div className="flex items-center gap-2">
                             <code className="text-primary-400 font-mono text-sm flex-1">{cloudAccount.email}</code>
                             <button
@@ -243,7 +243,7 @@ export function CloudSettingsPanel() {
                                 {copied ? 'Copied!' : 'Copy'}
                             </button>
                         </div>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-muted mt-1">
                             Use this email + sync password on other devices to connect.
                         </p>
                     </div>
@@ -283,8 +283,8 @@ export function CloudSettingsPanel() {
                         <div className="flex items-start gap-3">
                             <AlertCircle className="text-amber-400 mt-1 shrink-0" size={20} />
                             <div className="flex-1">
-                                <h4 className="text-white font-medium mb-1">Hotel Not Linked</h4>
-                                <p className="text-sm text-slate-400 mb-3">
+                                <h4 className="text-heading font-medium mb-1">Hotel Not Linked</h4>
+                                <p className="text-sm text-muted mb-3">
                                     Link your hotel to enable data syncing across devices.
                                 </p>
                                 <button
@@ -318,9 +318,9 @@ export function CloudSettingsPanel() {
                     <div className="card p-6">
                         <div className="flex items-center gap-3 mb-3">
                             <CheckCircle2 size={18} className="text-emerald-400" />
-                            <h4 className="text-white font-medium">All data syncs automatically</h4>
+                            <h4 className="text-heading font-medium">All data syncs automatically</h4>
                         </div>
-                        <p className="text-sm text-slate-400">
+                        <p className="text-sm text-muted">
                             This app operates fully online. All changes are saved directly to the cloud — no manual sync needed.
                         </p>
                     </div>
@@ -329,8 +329,8 @@ export function CloudSettingsPanel() {
                 {/* Account Management */}
                 {isCloudLinked && (
                     <div className="card p-6">
-                        <h4 className="text-white font-medium mb-4 flex items-center gap-2">
-                            <KeyRound size={18} className="text-slate-400" />
+                        <h4 className="text-heading font-medium mb-4 flex items-center gap-2">
+                            <KeyRound size={18} className="text-muted" />
                             Account Management
                         </h4>
 
@@ -351,19 +351,19 @@ export function CloudSettingsPanel() {
                             {!showChangeEmail ? (
                                 <button
                                     onClick={() => { setShowChangeEmail(true); setShowChangePassword(false); setMgmtSuccess(''); }}
-                                    className="w-full flex items-center gap-3 p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors text-left"
+                                    className="w-full flex items-center gap-3 p-3 bg-surface-raised/50 rounded-lg hover:bg-surface-raised transition-colors text-left"
                                 >
-                                    <Mail size={18} className="text-slate-400" />
+                                    <Mail size={18} className="text-muted" />
                                     <div>
-                                        <p className="text-white text-sm font-medium">Change Email</p>
-                                        <p className="text-xs text-slate-500">Update cloud account email address</p>
+                                        <p className="text-heading text-sm font-medium">Change Email</p>
+                                        <p className="text-xs text-muted">Update cloud account email address</p>
                                     </div>
                                 </button>
                             ) : (
-                                <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
+                                <div className="bg-surface-raised/50 rounded-lg p-4 space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <p className="text-white text-sm font-medium">Change Email</p>
-                                        <button onClick={() => setShowChangeEmail(false)} className="text-slate-400 hover:text-white text-xs">Cancel</button>
+                                        <p className="text-heading text-sm font-medium">Change Email</p>
+                                        <button onClick={() => setShowChangeEmail(false)} className="text-muted hover:text-heading text-xs">Cancel</button>
                                     </div>
                                     <input
                                         type="email"
@@ -372,7 +372,7 @@ export function CloudSettingsPanel() {
                                         className="input w-full"
                                         placeholder="New email address"
                                     />
-                                    <p className="text-xs text-slate-500">A confirmation link will be sent to the new email.</p>
+                                    <p className="text-xs text-muted">A confirmation link will be sent to the new email.</p>
                                     <button
                                         onClick={async () => {
                                             if (!newEmail) return;
@@ -398,19 +398,19 @@ export function CloudSettingsPanel() {
                             {!showChangePassword ? (
                                 <button
                                     onClick={() => { setShowChangePassword(true); setShowChangeEmail(false); setMgmtSuccess(''); }}
-                                    className="w-full flex items-center gap-3 p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors text-left"
+                                    className="w-full flex items-center gap-3 p-3 bg-surface-raised/50 rounded-lg hover:bg-surface-raised transition-colors text-left"
                                 >
-                                    <Lock size={18} className="text-slate-400" />
+                                    <Lock size={18} className="text-muted" />
                                     <div>
-                                        <p className="text-white text-sm font-medium">Change Sync Password</p>
-                                        <p className="text-xs text-slate-500">Update the password used for cloud sync</p>
+                                        <p className="text-heading text-sm font-medium">Change Sync Password</p>
+                                        <p className="text-xs text-muted">Update the password used for cloud sync</p>
                                     </div>
                                 </button>
                             ) : (
-                                <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
+                                <div className="bg-surface-raised/50 rounded-lg p-4 space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <p className="text-white text-sm font-medium">Change Sync Password</p>
-                                        <button onClick={() => setShowChangePassword(false)} className="text-slate-400 hover:text-white text-xs">Cancel</button>
+                                        <p className="text-heading text-sm font-medium">Change Sync Password</p>
+                                        <button onClick={() => setShowChangePassword(false)} className="text-muted hover:text-heading text-xs">Cancel</button>
                                     </div>
                                     <input
                                         type="password"
@@ -466,12 +466,12 @@ export function CloudSettingsPanel() {
                                     setMgmtLoading(false);
                                 }}
                                 disabled={mgmtLoading}
-                                className="w-full flex items-center gap-3 p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors text-left"
+                                className="w-full flex items-center gap-3 p-3 bg-surface-raised/50 rounded-lg hover:bg-surface-raised transition-colors text-left"
                             >
-                                <RefreshCw size={18} className="text-slate-400" />
+                                <RefreshCw size={18} className="text-muted" />
                                 <div>
-                                    <p className="text-white text-sm font-medium">Reset Password via Email</p>
-                                    <p className="text-xs text-slate-500">Send a password reset link to your cloud email</p>
+                                    <p className="text-heading text-sm font-medium">Reset Password via Email</p>
+                                    <p className="text-xs text-muted">Send a password reset link to your cloud email</p>
                                 </div>
                             </button>
                         </div>
@@ -496,23 +496,23 @@ export function CloudSettingsPanel() {
                         <Cloud className="text-primary-400" size={20} />
                     </div>
                     <div>
-                        <h3 className="text-lg font-semibold text-white">Cloud Sync</h3>
-                        <p className="text-sm text-slate-400">Sync data across devices</p>
+                        <h3 className="text-lg font-semibold text-heading">Cloud Sync</h3>
+                        <p className="text-sm text-muted">Sync data across devices</p>
                     </div>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-1 mb-6 bg-slate-700/50 p-1 rounded-lg">
+                <div className="flex gap-1 mb-6 bg-surface-raised/50 p-1 rounded-lg">
                     <button
                         onClick={() => setMode('create')}
-                        className={`flex - 1 py - 2 text - sm font - medium rounded - md transition - colors ${mode === 'create' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'
+                        className={`flex - 1 py - 2 text - sm font - medium rounded - md transition - colors ${mode === 'create' ? 'bg-surface-card text-heading' : 'text-muted hover:text-heading'
                             } `}
                     >
                         New Account
                     </button>
                     <button
                         onClick={() => setMode('connect')}
-                        className={`flex - 1 py - 2 text - sm font - medium rounded - md transition - colors flex items - center justify - center gap - 1.5 ${mode === 'connect' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'
+                        className={`flex - 1 py - 2 text - sm font - medium rounded - md transition - colors flex items - center justify - center gap - 1.5 ${mode === 'connect' ? 'bg-surface-card text-heading' : 'text-muted hover:text-heading'
                             } `}
                     >
                         <Monitor size={14} />
@@ -539,7 +539,7 @@ export function CloudSettingsPanel() {
                             <div>
                                 <label className="label">Email Address</label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
                                     <input
                                         type="email"
                                         value={cloudEmail}
@@ -550,14 +550,14 @@ export function CloudSettingsPanel() {
                                         autoComplete="email"
                                     />
                                 </div>
-                                <p className="text-xs text-slate-500 mt-1">
+                                <p className="text-xs text-muted mt-1">
                                     Used for cloud sync only — not for staff login.
                                 </p>
                             </div>
                             <div>
                                 <label className="label">Sync Password</label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
                                     <input
                                         type="password"
                                         value={syncPassword}
@@ -569,7 +569,7 @@ export function CloudSettingsPanel() {
                                         autoComplete="new-password"
                                     />
                                 </div>
-                                <p className="text-xs text-slate-500 mt-1">
+                                <p className="text-xs text-muted mt-1">
                                     Share this with devices that need to sync.
                                 </p>
                             </div>
@@ -580,7 +580,7 @@ export function CloudSettingsPanel() {
                             <div>
                                 <label className="label">Cloud Account Email</label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
                                     <input
                                         type="email"
                                         value={cloudEmail}
@@ -595,7 +595,7 @@ export function CloudSettingsPanel() {
                             <div>
                                 <label className="label">Sync Password</label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
                                     <input
                                         type="password"
                                         value={syncPassword}
@@ -629,7 +629,7 @@ export function CloudSettingsPanel() {
                     </button>
                 </form>
 
-                <p className="text-xs text-slate-500 mt-4 text-center">
+                <p className="text-xs text-muted mt-4 text-center">
                     {mode === 'create'
                         ? 'Creates a cloud account for this hotel. Share the email + password with other devices.'
                         : 'Enter the email from the device that created the cloud account.'}
@@ -659,7 +659,7 @@ function StatusCard({
         amber: 'bg-amber-500/10 text-amber-400',
         red: 'bg-red-500/10 text-red-400',
         blue: 'bg-blue-500/10 text-blue-400',
-        slate: 'bg-slate-700/50 text-slate-400',
+        slate: 'bg-surface-raised/50 text-muted',
     };
 
     return (

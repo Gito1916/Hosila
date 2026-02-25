@@ -41,7 +41,7 @@ export function SettingsPage() {
     if (!canAccess) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="text-center text-slate-400">
+                <div className="text-center text-muted">
                     <p className="text-xl mb-2">🔒 Access Denied</p>
                     <p>You don't have permission to access settings.</p>
                 </div>
@@ -53,14 +53,14 @@ export function SettingsPage() {
         <div className="space-y-6">
 
             {/* Tabs */}
-            <div className="flex flex-wrap gap-2 border-b border-slate-200 dark:border-slate-700 pb-2">
+            <div className="flex flex-wrap gap-2 border-b border-border pb-2">
                 {tabs.map((tab) => (
                     <button
                         key={tab.value}
                         onClick={() => setActiveTab(tab.value)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${activeTab === tab.value
-                            ? 'bg-primary-500 text-white'
-                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                            ? 'bg-primary-500 text-heading'
+                            : 'text-muted hover:text-heading dark:hover:text-heading hover:bg-surface-raised
                             }`}
                     >
                         {tab.icon}

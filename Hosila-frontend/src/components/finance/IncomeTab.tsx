@@ -107,15 +107,15 @@ export function IncomeTab({ dateFilter = 'daily', activeSection: controlledSecti
                         key={section.key}
                         onClick={() => setActiveSection(section.key)}
                         className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all whitespace-nowrap ${activeSection === section.key
-                            ? 'bg-primary-500 text-white'
-                            : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                            ? 'bg-primary-500 text-heading'
+                            : 'bg-surface-card text-muted hover:bg-surface-raised'
                             }`}
                     >
                         <section.icon size={18} />
                         <span>{section.label}</span>
                         <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeSection === section.key
                             ? 'bg-white/20'
-                            : 'bg-slate-700'
+                            : 'bg-surface-raised'
                             }`}>
                             ₦{section.total.toLocaleString()}
                         </span>
@@ -124,7 +124,7 @@ export function IncomeTab({ dateFilter = 'daily', activeSection: controlledSecti
             </div>
 
             {/* Section Content */}
-            <div className="bg-slate-800/50 rounded-lg border border-slate-700">
+            <div className="bg-surface-card/50 rounded-lg border border-border">
                 {activeSection === 'accommodation' && (
                     <ChargeSection charges={accommodationCharges} department="accommodation" />
                 )}
@@ -163,7 +163,7 @@ function ChargeSection({ charges, department }: { charges: Charge[]; department:
 
     if (charges.length === 0) {
         return (
-            <div className="text-center py-12 text-slate-400">
+            <div className="text-center py-12 text-muted">
                 <EmptyIcon size={32} className="mx-auto mb-2 opacity-50" />
                 <p>No {emptyLabel} income in this period</p>
                 <p className="text-sm mt-1">
@@ -192,7 +192,7 @@ function ChargeSection({ charges, department }: { charges: Charge[]; department:
         <div className="overflow-x-auto">
             <table className="w-full text-sm">
                 <thead>
-                    <tr className="bg-slate-900/50 text-slate-400 text-left">
+                    <tr className="bg-surface-base/50 text-muted text-left">
                         <th className="px-4 py-3 font-medium">Date/Time</th>
                         <th className="px-4 py-3 font-medium">Description</th>
                         <th className="px-4 py-3 font-medium">Guest</th>
@@ -202,28 +202,28 @@ function ChargeSection({ charges, department }: { charges: Charge[]; department:
                         <th className="px-4 py-3 font-medium text-right">Gross</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-700/50">
+                <tbody className="divide-y divide-border/50">
                     {enrichedCharges.map((charge) => (
-                        <tr key={charge.id} className="hover:bg-slate-700/30">
-                            <td className="px-4 py-3 text-slate-300">
+                        <tr key={charge.id} className="hover:bg-surface-raised/30">
+                            <td className="px-4 py-3 text-muted">
                                 {format(new Date(charge.charge_date), 'dd MMM HH:mm')}
                             </td>
-                            <td className="px-4 py-3 text-slate-300 max-w-[200px] truncate" title={charge.description}>
+                            <td className="px-4 py-3 text-muted max-w-[200px] truncate" title={charge.description}>
                                 {charge.description}
                             </td>
-                            <td className="px-4 py-3 text-slate-300">
+                            <td className="px-4 py-3 text-muted">
                                 {charge.guestName}
                             </td>
                             {department === 'accommodation' && (
                                 <td className="px-4 py-3">
                                     {charge.roomNumber && (
-                                        <span className="px-2 py-0.5 bg-slate-700 rounded text-xs text-slate-300">
+                                        <span className="px-2 py-0.5 bg-surface-raised rounded text-xs text-muted">
                                             Room {charge.roomNumber}
                                         </span>
                                     )}
                                 </td>
                             )}
-                            <td className="px-4 py-3 text-right text-slate-400">
+                            <td className="px-4 py-3 text-right text-muted">
                                 ₦{(charge.net_revenue ?? charge.gross_amount).toLocaleString()}
                             </td>
                             <td className="px-4 py-3 text-right text-amber-400 text-xs">
@@ -251,7 +251,7 @@ function OtherIncomeSection({
     return (
         <div>
             {/* Add Button */}
-            <div className="p-4 border-b border-slate-700">
+            <div className="p-4 border-b border-border">
                 <button onClick={onAddNew} className="btn btn-primary gap-2">
                     <Plus size={16} />
                     Record Other Income
@@ -259,7 +259,7 @@ function OtherIncomeSection({
             </div>
 
             {incomeList.length === 0 ? (
-                <div className="text-center py-12 text-slate-400">
+                <div className="text-center py-12 text-muted">
                     <Receipt size={32} className="mx-auto mb-2 opacity-50" />
                     <p>No other income recorded</p>
                     <p className="text-sm mt-1">Add venue rentals, pool fees, etc.</p>
@@ -268,7 +268,7 @@ function OtherIncomeSection({
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="bg-slate-900/50 text-slate-400 text-left">
+                            <tr className="bg-surface-base/50 text-muted text-left">
                                 <th className="px-4 py-3 font-medium">Date</th>
                                 <th className="px-4 py-3 font-medium">Category</th>
                                 <th className="px-4 py-3 font-medium">Description</th>
@@ -276,21 +276,21 @@ function OtherIncomeSection({
                                 <th className="px-4 py-3 font-medium text-right">Amount</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-700/50">
+                        <tbody className="divide-y divide-border/50">
                             {incomeList.map((income) => (
-                                <tr key={income.id} className="hover:bg-slate-700/30">
-                                    <td className="px-4 py-3 text-slate-300">
+                                <tr key={income.id} className="hover:bg-surface-raised/30">
+                                    <td className="px-4 py-3 text-muted">
                                         {format(new Date(income.date), 'dd MMM HH:mm')}
                                     </td>
-                                    <td className="px-4 py-3 text-slate-300">
-                                        <span className="px-2 py-0.5 rounded bg-slate-700 text-xs">
+                                    <td className="px-4 py-3 text-muted">
+                                        <span className="px-2 py-0.5 rounded bg-surface-raised text-xs">
                                             {categoryLabels[income.category]}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-slate-300 max-w-[200px] truncate">
+                                    <td className="px-4 py-3 text-muted max-w-[200px] truncate">
                                         {income.description}
                                     </td>
-                                    <td className="px-4 py-3 text-slate-400 capitalize">
+                                    <td className="px-4 py-3 text-muted capitalize">
                                         {income.payment_method}
                                     </td>
                                     <td className="px-4 py-3 text-right text-green-400 font-medium">

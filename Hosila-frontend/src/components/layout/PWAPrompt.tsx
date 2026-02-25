@@ -70,14 +70,14 @@ export function PWAPrompt() {
     }
 
     return (
-        <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl p-4 z-50 animate-slide-up">
+        <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-surface-card border border-border rounded-xl shadow-2xl p-4 z-50 animate-slide-up">
             <div className="flex items-start gap-3">
                 <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Download size={20} className="text-white" />
+                    <Download size={20} className="text-heading" />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white text-sm">Install Hosila</h3>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <h3 className="font-semibold text-heading text-sm">Install Hosila</h3>
+                    <p className="text-xs text-muted mt-1">
                         Install this app for quick access and offline use
                     </p>
                     <div className="flex gap-2 mt-3">
@@ -97,7 +97,7 @@ export function PWAPrompt() {
                 </div>
                 <button
                     onClick={handleDismiss}
-                    className="text-slate-500 hover:text-white p-1"
+                    className="text-muted hover:text-heading p-1"
                 >
                     <X size={16} />
                 </button>

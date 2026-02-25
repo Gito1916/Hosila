@@ -138,7 +138,7 @@ export function EmailSettingsPanel() {
             case 'skipped':
                 return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400"><AlertTriangle size={12} /> Skipped</span>;
             default:
-                return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-500/20 text-slate-400"><Clock size={12} /> Pending</span>;
+                return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-surface-inset0/20 text-muted"><Clock size={12} /> Pending</span>;
         }
     }
 
@@ -163,7 +163,7 @@ export function EmailSettingsPanel() {
         <div className="space-y-6">
             {/* ── Sending Mode ─────────────────────────────────── */}
             <div className="card p-4">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                     <Send size={18} />
                     Email Sending Mode
                 </h3>
@@ -171,7 +171,7 @@ export function EmailSettingsPanel() {
                 <div className="space-y-3">
                     {/* Shared mode */}
                     <label
-                        className={`block bg-slate-700/50 rounded-lg p-4 cursor-pointer border-2 transition-all ${sendingMode === 'shared' ? 'border-primary-400' : 'border-transparent'
+                        className={`block bg-surface-raised/50 rounded-lg p-4 cursor-pointer border-2 transition-all ${sendingMode === 'shared' ? 'border-primary-400' : 'border-transparent'
                             }`}
                     >
                         <div className="flex items-start gap-3">
@@ -185,10 +185,10 @@ export function EmailSettingsPanel() {
                             <div>
                                 <div className="flex items-center gap-2">
                                     <Globe size={16} className="text-primary-400" />
-                                    <span className="text-white font-medium">Use Hosila Shared Email</span>
+                                    <span className="text-heading font-medium">Use Hosila Shared Email</span>
                                     <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs rounded-full font-medium">Recommended</span>
                                 </div>
-                                <p className="text-sm text-slate-400 mt-1">
+                                <p className="text-sm text-muted mt-1">
                                     Emails sent from <strong>notifications@hosila.app</strong> with your hotel name.
                                     Reply-to set to your hotel's email. No domain setup needed.
                                 </p>
@@ -198,7 +198,7 @@ export function EmailSettingsPanel() {
 
                     {/* Custom mode */}
                     <label
-                        className={`block bg-slate-700/50 rounded-lg p-4 cursor-pointer border-2 transition-all ${sendingMode === 'custom' ? 'border-primary-400' : 'border-transparent'
+                        className={`block bg-surface-raised/50 rounded-lg p-4 cursor-pointer border-2 transition-all ${sendingMode === 'custom' ? 'border-primary-400' : 'border-transparent'
                             }`}
                     >
                         <div className="flex items-start gap-3">
@@ -212,10 +212,10 @@ export function EmailSettingsPanel() {
                             <div>
                                 <div className="flex items-center gap-2">
                                     <Shield size={16} className="text-amber-400" />
-                                    <span className="text-white font-medium">Use My Hotel Domain</span>
+                                    <span className="text-heading font-medium">Use My Hotel Domain</span>
                                     <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs rounded-full font-medium">Pro Feature</span>
                                 </div>
-                                <p className="text-sm text-slate-400 mt-1">
+                                <p className="text-sm text-muted mt-1">
                                     Emails sent from your own domain (e.g. reservations@grandhotel.com).
                                     Requires DNS verification.
                                 </p>
@@ -225,9 +225,9 @@ export function EmailSettingsPanel() {
 
                     {/* Custom domain fields */}
                     {sendingMode === 'custom' && (
-                        <div className="bg-slate-700/30 rounded-lg p-4 ml-6 mt-2 space-y-4">
+                        <div className="bg-surface-raised/30 rounded-lg p-4 ml-6 mt-2 space-y-4">
                             <div>
-                                <label className="block text-sm text-slate-300 mb-1">Custom Domain</label>
+                                <label className="block text-sm text-muted mb-1">Custom Domain</label>
                                 <input
                                     type="text"
                                     value={customDomain}
@@ -237,7 +237,7 @@ export function EmailSettingsPanel() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm text-slate-300 mb-1">Sender Email</label>
+                                <label className="block text-sm text-muted mb-1">Sender Email</label>
                                 <input
                                     type="email"
                                     value={customSenderEmail}
@@ -248,24 +248,24 @@ export function EmailSettingsPanel() {
                             </div>
 
                             {/* Verification Status */}
-                            <div className="bg-slate-800/50 rounded-lg p-3">
-                                <p className="text-xs font-medium text-slate-300 uppercase tracking-wider mb-2">Domain Verification</p>
+                            <div className="bg-surface-card/50 rounded-lg p-3">
+                                <p className="text-xs font-medium text-muted uppercase tracking-wider mb-2">Domain Verification</p>
                                 <div className="grid grid-cols-2 gap-2">
                                     <div className="flex items-center gap-2 text-sm">
-                                        {domainVerified ? <CheckCircle size={14} className="text-emerald-400" /> : <XCircle size={14} className="text-slate-500" />}
-                                        <span className={domainVerified ? 'text-emerald-400' : 'text-slate-500'}>Domain</span>
+                                        {domainVerified ? <CheckCircle size={14} className="text-emerald-400" /> : <XCircle size={14} className="text-muted" />}
+                                        <span className={domainVerified ? 'text-emerald-400' : 'text-muted'}>Domain</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm">
-                                        {spfVerified ? <CheckCircle size={14} className="text-emerald-400" /> : <XCircle size={14} className="text-slate-500" />}
-                                        <span className={spfVerified ? 'text-emerald-400' : 'text-slate-500'}>SPF</span>
+                                        {spfVerified ? <CheckCircle size={14} className="text-emerald-400" /> : <XCircle size={14} className="text-muted" />}
+                                        <span className={spfVerified ? 'text-emerald-400' : 'text-muted'}>SPF</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm">
-                                        {dkimVerified ? <CheckCircle size={14} className="text-emerald-400" /> : <XCircle size={14} className="text-slate-500" />}
-                                        <span className={dkimVerified ? 'text-emerald-400' : 'text-slate-500'}>DKIM</span>
+                                        {dkimVerified ? <CheckCircle size={14} className="text-emerald-400" /> : <XCircle size={14} className="text-muted" />}
+                                        <span className={dkimVerified ? 'text-emerald-400' : 'text-muted'}>DKIM</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm">
-                                        {dmarcVerified ? <CheckCircle size={14} className="text-emerald-400" /> : <XCircle size={14} className="text-slate-500" />}
-                                        <span className={dmarcVerified ? 'text-emerald-400' : 'text-slate-500'}>DMARC</span>
+                                        {dmarcVerified ? <CheckCircle size={14} className="text-emerald-400" /> : <XCircle size={14} className="text-muted" />}
+                                        <span className={dmarcVerified ? 'text-emerald-400' : 'text-muted'}>DMARC</span>
                                     </div>
                                 </div>
                                 {!domainVerified && (
@@ -282,24 +282,24 @@ export function EmailSettingsPanel() {
 
             {/* ── Auto-Send Toggles ───────────────────────────── */}
             <div className="card p-4">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                     <Mail size={18} />
                     Automated Guest Emails
                 </h3>
 
                 <div className="space-y-4">
                     {/* Reservation confirmation */}
-                    <div className="bg-slate-700/50 rounded-lg p-4">
+                    <div className="bg-surface-raised/50 rounded-lg p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h4 className="text-white font-medium">Reservation Confirmation</h4>
-                                <p className="text-sm text-slate-400 mt-0.5">
+                                <h4 className="text-heading font-medium">Reservation Confirmation</h4>
+                                <p className="text-sm text-muted mt-0.5">
                                     Auto-send when a new reservation is created
                                 </p>
                             </div>
                             <button
                                 onClick={() => setSendReservation(!sendReservation)}
-                                className={`transition-colors ${sendReservation ? 'text-status-available' : 'text-slate-500'}`}
+                                className={`transition-colors ${sendReservation ? 'text-status-available' : 'text-muted'}`}
                             >
                                 {sendReservation ? <ToggleRight size={28} /> : <ToggleLeft size={28} />}
                             </button>
@@ -307,17 +307,17 @@ export function EmailSettingsPanel() {
                     </div>
 
                     {/* Check-in welcome */}
-                    <div className="bg-slate-700/50 rounded-lg p-4">
+                    <div className="bg-surface-raised/50 rounded-lg p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h4 className="text-white font-medium">Check-in Welcome Email</h4>
-                                <p className="text-sm text-slate-400 mt-0.5">
+                                <h4 className="text-heading font-medium">Check-in Welcome Email</h4>
+                                <p className="text-sm text-muted mt-0.5">
                                     Auto-send when a guest checks in
                                 </p>
                             </div>
                             <button
                                 onClick={() => setSendCheckin(!sendCheckin)}
-                                className={`transition-colors ${sendCheckin ? 'text-status-available' : 'text-slate-500'}`}
+                                className={`transition-colors ${sendCheckin ? 'text-status-available' : 'text-muted'}`}
                             >
                                 {sendCheckin ? <ToggleRight size={28} /> : <ToggleLeft size={28} />}
                             </button>
@@ -325,17 +325,17 @@ export function EmailSettingsPanel() {
                     </div>
 
                     {/* Check-out receipt */}
-                    <div className="bg-slate-700/50 rounded-lg p-4">
+                    <div className="bg-surface-raised/50 rounded-lg p-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h4 className="text-white font-medium">Check-out Receipt Email</h4>
-                                <p className="text-sm text-slate-400 mt-0.5">
+                                <h4 className="text-heading font-medium">Check-out Receipt Email</h4>
+                                <p className="text-sm text-muted mt-0.5">
                                     Auto-send receipt with charges when a guest checks out
                                 </p>
                             </div>
                             <button
                                 onClick={() => setSendCheckout(!sendCheckout)}
-                                className={`transition-colors ${sendCheckout ? 'text-status-available' : 'text-slate-500'}`}
+                                className={`transition-colors ${sendCheckout ? 'text-status-available' : 'text-muted'}`}
                             >
                                 {sendCheckout ? <ToggleRight size={28} /> : <ToggleLeft size={28} />}
                             </button>
@@ -346,21 +346,21 @@ export function EmailSettingsPanel() {
 
             {/* ── Branding ────────────────────────────────────── */}
             <div className="card p-4">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                     <Palette size={18} />
                     Email Branding
                 </h3>
 
                 <div className="space-y-4">
                     {/* Primary Color */}
-                    <div className="bg-slate-700/50 rounded-lg p-4">
-                        <label className="block text-sm text-slate-300 mb-2">Brand Color (CTA buttons, accents)</label>
+                    <div className="bg-surface-raised/50 rounded-lg p-4">
+                        <label className="block text-sm text-muted mb-2">Brand Color (CTA buttons, accents)</label>
                         <div className="flex items-center gap-3">
                             <input
                                 type="color"
                                 value={primaryColor}
                                 onChange={(e) => setPrimaryColor(e.target.value)}
-                                className="w-10 h-10 rounded-lg border-2 border-slate-600 cursor-pointer"
+                                className="w-10 h-10 rounded-lg border-2 border-border-strong cursor-pointer"
                             />
                             <input
                                 type="text"
@@ -377,8 +377,8 @@ export function EmailSettingsPanel() {
                     </div>
 
                     {/* Custom Footer */}
-                    <div className="bg-slate-700/50 rounded-lg p-4">
-                        <label className="block text-sm text-slate-300 mb-2">Custom Footer Message (optional)</label>
+                    <div className="bg-surface-raised/50 rounded-lg p-4">
+                        <label className="block text-sm text-muted mb-2">Custom Footer Message (optional)</label>
                         <textarea
                             value={customFooter}
                             onChange={(e) => setCustomFooter(e.target.value)}
@@ -391,31 +391,31 @@ export function EmailSettingsPanel() {
 
             {/* ── Promo Block ─────────────────────────────────── */}
             <div className="card p-4">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                     <Megaphone size={18} />
                     Promotional Content
                 </h3>
 
-                <div className="bg-slate-700/50 rounded-lg p-4">
+                <div className="bg-surface-raised/50 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                         <div>
-                            <h4 className="text-white font-medium">Include Promo Block in Emails</h4>
-                            <p className="text-sm text-slate-400 mt-0.5">
+                            <h4 className="text-heading font-medium">Include Promo Block in Emails</h4>
+                            <p className="text-sm text-muted mt-0.5">
                                 Add a promotional section to guest emails
                             </p>
                         </div>
                         <button
                             onClick={() => setPromoEnabled(!promoEnabled)}
-                            className={`transition-colors ${promoEnabled ? 'text-status-available' : 'text-slate-500'}`}
+                            className={`transition-colors ${promoEnabled ? 'text-status-available' : 'text-muted'}`}
                         >
                             {promoEnabled ? <ToggleRight size={28} /> : <ToggleLeft size={28} />}
                         </button>
                     </div>
 
                     {promoEnabled && (
-                        <div className="space-y-3 mt-4 pt-3 border-t border-slate-600">
+                        <div className="space-y-3 mt-4 pt-3 border-t border-border-strong">
                             <div>
-                                <label className="block text-sm text-slate-300 mb-1">Promo Title</label>
+                                <label className="block text-sm text-muted mb-1">Promo Title</label>
                                 <input
                                     type="text"
                                     value={promoTitle}
@@ -425,7 +425,7 @@ export function EmailSettingsPanel() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm text-slate-300 mb-1">Promo Description</label>
+                                <label className="block text-sm text-muted mb-1">Promo Description</label>
                                 <textarea
                                     value={promoBody}
                                     onChange={(e) => setPromoBody(e.target.value)}
@@ -473,14 +473,14 @@ export function EmailSettingsPanel() {
                     onClick={handleExpandLogs}
                     className="flex items-center justify-between w-full"
                 >
-                    <h3 className="font-semibold text-white flex items-center gap-2">
+                    <h3 className="font-semibold text-heading flex items-center gap-2">
                         <Mail size={18} />
                         Email Send History
                         {logsTotal > 0 && (
-                            <span className="px-2 py-0.5 bg-slate-600 text-slate-300 text-xs rounded-full">{logsTotal}</span>
+                            <span className="px-2 py-0.5 bg-surface-card text-muted text-xs rounded-full">{logsTotal}</span>
                         )}
                     </h3>
-                    {logsExpanded ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
+                    {logsExpanded ? <ChevronUp size={18} className="text-muted" /> : <ChevronDown size={18} className="text-muted" />}
                 </button>
 
                 {logsExpanded && (
@@ -494,22 +494,22 @@ export function EmailSettingsPanel() {
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-sm">
                                         <thead>
-                                            <tr className="border-b border-slate-600">
-                                                <th className="text-left text-slate-400 font-medium pb-2 pr-3">Type</th>
-                                                <th className="text-left text-slate-400 font-medium pb-2 pr-3">Guest</th>
-                                                <th className="text-left text-slate-400 font-medium pb-2 pr-3">To</th>
-                                                <th className="text-left text-slate-400 font-medium pb-2 pr-3">Status</th>
-                                                <th className="text-left text-slate-400 font-medium pb-2">Date</th>
+                                            <tr className="border-b border-border-strong">
+                                                <th className="text-left text-muted font-medium pb-2 pr-3">Type</th>
+                                                <th className="text-left text-muted font-medium pb-2 pr-3">Guest</th>
+                                                <th className="text-left text-muted font-medium pb-2 pr-3">To</th>
+                                                <th className="text-left text-muted font-medium pb-2 pr-3">Status</th>
+                                                <th className="text-left text-muted font-medium pb-2">Date</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {logs.map(log => (
-                                                <tr key={log.id} className="border-b border-slate-700/50">
-                                                    <td className="py-2 pr-3 text-slate-300">{getEmailTypeLabel(log.email_type)}</td>
-                                                    <td className="py-2 pr-3 text-white">{log.guest_name || '—'}</td>
-                                                    <td className="py-2 pr-3 text-slate-400 text-xs">{log.recipient_email}</td>
+                                                <tr key={log.id} className="border-b border-border/50">
+                                                    <td className="py-2 pr-3 text-muted">{getEmailTypeLabel(log.email_type)}</td>
+                                                    <td className="py-2 pr-3 text-heading">{log.guest_name || '—'}</td>
+                                                    <td className="py-2 pr-3 text-muted text-xs">{log.recipient_email}</td>
                                                     <td className="py-2 pr-3">{getStatusBadge(log.status)}</td>
-                                                    <td className="py-2 text-slate-400 text-xs">
+                                                    <td className="py-2 text-muted text-xs">
                                                         {new Date(log.sent_at).toLocaleString()}
                                                     </td>
                                                 </tr>
@@ -528,7 +528,7 @@ export function EmailSettingsPanel() {
                                         >
                                             Previous
                                         </button>
-                                        <span className="text-sm text-slate-400">
+                                        <span className="text-sm text-muted">
                                             Page {logsPage} of {logsPages}
                                         </span>
                                         <button
@@ -543,9 +543,9 @@ export function EmailSettingsPanel() {
                             </>
                         ) : (
                             <div className="text-center py-8">
-                                <Mail size={32} className="text-slate-600 mx-auto mb-2" />
-                                <p className="text-slate-400 text-sm">No emails sent yet</p>
-                                <p className="text-slate-500 text-xs mt-1">Emails will appear here as guests check in, check out, and make reservations.</p>
+                                <Mail size={32} className="text-muted mx-auto mb-2" />
+                                <p className="text-muted text-sm">No emails sent yet</p>
+                                <p className="text-muted text-xs mt-1">Emails will appear here as guests check in, check out, and make reservations.</p>
                             </div>
                         )}
                     </div>

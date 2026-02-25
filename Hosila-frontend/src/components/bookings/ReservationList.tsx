@@ -129,7 +129,7 @@ export function ReservationList({ onCheckIn: _onCheckIn }: ReservationListProps)
             case 'checked_in':
                 return 'bg-blue-500/20 text-blue-400';
             default:
-                return 'bg-slate-500/20 text-slate-400';
+                return 'bg-surface-inset0/20 text-muted';
         }
     };
 
@@ -140,7 +140,7 @@ export function ReservationList({ onCheckIn: _onCheckIn }: ReservationListProps)
         if (isPast(checkInDate)) {
             return { label: 'Overdue', color: 'text-red-400' };
         }
-        return { label: format(checkInDate, 'MMM d'), color: 'text-slate-400' };
+        return { label: format(checkInDate, 'MMM d'), color: 'text-muted' };
     };
 
     return (
@@ -149,21 +149,21 @@ export function ReservationList({ onCheckIn: _onCheckIn }: ReservationListProps)
             <div className="grid grid-cols-3 gap-3">
                 <div className="card p-3 text-center">
                     <p className="text-2xl font-bold text-green-400">{statusCounts.confirmed}</p>
-                    <p className="text-xs text-slate-400">Confirmed</p>
+                    <p className="text-xs text-muted">Confirmed</p>
                 </div>
                 <div className="card p-3 text-center">
                     <p className="text-2xl font-bold text-amber-400">{statusCounts.pending}</p>
-                    <p className="text-xs text-slate-400">Pending</p>
+                    <p className="text-xs text-muted">Pending</p>
                 </div>
                 <div className="card p-3 text-center">
                     <p className="text-2xl font-bold text-red-400">{statusCounts.cancelled}</p>
-                    <p className="text-xs text-slate-400">Cancelled</p>
+                    <p className="text-xs text-muted">Cancelled</p>
                 </div>
             </div>
 
             {/* Filter */}
             <div className="flex items-center gap-2">
-                <Filter size={16} className="text-slate-400" />
+                <Filter size={16} className="text-muted" />
                 <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value as ReservationStatus | 'all')}
@@ -187,20 +187,20 @@ export function ReservationList({ onCheckIn: _onCheckIn }: ReservationListProps)
                     return (
                         <div
                             key={reservation.id}
-                            className="card p-4 flex items-center justify-between gap-4 hover:border-slate-600 transition-colors"
+                            className="card p-4 flex items-center justify-between gap-4 hover:border-border-strong transition-colors"
                         >
                             {/* Guest & Room Info */}
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <User size={14} className="text-slate-400" />
-                                    <span className="font-medium text-white truncate">
+                                    <User size={14} className="text-muted" />
+                                    <span className="font-medium text-heading truncate">
                                         {reservation.guestName}
                                     </span>
                                     <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusBadge(reservation.status)}`}>
                                         {reservation.status}
                                     </span>
                                 </div>
-                                <div className="text-sm text-slate-400 space-x-2">
+                                <div className="text-sm text-muted space-x-2">
                                     <span>Room {reservation.roomNumber}</span>
                                     <span>•</span>
                                     <span>{reservation.nights} night{reservation.nights !== 1 ? 's' : ''}</span>
@@ -214,7 +214,7 @@ export function ReservationList({ onCheckIn: _onCheckIn }: ReservationListProps)
                                 <p className={arrivalStatus.color}>
                                     Arrives: {arrivalStatus.label}
                                 </p>
-                                <p className="text-xs text-slate-500">
+                                <p className="text-xs text-muted">
                                     {format(new Date(reservation.check_in_date), 'MMM d')} - {format(new Date(reservation.check_out_date), 'MMM d')}
                                 </p>
                             </div>
@@ -224,7 +224,7 @@ export function ReservationList({ onCheckIn: _onCheckIn }: ReservationListProps)
                                 {(reservation.status === 'confirmed' || reservation.status === 'pending') && (
                                     <button
                                         onClick={() => setEditReservation(reservation)}
-                                        className="btn btn-ghost py-1 px-2 text-slate-400 hover:text-white hover:bg-slate-700"
+                                        className="btn btn-ghost py-1 px-2 text-muted hover:text-heading hover:bg-surface-raised"
                                         title="Edit Reservation"
                                     >
                                         <Edit3 size={14} />
@@ -261,7 +261,7 @@ export function ReservationList({ onCheckIn: _onCheckIn }: ReservationListProps)
 
             {/* Empty State */}
             {filteredReservations.length === 0 && (
-                <div className="text-center py-12 text-slate-400">
+                <div className="text-center py-12 text-muted">
                     <Calendar size={48} className="mx-auto mb-4 opacity-50" />
                     <p>No reservations found</p>
                 </div>

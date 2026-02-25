@@ -86,12 +86,12 @@ export function ReservationCalendar({ onReservationClick }: ReservationCalendarP
     return (
         <div className="card overflow-hidden">
             {/* Calendar Header */}
-            <div className="p-4 border-b border-slate-700 flex items-center justify-between">
+            <div className="p-4 border-b border-border flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <button onClick={prevMonth} className="btn btn-ghost p-2">
                         <ChevronLeft size={20} />
                     </button>
-                    <h3 className="text-lg font-semibold text-white min-w-[160px] text-center">
+                    <h3 className="text-lg font-semibold text-heading min-w-[160px] text-center">
                         {format(currentMonth, 'MMMM yyyy')}
                     </h3>
                     <button onClick={nextMonth} className="btn btn-ghost p-2">
@@ -104,9 +104,9 @@ export function ReservationCalendar({ onReservationClick }: ReservationCalendarP
             </div>
 
             {/* Weekday Headers */}
-            <div className="grid grid-cols-7 bg-slate-700/50">
+            <div className="grid grid-cols-7 bg-surface-raised/50">
                 {weekdays.map(day => (
-                    <div key={day} className="p-2 text-center text-sm font-medium text-slate-400">
+                    <div key={day} className="p-2 text-center text-sm font-medium text-muted">
                         {day}
                     </div>
                 ))}
@@ -122,13 +122,13 @@ export function ReservationCalendar({ onReservationClick }: ReservationCalendarP
                     return (
                         <div
                             key={idx}
-                            className={`min-h-[100px] p-1 border-r border-b border-slate-700 last:border-r-0 ${!isCurrentMonth ? 'bg-slate-800/30' : 'bg-slate-800/50'
+                            className={`min-h-[100px] p-1 border-r border-b border-border last:border-r-0 ${!isCurrentMonth ? 'bg-surface-inset' : 'bg-surface-card/50'
                                 }`}
                         >
                             {/* Day number */}
                             <div className={`text-sm mb-1 ${isToday
-                                ? 'w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold'
-                                : isCurrentMonth ? 'text-slate-300' : 'text-slate-600'
+                                ? 'w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center text-heading font-bold'
+                                : isCurrentMonth ? 'text-muted' : 'text-muted'
                                 }`}>
                                 {format(day, 'd')}
                             </div>
@@ -158,7 +158,7 @@ export function ReservationCalendar({ onReservationClick }: ReservationCalendarP
                                     );
                                 })}
                                 {dayReservations.length > 3 && (
-                                    <div className="text-xs text-slate-500 px-1">
+                                    <div className="text-xs text-muted px-1">
                                         +{dayReservations.length - 3} more
                                     </div>
                                 )}
@@ -169,7 +169,7 @@ export function ReservationCalendar({ onReservationClick }: ReservationCalendarP
             </div>
 
             {/* Legend */}
-            <div className="p-3 border-t border-slate-700 flex items-center gap-4 text-xs text-slate-400">
+            <div className="p-3 border-t border-border flex items-center gap-4 text-xs text-muted">
                 <div className="flex items-center gap-1">
                     <span className="w-3 h-3 bg-status-available/30 rounded"></span>
                     <span>Check-in</span>

@@ -277,7 +277,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-surface-base flex items-center justify-center p-4">
             <div className="w-full max-w-lg">
                 {/* Progress indicator */}
                 {currentStep !== 'welcome' && (
@@ -285,10 +285,10 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                         {activeSteps.map((_, i) => (
                             <div key={i} className="flex items-center gap-2">
                                 <div className={`w-3 h-3 rounded-full ${i < getStepIndex(currentStep) ? 'bg-status-available' :
-                                    i === getStepIndex(currentStep) ? 'bg-primary-500' : 'bg-slate-700'
+                                    i === getStepIndex(currentStep) ? 'bg-primary-500' : 'bg-surface-raised'
                                     }`} />
                                 {i < activeSteps.length - 1 && (
-                                    <div className={`w-12 h-0.5 ${i < getStepIndex(currentStep) ? 'bg-status-available' : 'bg-slate-700'
+                                    <div className={`w-12 h-0.5 ${i < getStepIndex(currentStep) ? 'bg-status-available' : 'bg-surface-raised'
                                         }`} />
                                 )}
                             </div>
@@ -296,7 +296,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                     </div>
                 )}
 
-                <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
+                <div className="bg-surface-card rounded-2xl border border-border overflow-hidden">
                     {/* Welcome — Choose new or connect */}
                     {currentStep === 'welcome' && (
                         <div className="p-6">
@@ -304,46 +304,46 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                 <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-16 h-16 rounded-xl" />
                                 </div>
-                                <h2 className="text-2xl font-bold text-white">Welcome to Hosila</h2>
-                                <p className="text-slate-400 mt-2">How would you like to get started?</p>
+                                <h2 className="text-2xl font-bold text-heading">Welcome to Hosila</h2>
+                                <p className="text-muted mt-2">How would you like to get started?</p>
                             </div>
 
                             <div className="space-y-3">
                                 <button
                                     onClick={() => setCurrentStep('account')}
-                                    className="w-full p-5 rounded-xl border-2 border-slate-700 hover:border-primary-500 hover:bg-primary-500/5 text-left transition-all group"
+                                    className="w-full p-5 rounded-xl border-2 border-border hover:border-primary-500 hover:bg-primary-500/5 text-left transition-all group"
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className="w-12 h-12 bg-primary-500/20 rounded-full flex items-center justify-center shrink-0 group-hover:bg-primary-500/30 transition-colors">
                                             <Building2 size={24} className="text-primary-400" />
                                         </div>
                                         <div>
-                                            <p className="text-white font-semibold text-lg">Create New Hotel</p>
-                                            <p className="text-sm text-slate-400">First time using Hosila? Set up your hotel.</p>
+                                            <p className="text-heading font-semibold text-lg">Create New Hotel</p>
+                                            <p className="text-sm text-muted">First time using Hosila? Set up your hotel.</p>
                                         </div>
-                                        <ChevronRight size={20} className="text-slate-500 ml-auto shrink-0" />
+                                        <ChevronRight size={20} className="text-muted ml-auto shrink-0" />
                                     </div>
                                 </button>
 
                                 <button
                                     onClick={() => setCurrentStep('connect')}
                                     disabled={!cloudAvailable}
-                                    className={`w-full p-5 rounded-xl border-2 border-slate-700 hover:border-cyan-500 hover:bg-cyan-500/5 text-left transition-all group ${!cloudAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`w-full p-5 rounded-xl border-2 border-border hover:border-cyan-500 hover:bg-cyan-500/5 text-left transition-all group ${!cloudAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className="w-12 h-12 bg-cyan-500/20 rounded-full flex items-center justify-center shrink-0 group-hover:bg-cyan-500/30 transition-colors">
                                             <Link2 size={24} className="text-cyan-400" />
                                         </div>
                                         <div>
-                                            <p className="text-white font-semibold text-lg">Connect to Hotel</p>
-                                            <p className="text-sm text-slate-400">Already set up? Join an existing hotel.</p>
+                                            <p className="text-heading font-semibold text-lg">Connect to Hotel</p>
+                                            <p className="text-sm text-muted">Already set up? Join an existing hotel.</p>
                                         </div>
-                                        <ChevronRight size={20} className="text-slate-500 ml-auto shrink-0" />
+                                        <ChevronRight size={20} className="text-muted ml-auto shrink-0" />
                                     </div>
                                 </button>
 
                                 {!cloudAvailable && (
-                                    <p className="text-xs text-slate-500 text-center mt-2">
+                                    <p className="text-xs text-muted text-center mt-2">
                                         Cloud sync not configured. Add Supabase credentials to connect to an existing hotel.
                                     </p>
                                 )}
@@ -358,8 +358,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                 <div className="w-16 h-16 bg-primary-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <UserPlus size={32} className="text-primary-400" />
                                 </div>
-                                <h2 className="text-2xl font-bold text-white">Create Your Account</h2>
-                                <p className="text-slate-400 mt-2">
+                                <h2 className="text-2xl font-bold text-heading">Create Your Account</h2>
+                                <p className="text-muted mt-2">
                                     This account secures your hotel data in the cloud
                                 </p>
                             </div>
@@ -368,7 +368,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                 <div>
                                     <label className="label">Email Address *</label>
                                     <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
                                         <input
                                             type="email"
                                             value={accountEmail}
@@ -378,7 +378,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                             autoFocus
                                         />
                                     </div>
-                                    <p className="text-xs text-slate-500 mt-1">
+                                    <p className="text-xs text-muted mt-1">
                                         Use the same email and password to connect other devices later.
                                     </p>
                                 </div>
@@ -437,8 +437,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                 <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-12 h-12 rounded-xl" />
                                 </div>
-                                <h2 className="text-2xl font-bold text-white">Hotel Details</h2>
-                                <p className="text-slate-400 mt-2">Tell us about your hotel</p>
+                                <h2 className="text-2xl font-bold text-heading">Hotel Details</h2>
+                                <p className="text-muted mt-2">Tell us about your hotel</p>
                             </div>
 
                             <div className="space-y-4">
@@ -519,8 +519,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                 <div className="w-16 h-16 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <Monitor size={32} className="text-cyan-400" />
                                 </div>
-                                <h2 className="text-2xl font-bold text-white">Connect to Hotel</h2>
-                                <p className="text-slate-400 mt-2">Enter the cloud account details from the hotel's account</p>
+                                <h2 className="text-2xl font-bold text-heading">Connect to Hotel</h2>
+                                <p className="text-muted mt-2">Enter the cloud account details from the hotel's account</p>
                             </div>
 
                             {!connectSuccess ? (
@@ -528,7 +528,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                     <div>
                                         <label className="label">Cloud Account Email</label>
                                         <div className="relative">
-                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
                                             <input
                                                 type="email"
                                                 value={connectEmail}
@@ -581,7 +581,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                         )}
                                     </button>
 
-                                    <p className="text-xs text-slate-500 text-center">
+                                    <p className="text-xs text-muted text-center">
                                         Ask the hotel administrator for the cloud email and password.
                                     </p>
                                 </div>
@@ -590,8 +590,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                     <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto">
                                         <Check size={24} className="text-emerald-400" />
                                     </div>
-                                    <p className="text-white font-medium text-lg">Connected Successfully!</p>
-                                    <p className="text-sm text-slate-400">
+                                    <p className="text-heading font-medium text-lg">Connected Successfully!</p>
+                                    <p className="text-sm text-muted">
                                         Your device is now linked to the hotel. You can sign in with your staff account.
                                     </p>
                                     <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 text-sm text-emerald-400">
@@ -633,8 +633,8 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                 <div className="w-16 h-16 bg-status-available/20 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <Check size={32} className="text-status-available" />
                                 </div>
-                                <h2 className="text-2xl font-bold text-white">You're All Set!</h2>
-                                <p className="text-slate-400 mt-2">
+                                <h2 className="text-2xl font-bold text-heading">You're All Set!</h2>
+                                <p className="text-muted mt-2">
                                     {`${hotelName || 'Your hotel'} is ready to use`}
                                 </p>
                             </div>
@@ -645,9 +645,9 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                     <ShieldAlert size={20} className="text-amber-400 shrink-0 mt-0.5" />
                                     <div>
                                         <p className="text-amber-400 font-medium text-sm">Change Your Default Password</p>
-                                        <p className="text-slate-400 text-xs mt-1">
-                                            You'll be signed in as <strong className="text-white">Admin</strong> with the default password.
-                                            Go to <strong className="text-white">Settings → Users</strong> to change it.
+                                        <p className="text-muted text-xs mt-1">
+                                            You'll be signed in as <strong className="text-heading">Admin</strong> with the default password.
+                                            Go to <strong className="text-heading">Settings → Users</strong> to change it.
                                         </p>
                                     </div>
                                 </div>
@@ -666,32 +666,32 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                         {copied ? 'Copied!' : 'Copy'}
                                     </button>
                                 </div>
-                                <p className="text-xs text-slate-400 mt-2">
+                                <p className="text-xs text-muted mt-2">
                                     Use this email + password to connect other devices.
                                 </p>
                             </div>
 
-                            <div className="bg-slate-700/50 rounded-lg p-4 mb-6">
-                                <h3 className="text-white font-medium mb-3 flex items-center gap-2">
+                            <div className="bg-surface-raised/50 rounded-lg p-4 mb-6">
+                                <h3 className="text-heading font-medium mb-3 flex items-center gap-2">
                                     <Settings size={16} className="text-primary-400" />
                                     Next Steps
                                 </h3>
-                                <ul className="text-sm text-slate-400 space-y-2">
+                                <ul className="text-sm text-muted space-y-2">
                                     <li className="flex items-start gap-2">
                                         <span className="text-primary-400 mt-0.5">→</span>
-                                        Go to <strong className="text-white">Settings → Room Types</strong> to configure room types
+                                        Go to <strong className="text-heading">Settings → Room Types</strong> to configure room types
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-primary-400 mt-0.5">→</span>
-                                        Go to <strong className="text-white">Settings → Rooms</strong> to add your rooms
+                                        Go to <strong className="text-heading">Settings → Rooms</strong> to add your rooms
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-primary-400 mt-0.5">→</span>
-                                        Go to <strong className="text-white">Settings → Users</strong> to add staff accounts
+                                        Go to <strong className="text-heading">Settings → Users</strong> to add staff accounts
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <span className="text-primary-400 mt-0.5">→</span>
-                                        Go to <strong className="text-white">Settings → Restaurant</strong> to set up the menu
+                                        Go to <strong className="text-heading">Settings → Restaurant</strong> to set up the menu
                                     </li>
                                 </ul>
                             </div>

@@ -49,18 +49,18 @@ export function TodayActivity({ onCheckIn, onCheckOut }: TodayActivityProps) {
 
     const getAvatarColor = (index: number) => {
         const colors = [
-            'bg-primary-400 text-white',
-            'bg-purple-500 text-white',
-            'bg-blue-500 text-white',
-            'bg-amber-500 text-white',
-            'bg-rose-500 text-white',
+            'bg-primary-400 text-heading',
+            'bg-purple-500 text-heading',
+            'bg-blue-500 text-heading',
+            'bg-amber-500 text-heading',
+            'bg-rose-500 text-heading',
         ];
         return colors[index % colors.length];
     };
 
     if (activities.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+            <div className="flex flex-col items-center justify-center py-12 text-muted">
                 <p>No activity expected today.</p>
             </div>
         );
@@ -70,32 +70,32 @@ export function TodayActivity({ onCheckIn, onCheckOut }: TodayActivityProps) {
         <div className="w-full">
             <table className="w-full text-left border-collapse">
                 <thead>
-                    <tr className="border-b border-slate-100 dark:border-navy-700">
-                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Guest</th>
-                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 hidden sm:table-cell">Room</th>
-                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 hidden md:table-cell">Duration</th>
-                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
-                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">Amount</th>
+                    <tr className="border-b border-border
+                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted
+                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted hidden sm:table-cell">Room</th>
+                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted hidden md:table-cell">Duration</th>
+                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted
+                        <th className="pb-3 text-xs font-semibold uppercase tracking-wider text-muted text-right">Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     {activities.map((act, idx) => (
-                        <tr key={act.id + act.type} className="border-b last:border-0 border-slate-50 dark:border-navy-700/50 hover:bg-slate-50 dark:hover:bg-navy-700/50 transition-colors group cursor-pointer" onClick={act.action}>
+                        <tr key={act.id + act.type} className="border-b last:border-0 border-border-subtle hover:bg-surface-inset transition-colors group cursor-pointer" onClick={act.action}>
                             <td className="py-3">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-9 h-9 rounded-full flex items-center justify-center font-medium text-sm shrink-0 shadow-sm ${getAvatarColor(idx)}`}>
                                         {act.guestName.charAt(0).toUpperCase()}
                                     </div>
                                     <div>
-                                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{act.guestName}</p>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">#{act.ref}</p>
+                                        <p className="text-sm font-semibold text-heading
+                                        <p className="text-xs text-muted
                                     </div>
                                 </div>
                             </td>
-                            <td className="py-3 text-sm text-slate-600 dark:text-slate-300 hidden sm:table-cell font-medium">
+                            <td className="py-3 text-sm text-muted hidden sm:table-cell font-medium">
                                 {act.room}
                             </td>
-                            <td className="py-3 text-sm text-slate-500 dark:text-slate-400 hidden md:table-cell">
+                            <td className="py-3 text-sm text-muted hidden md:table-cell">
                                 {act.duration}
                             </td>
                             <td className="py-3">
@@ -103,7 +103,7 @@ export function TodayActivity({ onCheckIn, onCheckOut }: TodayActivityProps) {
                                     {act.status}
                                 </span>
                             </td>
-                            <td className="py-3 text-sm font-medium text-slate-900 dark:text-white text-right">
+                            <td className="py-3 text-sm font-medium text-heading text-right">
                                 {act.amount}
                             </td>
                         </tr>

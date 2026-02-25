@@ -79,14 +79,14 @@ export function ReservationCard({ reservation, onClick, onCheckIn, onEdit, isPro
     return (
         <button
             onClick={onClick}
-            className="w-full text-left bg-slate-800 border border-slate-700 rounded-xl p-4 hover:border-slate-600 transition-all"
+            className="w-full text-left bg-surface-card border border-border rounded-xl p-4 hover:border-border-strong transition-all"
         >
             {/* Header */}
             <div className="flex items-start justify-between mb-3">
                 <div>
-                    <h3 className="text-lg font-semibold text-white">{guest?.name ?? 'Guest'}</h3>
+                    <h3 className="text-lg font-semibold text-heading">{guest?.name ?? 'Guest'}</h3>
                     {guest?.phone && (
-                        <p className="text-sm text-slate-400 flex items-center gap-1">
+                        <p className="text-sm text-muted flex items-center gap-1">
                             <Phone size={12} /> {guest.phone}
                         </p>
                     )}
@@ -100,24 +100,24 @@ export function ReservationCard({ reservation, onClick, onCheckIn, onEdit, isPro
             {/* Details */}
             <div className="space-y-2 text-sm">
                 {/* Room */}
-                <div className="flex items-center gap-2 text-slate-300">
-                    <MapPin size={14} className="text-slate-500" />
+                <div className="flex items-center gap-2 text-muted">
+                    <MapPin size={14} className="text-muted" />
                     <span>Room {room?.room_number ?? '...'}</span>
-                    <span className="text-slate-500">•</span>
-                    <span className="text-slate-400">{room?.room_type ?? '...'}</span>
+                    <span className="text-muted">•</span>
+                    <span className="text-muted">{room?.room_type ?? '...'}</span>
                 </div>
 
                 {/* Dates */}
-                <div className="flex items-center gap-2 text-slate-300">
-                    <Calendar size={14} className="text-slate-500" />
+                <div className="flex items-center gap-2 text-muted">
+                    <Calendar size={14} className="text-muted" />
                     <span>{format(checkInDate, 'MMM d')} - {format(checkOutDate, 'MMM d, yyyy')}</span>
-                    <span className="text-slate-500">•</span>
-                    <span className="text-slate-400">{reservation.nights} night{reservation.nights !== 1 ? 's' : ''}</span>
+                    <span className="text-muted">•</span>
+                    <span className="text-muted">{reservation.nights} night{reservation.nights !== 1 ? 's' : ''}</span>
                 </div>
 
                 {/* Arrival indicator */}
                 {reservation.status === 'confirmed' && (
-                    <div className={`flex items-center gap-2 ${arrival.urgent ? 'text-status-dirty' : 'text-slate-400'}`}>
+                    <div className={`flex items-center gap-2 ${arrival.urgent ? 'text-status-dirty' : 'text-muted'}`}>
                         {arrival.urgent && <AlertCircle size={14} />}
                         <span>Arrives: {arrival.label}</span>
                     </div>
@@ -125,10 +125,10 @@ export function ReservationCard({ reservation, onClick, onCheckIn, onEdit, isPro
             </div>
 
             {/* Footer */}
-            <div className="mt-3 pt-3 border-t border-slate-700 flex items-center justify-between">
+            <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
                 <div className="text-sm">
-                    <span className="text-slate-400">Total: </span>
-                    <span className="text-white font-medium">₦{reservation.total_amount.toLocaleString()}</span>
+                    <span className="text-muted">Total: </span>
+                    <span className="text-heading font-medium">₦{reservation.total_amount.toLocaleString()}</span>
                     {reservation.deposit_paid > 0 && (
                         <span className="text-status-available ml-2">
                             (₦{reservation.deposit_paid.toLocaleString()} paid)
@@ -144,7 +144,7 @@ export function ReservationCard({ reservation, onClick, onCheckIn, onEdit, isPro
                                 e.stopPropagation();
                                 onEdit?.(reservation);
                             }}
-                            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+                            className="p-1.5 text-muted hover:text-heading hover:bg-surface-raised rounded-lg transition-colors"
                             title="Edit Reservation"
                         >
                             <Edit3 size={16} />
@@ -158,7 +158,7 @@ export function ReservationCard({ reservation, onClick, onCheckIn, onEdit, isPro
                                 onCheckIn?.(reservation);
                             }}
                             disabled={isProcessing}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white text-xs font-bold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-heading text-xs font-bold rounded-lg transition-colors shadow-lg shadow-primary-900/20"
                         >
                             {isProcessing ? <Loader2 size={12} className="animate-spin" /> : <LogIn size={12} />}
                             {isProcessing ? 'Processing' : 'Check In'}
@@ -167,7 +167,7 @@ export function ReservationCard({ reservation, onClick, onCheckIn, onEdit, isPro
 
                     {/* Chevron only if no buttons or as affordance? */}
                     {!(reservation.status === 'confirmed' && (isToday(checkInDate) || isPast(checkInDate))) && (
-                        <ChevronRight size={16} className="text-slate-500" />
+                        <ChevronRight size={16} className="text-muted" />
                     )}
                 </div>
             </div>

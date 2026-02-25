@@ -108,22 +108,22 @@ function KpiCard({ label, value, trend, trendLabel, icon: Icon, accentColor, spa
     onClick?: () => void;
 }) {
     const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : null;
-    const trendColor = trend === 'up' ? 'text-emerald-400' : trend === 'down' ? 'text-red-400' : 'text-slate-500';
+    const trendColor = trend === 'up' ? 'text-emerald-400' : trend === 'down' ? 'text-red-400' : 'text-muted';
     return (
         <div
             onClick={onClick}
-            className={`finance-card relative overflow-hidden rounded-2xl border border-slate-700 bg-slate-800 p-5 transition-all hover:border-slate-600 ${onClick ? 'cursor-pointer hover:bg-slate-700' : ''}`}
+            className={`finance-card relative overflow-hidden rounded-2xl border border-border bg-surface-card p-5 transition-all hover:border-border-strong ${onClick ? 'cursor-pointer hover:bg-surface-raised' : ''}`}
         >
             {/* Gradient top accent */}
             <div
                 className="absolute top-0 left-0 right-0 h-[2px]"
                 style={{ background: `linear-gradient(90deg, ${accentColor}, transparent)` }}
             />
-            <div className="flex items-center gap-2 text-slate-400 mb-2">
+            <div className="flex items-center gap-2 text-muted mb-2">
                 <Icon size={14} style={{ color: accentColor }} />
                 <span className="text-xs font-medium uppercase tracking-wide">{label}</span>
             </div>
-            <p className="text-2xl font-bold text-white">{value}</p>
+            <p className="text-2xl font-bold text-heading">{value}</p>
             <div className="flex items-center justify-between mt-1">
                 {TrendIcon && trendLabel ? (
                     <div className={`flex items-center gap-1 text-xs font-medium ${trendColor}`}>
@@ -131,7 +131,7 @@ function KpiCard({ label, value, trend, trendLabel, icon: Icon, accentColor, spa
                         <span>{trendLabel}</span>
                     </div>
                 ) : trendLabel ? (
-                    <span className="text-xs text-slate-500">{trendLabel}</span>
+                    <span className="text-xs text-muted">{trendLabel}</span>
                 ) : <span />}
                 {sparkData && <Sparkline data={sparkData} color={accentColor} />}
             </div>
@@ -151,8 +151,8 @@ function DonutCard({ title, centerValue, centerLabel, segments, legendBelow = tr
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     void legendBelow;
     return (
-        <div className="finance-card rounded-2xl border border-slate-700 bg-slate-800 p-5">
-            <h3 className="text-sm font-semibold text-white mb-4">{title}</h3>
+        <div className="finance-card rounded-2xl border border-border bg-surface-card p-5">
+            <h3 className="text-sm font-semibold text-heading mb-4">{title}</h3>
             <div className="flex items-center gap-6">
                 <div className="relative w-[140px] h-[140px] flex-shrink-0">
                     {hasData ? (
@@ -174,15 +174,15 @@ function DonutCard({ title, centerValue, centerLabel, segments, legendBelow = tr
                             </PieChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className="w-full h-full rounded-full border-4 border-slate-700 flex items-center justify-center">
-                            <span className="text-slate-500 text-xs">No data</span>
+                        <div className="w-full h-full rounded-full border-4 border-border flex items-center justify-center">
+                            <span className="text-muted text-xs">No data</span>
                         </div>
                     )}
                     {/* Center KPI overlay */}
                     {hasData && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="text-sm font-bold text-white leading-none">{centerValue}</span>
-                            <span className="text-[10px] text-slate-400 mt-0.5">{centerLabel}</span>
+                            <span className="text-sm font-bold text-heading leading-none">{centerValue}</span>
+                            <span className="text-[10px] text-muted mt-0.5">{centerLabel}</span>
                         </div>
                     )}
                 </div>
@@ -193,11 +193,11 @@ function DonutCard({ title, centerValue, centerLabel, segments, legendBelow = tr
                             <div key={i} className="flex items-center justify-between text-sm">
                                 <div className="flex items-center gap-2 truncate">
                                     <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
-                                    <span className="text-slate-300 truncate">{s.name}</span>
+                                    <span className="text-muted truncate">{s.name}</span>
                                 </div>
                                 <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                                    <span className="text-white font-medium">{s.pct}</span>
-                                    <span className="text-slate-500 text-xs">{fmt(s.value)}</span>
+                                    <span className="text-heading font-medium">{s.pct}</span>
+                                    <span className="text-muted text-xs">{fmt(s.value)}</span>
                                 </div>
                             </div>
                         ))}
@@ -218,8 +218,8 @@ function MarginGauge({ margin }: { margin: number }) {
     const filled = (clamped / 100) * circ;
     const gaugeColor = clamped >= 60 ? '#10b981' : clamped >= 30 ? '#f59e0b' : '#ef4444';
     return (
-        <div className="finance-card rounded-2xl border border-slate-700 bg-slate-800 p-5">
-            <h3 className="text-sm font-semibold text-white mb-3">Profit Margin</h3>
+        <div className="finance-card rounded-2xl border border-border bg-surface-card p-5">
+            <h3 className="text-sm font-semibold text-heading mb-3">Profit Margin</h3>
             <div className="flex flex-col items-center">
                 <svg width={150} height={85} viewBox="0 0 150 85">
                     {/* Background arc */}
@@ -270,8 +270,8 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
     if (!active || !payload?.length) return null;
     return (
         <div className="card px-3 py-2 shadow-xl">
-            <p className="text-xs text-slate-400">{label}</p>
-            <p className="text-sm font-bold text-white">₦{payload[0].value.toLocaleString()}</p>
+            <p className="text-xs text-muted">{label}</p>
+            <p className="text-sm font-bold text-heading">₦{payload[0].value.toLocaleString()}</p>
         </div>
     );
 }
@@ -549,8 +549,8 @@ export function FinanceDashboard({ dateFilter = 'daily', onNavigate, onAddExpens
             </div>
 
             {/* ─── ROW 3: REVENUE TREND AREA CHART ─────────────────── */}
-            <div className="finance-card rounded-2xl border border-slate-700 bg-slate-800 p-5">
-                <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+            <div className="finance-card rounded-2xl border border-border bg-surface-card p-5">
+                <h3 className="text-sm font-semibold text-heading mb-4 flex items-center gap-2">
                     <Wallet size={16} className="text-primary-400" />
                     Revenue Trend — {dateFilter === 'yearly' ? 'Monthly' : 'Last 7 Days'}
                 </h3>
@@ -584,18 +584,18 @@ export function FinanceDashboard({ dateFilter = 'daily', onNavigate, onAddExpens
                 <MarginGauge margin={profitMargin} />
 
                 {/* Expenses by Category */}
-                <div className="finance-card rounded-2xl border border-slate-700 bg-slate-800 p-5">
-                    <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                <div className="finance-card rounded-2xl border border-border bg-surface-card p-5">
+                    <h3 className="text-sm font-semibold text-heading mb-4 flex items-center gap-2">
                         <Receipt size={16} className="text-red-400" />
                         Expenses by Category
                     </h3>
                     {sortedCategories.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
-                            <div className="w-12 h-12 rounded-full bg-slate-700/50 flex items-center justify-center mb-3">
-                                <Receipt size={20} className="text-slate-500" />
+                            <div className="w-12 h-12 rounded-full bg-surface-raised/50 flex items-center justify-center mb-3">
+                                <Receipt size={20} className="text-muted" />
                             </div>
-                            <p className="text-slate-400 text-sm mb-1">No expenses recorded</p>
-                            <p className="text-slate-500 text-xs mb-4">Track spending by adding expenses</p>
+                            <p className="text-muted text-sm mb-1">No expenses recorded</p>
+                            <p className="text-muted text-xs mb-4">Track spending by adding expenses</p>
                             {onAddExpense && (
                                 <button onClick={onAddExpense} className="btn btn-secondary text-sm flex items-center gap-2">
                                     <PlusCircle size={14} />
@@ -610,10 +610,10 @@ export function FinanceDashboard({ dateFilter = 'daily', onNavigate, onAddExpens
                                 return (
                                     <div key={category}>
                                         <div className="flex items-center justify-between text-sm mb-1">
-                                            <span className="text-slate-300">{categoryLabels[category]}</span>
-                                            <span className="text-white font-medium">₦{amount.toLocaleString()}</span>
+                                            <span className="text-muted">{categoryLabels[category]}</span>
+                                            <span className="text-heading font-medium">₦{amount.toLocaleString()}</span>
                                         </div>
-                                        <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                                        <div className="h-1.5 bg-surface-raised rounded-full overflow-hidden">
                                             <div
                                                 className="h-full rounded-full transition-all"
                                                 style={{
@@ -625,9 +625,9 @@ export function FinanceDashboard({ dateFilter = 'daily', onNavigate, onAddExpens
                                     </div>
                                 );
                             })}
-                            <div className="pt-3 border-t border-slate-700 flex justify-between">
-                                <span className="text-slate-400 text-sm">Total</span>
-                                <span className="text-white font-bold">₦{totalCatExpenses.toLocaleString()}</span>
+                            <div className="pt-3 border-t border-border flex justify-between">
+                                <span className="text-muted text-sm">Total</span>
+                                <span className="text-heading font-bold">₦{totalCatExpenses.toLocaleString()}</span>
                             </div>
                         </div>
                     )}

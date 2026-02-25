@@ -189,7 +189,7 @@ export function AccountPanel() {
         return (
             <div className="flex items-start gap-2 group">
                 <div className="flex-1">
-                    <p className="text-xs text-slate-500 mb-0.5">{label}</p>
+                    <p className="text-xs text-muted mb-0.5">{label}</p>
                     {isEditing ? (
                         <div className="flex items-center gap-2">
                             {multiline ? (
@@ -222,20 +222,20 @@ export function AccountPanel() {
                             </button>
                             <button
                                 onClick={cancelEdit}
-                                className="p-1.5 bg-slate-700 text-slate-400 rounded-lg hover:bg-slate-600 transition-colors"
+                                className="p-1.5 bg-surface-raised text-muted rounded-lg hover:bg-surface-card transition-colors"
                                 title="Cancel"
                             >
                                 <XCircle size={14} />
                             </button>
                         </div>
                     ) : (
-                        <p className="text-white text-sm">{value || <span className="text-slate-600 italic">Not set</span>}</p>
+                        <p className="text-heading text-sm">{value || <span className="text-muted italic">Not set</span>}</p>
                     )}
                 </div>
                 {!isEditing && (
                     <button
                         onClick={() => startEdit(field, value || '')}
-                        className="p-1.5 text-slate-600 hover:text-primary-400 hover:bg-slate-700/50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                        className="p-1.5 text-muted hover:text-primary-400 hover:bg-surface-raised rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                         title={`Edit ${label.toLowerCase()}`}
                     >
                         <Pencil size={13} />
@@ -249,7 +249,7 @@ export function AccountPanel() {
         <div className="space-y-6">
             {/* Hotel Information */}
             <div className="card p-4">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                     <Building size={18} />
                     Hotel Information
                 </h3>
@@ -257,7 +257,7 @@ export function AccountPanel() {
                 <div className="space-y-4">
                     {/* Logo */}
                     <div>
-                        <p className="text-xs text-slate-500 mb-1 flex items-center gap-1">
+                        <p className="text-xs text-muted mb-1 flex items-center gap-1">
                             <Image size={12} />
                             Hotel Logo
                         </p>
@@ -267,11 +267,11 @@ export function AccountPanel() {
                                     <img
                                         src={logoPreview || hotel?.logo_url}
                                         alt="Hotel Logo"
-                                        className="w-20 h-20 object-contain bg-slate-700 rounded-lg border border-slate-600"
+                                        className="w-20 h-20 object-contain bg-surface-raised rounded-lg border border-border-strong"
                                     />
                                     <button
                                         onClick={handleRemoveLogo}
-                                        className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
+                                        className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full text-heading hover:bg-red-600"
                                     >
                                         <X size={10} />
                                     </button>
@@ -279,10 +279,10 @@ export function AccountPanel() {
                             ) : (
                                 <div
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="w-20 h-20 flex flex-col items-center justify-center bg-slate-700/50 rounded-lg border border-dashed border-slate-500 cursor-pointer hover:border-primary-400 transition-colors"
+                                    className="w-20 h-20 flex flex-col items-center justify-center bg-surface-raised/50 rounded-lg border border-dashed border-border-subtle0 cursor-pointer hover:border-primary-400 transition-colors"
                                 >
-                                    <Upload size={18} className="text-slate-400" />
-                                    <span className="text-xs text-slate-400 mt-1">Upload</span>
+                                    <Upload size={18} className="text-muted" />
+                                    <span className="text-xs text-muted mt-1">Upload</span>
                                 </div>
                             )}
                             <input
@@ -298,7 +298,7 @@ export function AccountPanel() {
                                     Save Logo
                                 </button>
                             )}
-                            <div className="text-xs text-slate-500">
+                            <div className="text-xs text-muted">
                                 <p>Square image (e.g., 200×200px)</p>
                                 <p>Max size: 2 MB</p>
                             </div>
@@ -318,7 +318,7 @@ export function AccountPanel() {
             {/* Cloud Account */}
             {isCloudAvailable() && cloudAccount && (
                 <div className="card p-4">
-                    <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                    <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                         <Cloud size={18} />
                         Cloud Account
                     </h3>
@@ -339,7 +339,7 @@ export function AccountPanel() {
                             </div>
                             <p className="font-medium text-sm">{cloudLinked ? 'Yes' : 'Not Linked'}</p>
                         </div>
-                        <div className={`p-3 rounded-lg ${isOnline ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-700/50 text-slate-400'}`}>
+                        <div className={`p-3 rounded-lg ${isOnline ? 'bg-emerald-500/10 text-emerald-400' : 'bg-surface-raised/50 text-muted'}`}>
                             <div className="flex items-center gap-2 mb-1 opacity-70 text-xs">
                                 {isOnline ? <Cloud size={14} /> : <CloudOff size={14} />}
                                 Connection
@@ -349,8 +349,8 @@ export function AccountPanel() {
                     </div>
 
                     {/* Cloud email */}
-                    <div className="bg-slate-700/50 rounded-lg p-3 mb-4">
-                        <p className="text-xs text-slate-400 mb-1">Cloud Account Email</p>
+                    <div className="bg-surface-raised/50 rounded-lg p-3 mb-4">
+                        <p className="text-xs text-muted mb-1">Cloud Account Email</p>
                         <div className="flex items-center gap-2">
                             <code className="text-primary-400 font-mono text-sm flex-1">{cloudAccount.email}</code>
                             <button
@@ -368,7 +368,7 @@ export function AccountPanel() {
             {/* Account Management */}
             {isCloudAvailable() && cloudAccount && cloudLinked && (
                 <div className="card p-4">
-                    <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                    <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                         <KeyRound size={18} />
                         Account Management
                     </h3>
@@ -390,19 +390,19 @@ export function AccountPanel() {
                         {!showChangeEmail ? (
                             <button
                                 onClick={() => { setShowChangeEmail(true); setShowChangePassword(false); setMgmtSuccess(''); }}
-                                className="w-full flex items-center gap-3 p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors text-left"
+                                className="w-full flex items-center gap-3 p-3 bg-surface-raised/50 rounded-lg hover:bg-surface-raised transition-colors text-left"
                             >
-                                <Mail size={18} className="text-slate-400" />
+                                <Mail size={18} className="text-muted" />
                                 <div>
-                                    <p className="text-white text-sm font-medium">Change Email</p>
-                                    <p className="text-xs text-slate-500">Update cloud account email address</p>
+                                    <p className="text-heading text-sm font-medium">Change Email</p>
+                                    <p className="text-xs text-muted">Update cloud account email address</p>
                                 </div>
                             </button>
                         ) : (
-                            <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
+                            <div className="bg-surface-raised/50 rounded-lg p-4 space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <p className="text-white text-sm font-medium">Change Email</p>
-                                    <button onClick={() => setShowChangeEmail(false)} className="text-slate-400 hover:text-white text-xs">Cancel</button>
+                                    <p className="text-heading text-sm font-medium">Change Email</p>
+                                    <button onClick={() => setShowChangeEmail(false)} className="text-muted hover:text-heading text-xs">Cancel</button>
                                 </div>
                                 <input
                                     type="email"
@@ -411,7 +411,7 @@ export function AccountPanel() {
                                     className="input w-full"
                                     placeholder="New email address"
                                 />
-                                <p className="text-xs text-slate-500">A confirmation link will be sent to the new email.</p>
+                                <p className="text-xs text-muted">A confirmation link will be sent to the new email.</p>
                                 <button
                                     onClick={async () => {
                                         if (!newEmail) return;
@@ -437,19 +437,19 @@ export function AccountPanel() {
                         {!showChangePassword ? (
                             <button
                                 onClick={() => { setShowChangePassword(true); setShowChangeEmail(false); setMgmtSuccess(''); }}
-                                className="w-full flex items-center gap-3 p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors text-left"
+                                className="w-full flex items-center gap-3 p-3 bg-surface-raised/50 rounded-lg hover:bg-surface-raised transition-colors text-left"
                             >
-                                <Lock size={18} className="text-slate-400" />
+                                <Lock size={18} className="text-muted" />
                                 <div>
-                                    <p className="text-white text-sm font-medium">Change Sync Password</p>
-                                    <p className="text-xs text-slate-500">Update the password used for cloud sync</p>
+                                    <p className="text-heading text-sm font-medium">Change Sync Password</p>
+                                    <p className="text-xs text-muted">Update the password used for cloud sync</p>
                                 </div>
                             </button>
                         ) : (
-                            <div className="bg-slate-700/50 rounded-lg p-4 space-y-3">
+                            <div className="bg-surface-raised/50 rounded-lg p-4 space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <p className="text-white text-sm font-medium">Change Sync Password</p>
-                                    <button onClick={() => setShowChangePassword(false)} className="text-slate-400 hover:text-white text-xs">Cancel</button>
+                                    <p className="text-heading text-sm font-medium">Change Sync Password</p>
+                                    <button onClick={() => setShowChangePassword(false)} className="text-muted hover:text-heading text-xs">Cancel</button>
                                 </div>
                                 <input
                                     type="password"
@@ -505,12 +505,12 @@ export function AccountPanel() {
                                 setMgmtLoading(false);
                             }}
                             disabled={mgmtLoading}
-                            className="w-full flex items-center gap-3 p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors text-left"
+                            className="w-full flex items-center gap-3 p-3 bg-surface-raised/50 rounded-lg hover:bg-surface-raised transition-colors text-left"
                         >
-                            <RefreshCw size={18} className="text-slate-400" />
+                            <RefreshCw size={18} className="text-muted" />
                             <div>
-                                <p className="text-white text-sm font-medium">Reset Password via Email</p>
-                                <p className="text-xs text-slate-500">Send a password reset link to your cloud email</p>
+                                <p className="text-heading text-sm font-medium">Reset Password via Email</p>
+                                <p className="text-xs text-muted">Send a password reset link to your cloud email</p>
                             </div>
                         </button>
                     </div>

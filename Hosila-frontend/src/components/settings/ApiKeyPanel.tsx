@@ -153,7 +153,7 @@ export function ApiKeyPanel() {
 
     if (!supabase) {
         return (
-            <div className="text-slate-400 text-sm">
+            <div className="text-muted text-sm">
                 Cloud not configured. API keys require cloud sync.
             </div>
         );
@@ -165,7 +165,7 @@ export function ApiKeyPanel() {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Globe className="text-cyan-400" size={20} />
-                    <h4 className="text-white font-medium">Website API</h4>
+                    <h4 className="text-heading font-medium">Website API</h4>
                 </div>
                 <button
                     onClick={generateKey}
@@ -186,7 +186,7 @@ export function ApiKeyPanel() {
                 </button>
             </div>
 
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-muted">
                 API keys allow your hotel website to query room availability and create reservations.
             </p>
 
@@ -208,7 +208,7 @@ export function ApiKeyPanel() {
                         </p>
                     </div>
                     <div className="flex items-center gap-2 mt-2">
-                        <code className="flex-1 bg-slate-800 text-emerald-400 px-3 py-2 rounded text-xs font-mono break-all">
+                        <code className="flex-1 bg-surface-card text-emerald-400 px-3 py-2 rounded text-xs font-mono break-all">
                             {newKeyValue}
                         </code>
                         <button
@@ -224,10 +224,10 @@ export function ApiKeyPanel() {
             {/* Keys list */}
             {loading ? (
                 <div className="flex items-center justify-center py-8">
-                    <Loader2 className="animate-spin text-slate-400" size={24} />
+                    <Loader2 className="animate-spin text-muted" size={24} />
                 </div>
             ) : keys.length === 0 ? (
-                <div className="text-center py-8 text-slate-500 text-sm">
+                <div className="text-center py-8 text-muted text-sm">
                     No API keys yet. Generate one to get started.
                 </div>
             ) : (
@@ -236,14 +236,14 @@ export function ApiKeyPanel() {
                         <div
                             key={key.id}
                             className={`p-3 rounded-lg border ${key.is_active
-                                    ? 'bg-slate-800/50 border-slate-700'
-                                    : 'bg-slate-800/20 border-slate-700/50 opacity-60'
+                                    ? 'bg-surface-card/50 border-border'
+                                    : 'bg-surface-card/20 border-border/50 opacity-60'
                                 }`}
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <Key size={14} className={key.is_active ? 'text-cyan-400' : 'text-slate-500'} />
-                                    <code className="text-sm font-mono text-slate-300">
+                                    <Key size={14} className={key.is_active ? 'text-cyan-400' : 'text-muted'} />
+                                    <code className="text-sm font-mono text-muted">
                                         {key.key_prefix}...
                                     </code>
                                     {!key.is_active && (
@@ -271,7 +271,7 @@ export function ApiKeyPanel() {
                                     </button>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4 mt-1 text-xs text-slate-500">
+                            <div className="flex items-center gap-4 mt-1 text-xs text-muted">
                                 <span>Created: {new Date(key.created_at).toLocaleDateString()}</span>
                                 {key.last_used_at && (
                                     <span>Last used: {new Date(key.last_used_at).toLocaleDateString()}</span>
@@ -283,27 +283,27 @@ export function ApiKeyPanel() {
             )}
 
             {/* API Docs preview */}
-            <div className="mt-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
-                <h5 className="text-white text-sm font-medium mb-2 flex items-center gap-2">
+            <div className="mt-4 p-4 bg-surface-card/50 rounded-lg border border-border">
+                <h5 className="text-heading text-sm font-medium mb-2 flex items-center gap-2">
                     <ExternalLink size={14} />
                     API Endpoints
                 </h5>
                 <div className="space-y-1.5 text-xs font-mono">
                     <div>
                         <span className="text-emerald-400">GET</span>{' '}
-                        <span className="text-slate-400">{apiBaseUrl}?action=hotel-info&hotel_id={hotelId || '{hotel_id}'}</span>
+                        <span className="text-muted">{apiBaseUrl}?action=hotel-info&hotel_id={hotelId || '{hotel_id}'}</span>
                     </div>
                     <div>
                         <span className="text-emerald-400">GET</span>{' '}
-                        <span className="text-slate-400">{apiBaseUrl}?action=room-types&hotel_id={hotelId || '{hotel_id}'}</span>
+                        <span className="text-muted">{apiBaseUrl}?action=room-types&hotel_id={hotelId || '{hotel_id}'}</span>
                     </div>
                     <div>
                         <span className="text-emerald-400">GET</span>{' '}
-                        <span className="text-slate-400">{apiBaseUrl}?action=availability&hotel_id={hotelId || '{hotel_id}'}&check_in=...&check_out=...</span>
+                        <span className="text-muted">{apiBaseUrl}?action=availability&hotel_id={hotelId || '{hotel_id}'}&check_in=...&check_out=...</span>
                     </div>
                     <div>
                         <span className="text-blue-400">POST</span>{' '}
-                        <span className="text-slate-400">{apiBaseUrl}?action=create-reservation</span>
+                        <span className="text-muted">{apiBaseUrl}?action=create-reservation</span>
                         <span className="text-amber-400 ml-1">(API key required)</span>
                     </div>
                 </div>

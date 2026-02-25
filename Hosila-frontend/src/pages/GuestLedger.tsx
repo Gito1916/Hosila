@@ -43,8 +43,8 @@ export function GuestLedgerPage() {
     if (!booking) {
         return (
             <div className="text-center py-12">
-                <h2 className="text-xl font-bold text-white mb-2">Booking Not Found</h2>
-                <p className="text-slate-400 mb-4">The booking you're looking for doesn't exist.</p>
+                <h2 className="text-xl font-bold text-heading mb-2">Booking Not Found</h2>
+                <p className="text-muted mb-4">The booking you're looking for doesn't exist.</p>
                 <button
                     onClick={() => navigate('/bookings')}
                     className="btn btn-primary"
@@ -59,8 +59,8 @@ export function GuestLedgerPage() {
     if (!guest) {
         return (
             <div className="text-center py-12">
-                <h2 className="text-xl font-bold text-white mb-2">Guest Not Found</h2>
-                <p className="text-slate-400 mb-4">The guest associated with this booking was not found.</p>
+                <h2 className="text-xl font-bold text-heading mb-2">Guest Not Found</h2>
+                <p className="text-muted mb-4">The guest associated with this booking was not found.</p>
                 <button
                     onClick={() => navigate('/guests')}
                     className="btn btn-primary"
@@ -76,7 +76,7 @@ export function GuestLedgerPage() {
             {/* Back Button */}
             <button
                 onClick={() => navigate('/booking')}
-                className="flex items-center gap-2 text-slate-400 hover:text-white"
+                className="flex items-center gap-2 text-muted hover:text-heading"
             >
                 <ArrowLeft size={20} />
                 Back to Bookings

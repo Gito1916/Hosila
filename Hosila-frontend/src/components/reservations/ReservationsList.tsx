@@ -133,7 +133,7 @@ export function ReservationsList() {
                 {/* Filters */}
                 <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2">
-                        <Filter size={16} className="text-slate-400" />
+                        <Filter size={16} className="text-muted" />
                         <select
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value as ReservationStatus | 'all')}
@@ -150,24 +150,24 @@ export function ReservationsList() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2">
-                    <div className="flex rounded-lg overflow-hidden border border-slate-700">
+                    <div className="flex rounded-lg overflow-hidden border border-border">
                         <button
                             onClick={() => setViewMode('pipeline')}
-                            className={`p-2 ${viewMode === 'pipeline' ? 'bg-primary-500 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+                            className={`p-2 ${viewMode === 'pipeline' ? 'bg-primary-500 text-heading' : 'bg-surface-card text-muted hover:text-heading'}`}
                             title="Pipeline view"
                         >
                             <Columns size={18} />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`p-2 ${viewMode === 'list' ? 'bg-primary-500 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+                            className={`p-2 ${viewMode === 'list' ? 'bg-primary-500 text-heading' : 'bg-surface-card text-muted hover:text-heading'}`}
                             title="List view"
                         >
                             <List size={18} />
                         </button>
                         <button
                             onClick={() => setViewMode('calendar')}
-                            className={`p-2 ${viewMode === 'calendar' ? 'bg-primary-500 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+                            className={`p-2 ${viewMode === 'calendar' ? 'bg-primary-500 text-heading' : 'bg-surface-card text-muted hover:text-heading'}`}
                             title="Calendar view"
                         >
                             <Calendar size={18} />
@@ -184,19 +184,19 @@ export function ReservationsList() {
             {/* Status Summary */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="card p-3">
-                    <p className="text-sm text-slate-400">Confirmed</p>
+                    <p className="text-sm text-muted">Confirmed</p>
                     <p className="text-2xl font-bold text-status-available">{counts.confirmed}</p>
                 </div>
                 <div className="card p-3">
-                    <p className="text-sm text-slate-400">Pending</p>
+                    <p className="text-sm text-muted">Pending</p>
                     <p className="text-2xl font-bold text-status-dirty">{counts.pending}</p>
                 </div>
                 <div className="card p-3">
-                    <p className="text-sm text-slate-400">Checked In</p>
+                    <p className="text-sm text-muted">Checked In</p>
                     <p className="text-2xl font-bold text-status-shortRest">{counts.checked_in}</p>
                 </div>
                 <div className="card p-3">
-                    <p className="text-sm text-slate-400">Cancelled</p>
+                    <p className="text-sm text-muted">Cancelled</p>
                     <p className="text-2xl font-bold text-status-maintenance">{counts.cancelled}</p>
                 </div>
             </div>
@@ -205,7 +205,7 @@ export function ReservationsList() {
             {viewMode === 'list' && (
                 <div className="space-y-3">
                     {filteredReservations.length === 0 ? (
-                        <div className="text-center py-12 text-slate-400">
+                        <div className="text-center py-12 text-muted">
                             <Calendar size={48} className="mx-auto mb-3 opacity-50" />
                             <p>No reservations found</p>
                             <button onClick={() => setShowForm(true)} className="btn btn-primary mt-4">

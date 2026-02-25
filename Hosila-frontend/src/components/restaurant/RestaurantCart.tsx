@@ -437,17 +437,17 @@ export function RestaurantCart({
         if (isSidebar) {
             return (
                 <div className="card p-6 text-center">
-                    <ShoppingCart size={48} className="mx-auto text-slate-600 mb-4" />
-                    <h3 className="text-lg font-bold text-white mb-2">Cart is Empty</h3>
-                    <p className="text-slate-400 text-sm">Add items from the menu</p>
+                    <ShoppingCart size={48} className="mx-auto text-muted mb-4" />
+                    <h3 className="text-lg font-bold text-heading mb-2">Cart is Empty</h3>
+                    <p className="text-muted text-sm">Add items from the menu</p>
                 </div>
             );
         }
         return (
             <div className="p-6 text-center">
-                <ShoppingCart size={48} className="mx-auto text-slate-600 mb-4" />
-                <h2 className="text-xl font-bold text-white mb-2">Cart is Empty</h2>
-                <p className="text-slate-400 mb-4">Add some items from the menu to get started.</p>
+                <ShoppingCart size={48} className="mx-auto text-muted mb-4" />
+                <h2 className="text-xl font-bold text-heading mb-2">Cart is Empty</h2>
+                <p className="text-muted mb-4">Add some items from the menu to get started.</p>
                 {onClose && (
                     <button onClick={onClose} className="btn btn-primary">
                         Browse Menu
@@ -461,17 +461,17 @@ export function RestaurantCart({
     const cartContent = (
         <>
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-700">
+            <div className="flex items-center justify-between p-4 border-b border-border">
                 <div className="flex items-center gap-2">
                     <ShoppingCart size={20} className="text-primary-400" />
-                    <h2 className={`font-bold text-white ${isSidebar ? 'text-lg' : 'text-xl'}`}>
+                    <h2 className={`font-bold text-heading ${isSidebar ? 'text-lg' : 'text-xl'}`}>
                         Cart ({itemCount} items)
                     </h2>
                 </div>
                 {onClose && !isSidebar && (
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                     >
                         <X size={20} />
                     </button>
@@ -489,11 +489,11 @@ export function RestaurantCart({
                 {cart.map((item) => (
                     <div
                         key={item.service.id}
-                        className="bg-slate-700/50 rounded-lg p-3 flex items-center gap-3"
+                        className="bg-surface-raised/50 rounded-lg p-3 flex items-center gap-3"
                     >
                         <div className="flex-1 min-w-0">
-                            <p className="text-white font-medium truncate">{item.service.name}</p>
-                            <p className="text-sm text-slate-400">
+                            <p className="text-heading font-medium truncate">{item.service.name}</p>
+                            <p className="text-sm text-muted">
                                 ₦{item.service.price.toLocaleString()} each
                             </p>
                         </div>
@@ -502,14 +502,14 @@ export function RestaurantCart({
                         <div className="flex items-center gap-1">
                             <button
                                 onClick={() => onUpdateQuantity(item.service.id, item.quantity - 1)}
-                                className="w-7 h-7 rounded-full bg-slate-600 hover:bg-slate-500 flex items-center justify-center text-white"
+                                className="w-7 h-7 rounded-full bg-surface-card hover:bg-surface-inset0 flex items-center justify-center text-heading"
                             >
                                 <Minus size={12} />
                             </button>
-                            <span className="text-white font-bold w-6 text-center text-sm">{item.quantity}</span>
+                            <span className="text-heading font-bold w-6 text-center text-sm">{item.quantity}</span>
                             <button
                                 onClick={() => onUpdateQuantity(item.service.id, item.quantity + 1)}
-                                className="w-7 h-7 rounded-full bg-slate-600 hover:bg-slate-500 flex items-center justify-center text-white"
+                                className="w-7 h-7 rounded-full bg-surface-card hover:bg-surface-inset0 flex items-center justify-center text-heading"
                             >
                                 <Plus size={12} />
                             </button>
@@ -517,7 +517,7 @@ export function RestaurantCart({
 
                         {/* Item Total */}
                         <div className="text-right min-w-[60px]">
-                            <p className="text-white font-bold text-sm">
+                            <p className="text-heading font-bold text-sm">
                                 ₦{(item.service.price * item.quantity).toLocaleString()}
                             </p>
                         </div>
@@ -534,7 +534,7 @@ export function RestaurantCart({
             </div>
 
             {/* Checkout Section */}
-            <div className="border-t border-slate-700 p-4 space-y-4">
+            <div className="border-t border-border p-4 space-y-4">
                 {/* Mode Selector */}
                 <div>
                     <label className="label">Order Type</label>
@@ -542,8 +542,8 @@ export function RestaurantCart({
                         <button
                             onClick={() => setMode('room_tab')}
                             className={`flex items-center justify-center gap-2 p-2.5 rounded-lg font-medium text-sm transition-all ${mode === 'room_tab'
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-700'
+                                ? 'bg-primary-500 text-heading'
+                                : 'bg-surface-raised/50 text-muted hover:text-heading hover:bg-surface-raised'
                                 }`}
                         >
                             <DoorOpen size={16} />
@@ -552,8 +552,8 @@ export function RestaurantCart({
                         <button
                             onClick={() => setMode('walk_in')}
                             className={`flex items-center justify-center gap-2 p-2.5 rounded-lg font-medium text-sm transition-all ${mode === 'walk_in'
-                                ? 'bg-primary-500 text-white'
-                                : 'bg-slate-700/50 text-slate-400 hover:text-white hover:bg-slate-700'
+                                ? 'bg-primary-500 text-heading'
+                                : 'bg-surface-raised/50 text-muted hover:text-heading hover:bg-surface-raised'
                                 }`}
                         >
                             <CreditCard size={16} />
@@ -618,32 +618,32 @@ export function RestaurantCart({
                 )}
 
                 {/* Total with Tax */}
-                <div className="bg-slate-700/50 rounded-lg p-3 space-y-1.5">
+                <div className="bg-surface-raised/50 rounded-lg p-3 space-y-1.5">
                     <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Subtotal</span>
-                        <span className="text-white">₦{subtotal.toLocaleString()}</span>
+                        <span className="text-muted">Subtotal</span>
+                        <span className="text-heading">₦{subtotal.toLocaleString()}</span>
                     </div>
                     {scAmount > 0 && (
                         <div className="flex justify-between text-sm">
-                            <span className="text-slate-400">Service Charge</span>
-                            <span className="text-white">₦{scAmount.toLocaleString()}</span>
+                            <span className="text-muted">Service Charge</span>
+                            <span className="text-heading">₦{scAmount.toLocaleString()}</span>
                         </div>
                     )}
                     {vatAmount > 0 && (
                         <div className="flex justify-between text-sm">
-                            <span className="text-slate-400">VAT</span>
-                            <span className="text-white">₦{vatAmount.toLocaleString()}</span>
+                            <span className="text-muted">VAT</span>
+                            <span className="text-heading">₦{vatAmount.toLocaleString()}</span>
                         </div>
                     )}
                     {tdlAmount > 0 && (
                         <div className="flex justify-between text-sm">
-                            <span className="text-slate-400">TDL</span>
-                            <span className="text-white">₦{tdlAmount.toLocaleString()}</span>
+                            <span className="text-muted">TDL</span>
+                            <span className="text-heading">₦{tdlAmount.toLocaleString()}</span>
                         </div>
                     )}
-                    <div className="border-t border-slate-600 pt-1.5 flex justify-between">
-                        <span className="text-slate-300 font-medium">Total</span>
-                        <span className={`font-bold text-white ${isSidebar ? 'text-lg' : 'text-2xl'}`}>
+                    <div className="border-t border-border-strong pt-1.5 flex justify-between">
+                        <span className="text-muted font-medium">Total</span>
+                        <span className={`font-bold text-heading ${isSidebar ? 'text-lg' : 'text-2xl'}`}>
                             ₦{cartTotal.toLocaleString()}
                         </span>
                     </div>
@@ -689,41 +689,41 @@ export function RestaurantCart({
     // Confirmation Modal
     const confirmationModal = showConfirmation && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md p-5 space-y-4 animate-scale-up">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-md p-5 space-y-4 animate-scale-up">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary-500/20 rounded-lg">
                         <User size={24} className="text-primary-400" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-white">Confirm Guest Charge</h3>
-                        <p className="text-sm text-slate-400">Verify guest details before charging</p>
+                        <h3 className="text-lg font-bold text-heading">Confirm Guest Charge</h3>
+                        <p className="text-sm text-muted">Verify guest details before charging</p>
                     </div>
                 </div>
 
                 {/* Guest Details */}
-                <div className="bg-slate-700/50 rounded-lg p-4 space-y-2">
+                <div className="bg-surface-raised/50 rounded-lg p-4 space-y-2">
                     <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Room</span>
-                        <span className="text-white font-medium">{selectedBooking?.roomNumber}</span>
+                        <span className="text-muted">Room</span>
+                        <span className="text-heading font-medium">{selectedBooking?.roomNumber}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Guest Name</span>
-                        <span className="text-white font-medium">{selectedBooking?.guestName}</span>
+                        <span className="text-muted">Guest Name</span>
+                        <span className="text-heading font-medium">{selectedBooking?.guestName}</span>
                     </div>
-                    <div className="border-t border-slate-600 my-2" />
+                    <div className="border-t border-border-strong my-2" />
                     <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">Current Balance</span>
+                        <span className="text-muted">Current Balance</span>
                         <span className={guestBalance > 0 ? 'text-amber-400 font-medium' : 'text-green-400 font-medium'}>
                             ₦{guestBalance.toLocaleString()}
                         </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                        <span className="text-slate-400">This Order</span>
-                        <span className="text-white font-medium">₦{cartTotal.toLocaleString()}</span>
+                        <span className="text-muted">This Order</span>
+                        <span className="text-heading font-medium">₦{cartTotal.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between font-bold">
-                        <span className="text-white">New Balance</span>
-                        <span className={creditLimitWarning ? 'text-red-400' : 'text-white'}>
+                        <span className="text-heading">New Balance</span>
+                        <span className={creditLimitWarning ? 'text-red-400' : 'text-heading'}>
                             ₦{(guestBalance + cartTotal).toLocaleString()}
                         </span>
                     </div>

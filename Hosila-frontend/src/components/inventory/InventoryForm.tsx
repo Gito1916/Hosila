@@ -86,13 +86,13 @@ export function InventoryForm({ onClose, onSuccess }: InventoryFormProps) {
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-md">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
-                    <h2 className="text-xl font-bold text-white">Add Inventory Item</h2>
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                    <h2 className="text-xl font-bold text-heading">Add Inventory Item</h2>
                     <button
                         onClick={onClose}
-                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                     >
                         <X size={20} />
                     </button>
@@ -147,40 +147,40 @@ export function InventoryForm({ onClose, onSuccess }: InventoryFormProps) {
                     <div>
                         <label className="label">Item Behavior</label>
                         <div className="grid grid-cols-2 gap-2">
-                            <label className="flex items-center gap-2 p-3 rounded-lg border border-slate-600 cursor-pointer hover:border-primary-500 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10">
+                            <label className="flex items-center gap-2 p-3 rounded-lg border border-border-strong cursor-pointer hover:border-primary-500 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10">
                                 <input
                                     type="radio"
                                     value="consumable"
                                     {...register('behavior')}
                                     className="accent-primary-500"
                                 />
-                                <Package size={18} className="text-slate-400" />
+                                <Package size={18} className="text-muted" />
                                 <div>
-                                    <p className="text-sm font-medium text-white">Consumable</p>
-                                    <p className="text-xs text-slate-400">Deducted immediately</p>
+                                    <p className="text-sm font-medium text-heading">Consumable</p>
+                                    <p className="text-xs text-muted">Deducted immediately</p>
                                 </div>
                             </label>
-                            <label className="flex items-center gap-2 p-3 rounded-lg border border-slate-600 cursor-pointer hover:border-primary-500 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10">
+                            <label className="flex items-center gap-2 p-3 rounded-lg border border-border-strong cursor-pointer hover:border-primary-500 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10">
                                 <input
                                     type="radio"
                                     value="returnable"
                                     {...register('behavior')}
                                     className="accent-primary-500"
                                 />
-                                <RotateCcw size={18} className="text-slate-400" />
+                                <RotateCcw size={18} className="text-muted" />
                                 <div>
-                                    <p className="text-sm font-medium text-white">Returnable</p>
-                                    <p className="text-xs text-slate-400">Tracked until checkout</p>
+                                    <p className="text-sm font-medium text-heading">Returnable</p>
+                                    <p className="text-xs text-muted">Tracked until checkout</p>
                                 </div>
                             </label>
                         </div>
                     </div>
 
                     {/* Amenity Toggle */}
-                    <div className="flex items-center justify-between p-3 rounded-lg border border-slate-600">
+                    <div className="flex items-center justify-between p-3 rounded-lg border border-border-strong">
                         <div>
-                            <p className="text-sm font-medium text-white">Issue at Check-In</p>
-                            <p className="text-xs text-slate-400">Show in check-in amenities list</p>
+                            <p className="text-sm font-medium text-heading">Issue at Check-In</p>
+                            <p className="text-xs text-muted">Show in check-in amenities list</p>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                             <input
@@ -188,7 +188,7 @@ export function InventoryForm({ onClose, onSuccess }: InventoryFormProps) {
                                 {...register('isAmenity')}
                                 className="sr-only peer"
                             />
-                            <div className="w-11 h-6 bg-slate-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"></div>
+                            <div className="w-11 h-6 bg-surface-card peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"></div>
                         </label>
                     </div>
 
@@ -203,7 +203,7 @@ export function InventoryForm({ onClose, onSuccess }: InventoryFormProps) {
                                 min="0"
                                 placeholder="Quantity per room (0 = off)"
                             />
-                            <p className="text-xs text-slate-400 mt-1">Auto-selected quantity at check-in</p>
+                            <p className="text-xs text-muted mt-1">Auto-selected quantity at check-in</p>
                         </div>
                     )}
 
@@ -249,12 +249,12 @@ export function InventoryForm({ onClose, onSuccess }: InventoryFormProps) {
                             className="input"
                             min="0"
                         />
-                        <p className="text-xs text-slate-400 mt-1">Price shown in restaurant menu (for beverages)</p>
+                        <p className="text-xs text-muted mt-1">Price shown in restaurant menu (for beverages)</p>
                     </div>
 
                     {/* Supplier Section */}
-                    <div className="border-t border-slate-700 pt-4 mt-4">
-                        <h4 className="text-sm font-medium text-slate-300 mb-3">Supplier Information</h4>
+                    <div className="border-t border-border pt-4 mt-4">
+                        <h4 className="text-sm font-medium text-muted mb-3">Supplier Information</h4>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <label className="label">Supplier Name</label>
@@ -282,7 +282,7 @@ export function InventoryForm({ onClose, onSuccess }: InventoryFormProps) {
                                 min="0"
                                 placeholder="Suggested order qty"
                             />
-                            <p className="text-xs text-slate-400 mt-1">How many to order when restocking</p>
+                            <p className="text-xs text-muted mt-1">How many to order when restocking</p>
                         </div>
                     </div>
 

@@ -98,13 +98,13 @@ export function AmenitiesSelection({ onSelectionChange }: AmenitiesSelectionProp
                             key={item.id}
                             className={`flex items-center justify-between p-2 rounded-lg border transition-colors ${qty > 0
                                 ? 'border-primary-500/50 bg-primary-500/10'
-                                : 'border-slate-600 bg-slate-700/30'
+                                : 'border-border-strong bg-surface-raised/30'
                                 } ${isOutOfStock ? 'opacity-50' : ''}`}
                         >
                             <div className="flex items-center gap-2 flex-1 min-w-0">
                                 <div className={`p-1.5 rounded ${item.behavior === 'returnable'
                                     ? 'bg-blue-500/20 text-blue-400'
-                                    : 'bg-slate-600/50 text-slate-400'
+                                    : 'bg-surface-card/50 text-muted'
                                     }`}>
                                     {item.behavior === 'returnable'
                                         ? <RotateCcw size={14} />
@@ -112,10 +112,10 @@ export function AmenitiesSelection({ onSelectionChange }: AmenitiesSelectionProp
                                     }
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-white truncate">
+                                    <p className="text-sm font-medium text-heading truncate">
                                         {item.name}
                                     </p>
-                                    <p className="text-xs text-slate-400">
+                                    <p className="text-xs text-muted">
                                         Stock: {item.current_stock} {item.unit_type}
                                         {isLowStock && !isOutOfStock && (
                                             <span className="text-yellow-400 ml-1">
@@ -135,7 +135,7 @@ export function AmenitiesSelection({ onSelectionChange }: AmenitiesSelectionProp
                                     type="button"
                                     onClick={() => updateQuantity(item.id, -1)}
                                     disabled={qty === 0}
-                                    className="p-1 rounded bg-slate-600 hover:bg-slate-500 disabled:opacity-30 disabled:cursor-not-allowed"
+                                    className="p-1 rounded bg-surface-card hover:bg-surface-inset0 disabled:opacity-30 disabled:cursor-not-allowed"
                                 >
                                     <Minus size={14} />
                                 </button>
@@ -144,7 +144,7 @@ export function AmenitiesSelection({ onSelectionChange }: AmenitiesSelectionProp
                                     value={qty}
                                     onChange={(e) => setQuantity(item.id, parseInt(e.target.value) || 0)}
                                     disabled={isOutOfStock}
-                                    className="w-12 text-center bg-slate-700 border-none rounded text-sm text-white py-1"
+                                    className="w-12 text-center bg-surface-raised border-none rounded text-sm text-heading py-1"
                                     min="0"
                                     max={item.current_stock}
                                 />
@@ -152,7 +152,7 @@ export function AmenitiesSelection({ onSelectionChange }: AmenitiesSelectionProp
                                     type="button"
                                     onClick={() => updateQuantity(item.id, 1)}
                                     disabled={isOutOfStock || qty >= item.current_stock}
-                                    className="p-1 rounded bg-slate-600 hover:bg-slate-500 disabled:opacity-30 disabled:cursor-not-allowed"
+                                    className="p-1 rounded bg-surface-card hover:bg-surface-inset0 disabled:opacity-30 disabled:cursor-not-allowed"
                                 >
                                     <Plus size={14} />
                                 </button>
@@ -163,7 +163,7 @@ export function AmenitiesSelection({ onSelectionChange }: AmenitiesSelectionProp
             </div>
 
             {Object.values(selections).some(q => q > 0) && (
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-muted">
                     {Object.values(selections).filter(q => q > 0).length} item(s) will be issued
                 </p>
             )}

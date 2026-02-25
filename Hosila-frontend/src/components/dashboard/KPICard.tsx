@@ -25,18 +25,18 @@ export function KPICard({
 }: KPICardProps) {
     return (
         <div
-            className={`bg-slate-800 rounded-xl shadow-sm border border-slate-700 p-5 ${onClick ? 'cursor-pointer hover:bg-slate-700 transition-colors' : ''} ${alert ? 'border-red-500/50 bg-red-950' : ''}`}
+            className={`bg-surface-card rounded-xl shadow-sm border border-border p-5 ${onClick ? 'cursor-pointer hover:bg-surface-raised transition-colors' : ''} ${alert ? 'border-red-500/50 bg-red-950' : ''}`}
             onClick={onClick}
         >
             <div className="flex justify-between items-center mb-2">
-                <p className="text-xs font-semibold tracking-wider text-slate-400 uppercase truncate pr-2">{title}</p>
-                <div className="text-slate-500 shrink-0">
+                <p className="text-xs font-semibold tracking-wider text-muted uppercase truncate pr-2">{title}</p>
+                <div className="text-muted shrink-0">
                     {icon}
                 </div>
             </div>
 
             <div>
-                <p className={`font-bold ${alert ? 'text-red-500' : 'text-white'} text-3xl truncate`}>
+                <p className={`font-bold ${alert ? 'text-red-500' : 'text-heading'} text-3xl truncate`}>
                     {value}
                 </p>
             </div>
@@ -46,7 +46,7 @@ export function KPICard({
                     {trend && trendValue && (
                         <div className={`flex items-center gap-1 font-medium ${trend === 'up' ? 'text-primary-400' :
                             trend === 'down' ? 'text-red-500' :
-                                'text-slate-400'
+                                'text-muted'
                             }`}>
                             {trend === 'up' && <TrendingUp size={14} />}
                             {trend === 'down' && <TrendingDown size={14} />}
@@ -54,7 +54,7 @@ export function KPICard({
                             <span>{trendValue}</span>
                         </div>
                     )}
-                    {subtitle && <span className="text-slate-400 truncate">{subtitle}</span>}
+                    {subtitle && <span className="text-muted truncate">{subtitle}</span>}
                 </div>
             )}
         </div>

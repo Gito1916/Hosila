@@ -56,9 +56,9 @@ const statusConfig: Record<RoomStatus, {
     },
     maintenance: {
         label: 'Maintenance',
-        accent: 'bg-gray-500',
+        accent: 'bg-surface-inset0',
         dot: 'bg-gray-400',
-        badgeCls: 'bg-gray-100 text-gray-600 dark:bg-gray-500/15 dark:text-gray-400',
+        badgeCls: 'bg-surface-raised text-body dark:bg-surface-inset0/15 dark:text-muted',
     },
 };
 
@@ -96,8 +96,7 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
     return (
         <div
             className="relative flex flex-col rounded-xl border shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group overflow-hidden
-                bg-white border-gray-200
-                dark:bg-navy-800 dark:border-navy-700 dark:hover:shadow-lg dark:shadow-black/20"
+                bg-surface-card border-border dark:hover:shadow-lg
             style={{ minHeight: 180 }}
             onClick={onClick}
         >
@@ -106,7 +105,7 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
 
             {/* ── Header: Room Number + Badge ── */}
             <div className="flex items-start justify-between px-5 pt-4 pb-1 pl-6">
-                <h3 className="text-2xl font-extrabold tracking-tight leading-none text-gray-900 dark:text-white">
+                <h3 className="text-2xl font-extrabold tracking-tight leading-none text-gray-900
                     {room.room_number}
                 </h3>
                 <div
@@ -119,7 +118,7 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
 
             {/* ── Room Type ── */}
             <div className="px-5 pl-6 pb-2">
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-slate-500">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted
                     {room.room_type}
                 </p>
             </div>
@@ -132,7 +131,7 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                     <div>
                         <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                             ₦{Number(room.night_rate).toLocaleString()}
-                            <span className="text-xs font-normal text-gray-400 dark:text-slate-500">/night</span>
+                            <span className="text-xs font-normal text-muted
                         </p>
                     </div>
                 )}
@@ -144,10 +143,10 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                             <CalendarCheck size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm font-semibold truncate text-gray-800 dark:text-white">
+                            <p className="text-sm font-semibold truncate text-gray-800
                                 {room.reservationGuestName}
                             </p>
-                            <p className="text-xs text-gray-400 dark:text-slate-500">Arriving today</p>
+                            <p className="text-xs text-muted today</p>
                         </div>
                     </div>
                 )}
@@ -155,16 +154,16 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                 {/* Occupied */}
                 {room.status === 'occupied' && room.activeBooking && (
                     <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-gray-100 text-gray-600 dark:bg-navy-700 dark:text-slate-300">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-surface-raised text-body
                             {room.guestName
                                 ? room.guestName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
                                 : <User size={14} />}
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm font-semibold truncate text-gray-800 dark:text-white">
+                            <p className="text-sm font-semibold truncate text-gray-800
                                 {room.guestName || 'Guest'}
                             </p>
-                            <p className="text-xs mt-0.5 text-gray-400 dark:text-slate-500">
+                            <p className="text-xs mt-0.5 text-muted
                                 Out: {format(new Date(room.activeBooking.planned_checkout), 'MMM d, h:mm a')}
                             </p>
                         </div>
@@ -178,7 +177,7 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                             <Clock size={16} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm font-semibold truncate text-gray-800 dark:text-white">
+                            <p className="text-sm font-semibold truncate text-gray-800
                                 {room.guestName || 'Guest'}
                             </p>
                             <div className={`text-sm font-mono font-bold mt-0.5 ${countdown.isExpiringSoon ? 'text-red-500' : 'text-purple-500 dark:text-purple-400'}`}>
@@ -197,9 +196,9 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                 {/* Maintenance — minimal */}
                 {room.status === 'maintenance' && (
                     <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Under maintenance</p>
+                        <p className="text-sm font-medium text-muted dark:text-muted">Under maintenance</p>
                         {room.maintenance_reason && (
-                            <p className="text-xs mt-0.5 line-clamp-1 text-gray-400 dark:text-slate-500">
+                            <p className="text-xs mt-0.5 line-clamp-1 text-muted
                                 {room.maintenance_reason}
                             </p>
                         )}
@@ -213,7 +212,7 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                 <div className="px-5 pl-6 pb-3 pt-2 mt-auto flex gap-2">
                     <button
                         onClick={(e) => handleStatusChange(e, 'maintenance')}
-                        className="p-1.5 rounded-md transition-colors text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-slate-500 dark:hover:text-slate-300 dark:hover:bg-navy-700"
+                        className="p-1.5 rounded-md transition-colors text-muted hover:text-body hover:bg-surface-raised dark:hover:text-muted
                         title="Maintenance"
                     >
                         <Wrench size={14} />
@@ -237,8 +236,8 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                     <button
                         onClick={(e) => handleStatusChange(e, 'maintenance')}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
-                            bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100
-                            dark:bg-gray-500/10 dark:text-gray-400 dark:border-gray-500/20 dark:hover:bg-gray-500/20"
+                            bg-surface-inset text-muted border border-border hover:bg-surface-raised
+                            dark:bg-surface-inset0/10 dark:text-muted dark:border-gray-500/20 dark:hover:bg-surface-inset0/20"
                         title="Maintenance"
                     >
                         <Wrench size={13} />

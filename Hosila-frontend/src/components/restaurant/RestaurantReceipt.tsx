@@ -186,28 +186,28 @@ export function RestaurantInvoiceView({
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-sm my-4 flex flex-col shadow-2xl">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-sm my-4 flex flex-col shadow-2xl">
                 {/* Modal Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700 bg-slate-900/50">
+                <div className="flex items-center justify-between p-4 border-b border-border bg-surface-base/50">
                     <div className="flex items-center gap-2">
                         <FileText size={20} className="text-blue-400" />
-                        <h2 className="text-lg font-bold text-white">Invoice Preview</h2>
+                        <h2 className="text-lg font-bold text-heading">Invoice Preview</h2>
                     </div>
                     <div className="flex items-center gap-2">
                         <button onClick={handlePrint} className="btn btn-secondary text-sm">
                             <Printer size={16} className="mr-1" /> Print
                         </button>
-                        <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg">
+                        <button onClick={onClose} className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg">
                             <X size={20} />
                         </button>
                     </div>
                 </div>
 
                 {/* Invoice Content - 80mm Thermal Style */}
-                <div className="p-4 bg-slate-800 overflow-y-auto max-h-[75vh]">
+                <div className="p-4 bg-surface-card overflow-y-auto max-h-[75vh]">
                     <div
                         ref={printRef}
-                        className="bg-white text-black p-5 mx-auto shadow-md"
+                        className="bg-surface-card text-black p-5 mx-auto shadow-md"
                         style={{
                             maxWidth: '300px',
                             fontFamily: "'Courier New', Courier, 'Lucida Console', Monaco, monospace",
@@ -224,8 +224,8 @@ export function RestaurantInvoiceView({
                                 />
                             )}
                             <div className="font-bold text-base uppercase">{hotel?.name ?? 'HOTEL'}</div>
-                            <div className="text-[10px] text-gray-600">{hotel?.address}</div>
-                            <div className="text-[10px] text-gray-600">Tel: {hotel?.phone}</div>
+                            <div className="text-[10px] text-body">{hotel?.address}</div>
+                            <div className="text-[10px] text-body">Tel: {hotel?.phone}</div>
                         </div>
 
                         {/* Divider */}
@@ -249,7 +249,7 @@ export function RestaurantInvoiceView({
 
                         {/* Customer Info */}
                         <div className="text-[11px] mb-3">
-                            <div className="text-gray-600 mb-1">Customer:</div>
+                            <div className="text-body mb-1">Customer:</div>
                             <div className="font-medium">
                                 {mode === 'room_tab'
                                     ? (roomDetails || 'Room Guest')
@@ -309,7 +309,7 @@ export function RestaurantInvoiceView({
                         <div className="border-t border-dashed border-black my-2"></div>
 
                         {/* Footer */}
-                        <div className="text-center text-[10px] text-gray-500 mt-4 pt-2 border-t border-dashed border-gray-300">
+                        <div className="text-center text-[10px] text-muted mt-4 pt-2 border-t border-dashed border-border-strong">
                             <p className="font-medium">Payment due before service</p>
                             <p className="mt-3">Powered by HotelFlow PMS</p>
                         </div>
@@ -391,28 +391,28 @@ export function RestaurantReceiptView({
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-sm my-4 flex flex-col shadow-2xl">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-sm my-4 flex flex-col shadow-2xl">
                 {/* Modal Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700 bg-slate-900/50">
+                <div className="flex items-center justify-between p-4 border-b border-border bg-surface-base/50">
                     <div className="flex items-center gap-2">
                         <CheckCircle size={20} className="text-green-400" />
-                        <h2 className="text-lg font-bold text-white">Receipt</h2>
+                        <h2 className="text-lg font-bold text-heading">Receipt</h2>
                     </div>
                     <div className="flex items-center gap-2">
                         <button onClick={handlePrint} className="btn btn-secondary text-sm">
                             <Printer size={16} className="mr-1" /> Print
                         </button>
-                        <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg">
+                        <button onClick={onClose} className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg">
                             <X size={20} />
                         </button>
                     </div>
                 </div>
 
                 {/* Receipt Content - 80mm Thermal Style */}
-                <div className="p-4 bg-slate-800 overflow-y-auto max-h-[75vh]">
+                <div className="p-4 bg-surface-card overflow-y-auto max-h-[75vh]">
                     <div
                         ref={printRef}
-                        className="bg-white text-black p-5 mx-auto shadow-md"
+                        className="bg-surface-card text-black p-5 mx-auto shadow-md"
                         style={{
                             maxWidth: '300px',
                             fontFamily: "'Courier New', Courier, 'Lucida Console', Monaco, monospace",
@@ -429,8 +429,8 @@ export function RestaurantReceiptView({
                                 />
                             )}
                             <div className="font-bold text-base uppercase">{hotel?.name ?? 'HOTEL'}</div>
-                            <div className="text-[10px] text-gray-600">{hotel?.address}</div>
-                            <div className="text-[10px] text-gray-600">Tel: {hotel?.phone}</div>
+                            <div className="text-[10px] text-body">{hotel?.address}</div>
+                            <div className="text-[10px] text-body">Tel: {hotel?.phone}</div>
                         </div>
 
                         {/* Divider */}
@@ -459,7 +459,7 @@ export function RestaurantReceiptView({
 
                         {/* Customer Info */}
                         <div className="text-[11px] mb-3">
-                            <div className="text-gray-600 mb-1">Customer:</div>
+                            <div className="text-body mb-1">Customer:</div>
                             <div className="font-medium">{customerInfo || 'Walk-in Guest'}</div>
                         </div>
 
@@ -534,7 +534,7 @@ export function RestaurantReceiptView({
                         <div className="border-t border-dashed border-black my-2"></div>
 
                         {/* Footer */}
-                        <div className="text-center text-[10px] text-gray-500 mt-4 pt-2 border-t border-dashed border-gray-300">
+                        <div className="text-center text-[10px] text-muted mt-4 pt-2 border-t border-dashed border-border-strong">
                             <p className="font-medium">Thank you for your patronage</p>
                             <p>No refund after payment</p>
                             <p className="mt-3">Powered by HotelFlow PMS</p>

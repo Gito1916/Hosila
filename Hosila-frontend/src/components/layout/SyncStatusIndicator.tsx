@@ -83,7 +83,7 @@ export function SyncStatusIndicator() {
                                     ? <Cloud size={14} className="text-amber-400 animate-pulse" />
                                     : <CloudOff size={14} className="text-red-400" />
                         }
-                        <span className="text-xs text-slate-300 truncate">
+                        <span className="text-xs text-muted truncate">
                             {statusText}
                         </span>
                     </div>

@@ -59,60 +59,60 @@ export function UserManagement() {
         <div className="space-y-6">
             {/* Role Permissions Info */}
             <div className="card p-4">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                     <Shield size={18} />
                     Role Permissions
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <div className="bg-slate-700/50 rounded-lg p-3">
+                    <div className="bg-surface-raised/50 rounded-lg p-3">
                         <div className="flex items-center gap-2 mb-2">
                             <ShieldAlert size={16} className="text-red-400" />
-                            <span className="text-white font-medium">Admin</span>
+                            <span className="text-heading font-medium">Admin</span>
                         </div>
-                        <p className="text-xs text-slate-400">Full access: All settings, user management, reports, data backup</p>
+                        <p className="text-xs text-muted">Full access: All settings, user management, reports, data backup</p>
                     </div>
-                    <div className="bg-slate-700/50 rounded-lg p-3">
+                    <div className="bg-surface-raised/50 rounded-lg p-3">
                         <div className="flex items-center gap-2 mb-2">
                             <ShieldCheck size={16} className="text-purple-400" />
-                            <span className="text-white font-medium">Manager</span>
+                            <span className="text-heading font-medium">Manager</span>
                         </div>
-                        <p className="text-xs text-slate-400">Settings access, reports, staff management (no data backup)</p>
+                        <p className="text-xs text-muted">Settings access, reports, staff management (no data backup)</p>
                     </div>
-                    <div className="bg-slate-700/50 rounded-lg p-3">
+                    <div className="bg-surface-raised/50 rounded-lg p-3">
                         <div className="flex items-center gap-2 mb-2">
                             <Shield size={16} className="text-primary-400" />
-                            <span className="text-white font-medium">Reception</span>
+                            <span className="text-heading font-medium">Reception</span>
                         </div>
-                        <p className="text-xs text-slate-400">Check-in/out, reservations, guest management, payments</p>
+                        <p className="text-xs text-muted">Check-in/out, reservations, guest management, payments</p>
                     </div>
-                    <div className="bg-slate-700/50 rounded-lg p-3">
+                    <div className="bg-surface-raised/50 rounded-lg p-3">
                         <div className="flex items-center gap-2 mb-2">
                             <Shield size={16} className="text-cyan-400" />
-                            <span className="text-white font-medium">Housekeeping</span>
+                            <span className="text-heading font-medium">Housekeeping</span>
                         </div>
-                        <p className="text-xs text-slate-400">Room status updates, cleaning schedules</p>
+                        <p className="text-xs text-muted">Room status updates, cleaning schedules</p>
                     </div>
-                    <div className="bg-slate-700/50 rounded-lg p-3">
+                    <div className="bg-surface-raised/50 rounded-lg p-3">
                         <div className="flex items-center gap-2 mb-2">
                             <Shield size={16} className="text-status-available" />
-                            <span className="text-white font-medium">Accountant</span>
+                            <span className="text-heading font-medium">Accountant</span>
                         </div>
-                        <p className="text-xs text-slate-400">Finance reports, expenses, income tracking (read-only operations)</p>
+                        <p className="text-xs text-muted">Finance reports, expenses, income tracking (read-only operations)</p>
                     </div>
-                    <div className="bg-slate-700/50 rounded-lg p-3">
+                    <div className="bg-surface-raised/50 rounded-lg p-3">
                         <div className="flex items-center gap-2 mb-2">
                             <Shield size={16} className="text-amber-400" />
-                            <span className="text-white font-medium">Back Desk</span>
+                            <span className="text-heading font-medium">Back Desk</span>
                         </div>
-                        <p className="text-xs text-slate-400">Restaurant/Kitchen only - order status, menu availability</p>
+                        <p className="text-xs text-muted">Restaurant/Kitchen only - order status, menu availability</p>
                     </div>
                 </div>
             </div>
 
             {/* User List */}
             <div className="card">
-                <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-                    <h3 className="font-semibold text-white flex items-center gap-2">
+                <div className="p-4 border-b border-border flex justify-between items-center">
+                    <h3 className="font-semibold text-heading flex items-center gap-2">
                         <UserIcon size={18} />
                         User Management
                     </h3>
@@ -125,7 +125,7 @@ export function UserManagement() {
                     </button>
                 </div>
 
-                <div className="divide-y divide-slate-700/50">
+                <div className="divide-y divide-border/50">
                     {users?.map((user) => {
                         const config = roleConfig[user.role];
                         const isCurrentUser = user.id === currentUser?.id;
@@ -133,17 +133,17 @@ export function UserManagement() {
                         return (
                             <div key={user.id} className="p-4 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-semibold">
+                                    <div className="w-10 h-10 rounded-full bg-surface-raised flex items-center justify-center text-heading font-semibold">
                                         {user.name.charAt(0).toUpperCase()}
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <p className="text-white font-medium">{user.name}</p>
+                                            <p className="text-heading font-medium">{user.name}</p>
                                             {isCurrentUser && (
                                                 <span className="text-xs bg-primary-500/30 text-primary-300 px-2 py-0.5 rounded-full">You</span>
                                             )}
                                         </div>
-                                        <p className="text-sm text-slate-400">@{user.username}</p>
+                                        <p className="text-sm text-muted">@{user.username}</p>
                                     </div>
                                 </div>
 
@@ -153,21 +153,21 @@ export function UserManagement() {
                                         {config.label}
                                     </span>
 
-                                    <span className={`text-sm ${user.is_active ? 'text-status-available' : 'text-slate-500'}`}>
+                                    <span className={`text-sm ${user.is_active ? 'text-status-available' : 'text-muted'}`}>
                                         {user.is_active ? 'Active' : 'Inactive'}
                                     </span>
 
                                     <div className="flex gap-1">
                                         <button
                                             onClick={() => handleEdit(user)}
-                                            className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                                            className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                                             title="Edit user"
                                         >
                                             <Edit2 size={16} />
                                         </button>
                                         <button
                                             onClick={() => setResetPasswordUser(user)}
-                                            className="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-700 rounded-lg"
+                                            className="p-2 text-muted hover:text-amber-400 hover:bg-surface-raised rounded-lg"
                                             title="Reset password"
                                         >
                                             <KeyRound size={16} />
@@ -175,7 +175,7 @@ export function UserManagement() {
                                         {!isCurrentUser && (
                                             <button
                                                 onClick={() => handleDelete(user)}
-                                                className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg"
+                                                className="p-2 text-muted hover:text-red-400 hover:bg-surface-raised rounded-lg"
                                                 title="Delete user"
                                             >
                                                 <Trash2 size={16} />
@@ -261,12 +261,12 @@ function UserForm({
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md">
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
-                    <h2 className="text-xl font-bold text-white">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-md">
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                    <h2 className="text-xl font-bold text-heading">
                         {user ? 'Edit User' : 'Add New User'}
                     </h2>
-                    <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg">
+                    <button onClick={onClose} className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg">
                         <X size={20} />
                     </button>
                 </div>
@@ -340,7 +340,7 @@ function UserForm({
                                 onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                                 className="w-4 h-4"
                             />
-                            <label htmlFor="is_active" className="text-slate-400">Active</label>
+                            <label htmlFor="is_active" className="text-muted">Active</label>
                         </div>
                     )}
 
@@ -399,21 +399,21 @@ function PasswordResetModal({
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-sm">
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-sm">
+                <div className="flex items-center justify-between p-4 border-b border-border">
                     <div className="flex items-center gap-2">
                         <KeyRound size={20} className="text-amber-400" />
-                        <h2 className="text-lg font-bold text-white">Reset Password</h2>
+                        <h2 className="text-lg font-bold text-heading">Reset Password</h2>
                     </div>
-                    <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg">
+                    <button onClick={onClose} className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg">
                         <X size={20} />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
-                    <div className="bg-slate-700/50 rounded-lg p-3">
-                        <p className="text-sm text-slate-400">Resetting password for:</p>
-                        <p className="text-white font-medium">{user.name} <span className="text-slate-400">(@{user.username})</span></p>
+                    <div className="bg-surface-raised/50 rounded-lg p-3">
+                        <p className="text-sm text-muted">Resetting password for:</p>
+                        <p className="text-heading font-medium">{user.name} <span className="text-muted">(@{user.username})</span></p>
                     </div>
 
                     {error && (

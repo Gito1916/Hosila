@@ -67,34 +67,34 @@ export function AutomationPanel() {
     return (
         <div className="space-y-6">
             <div className="card p-4">
-                <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-heading mb-4 flex items-center gap-2">
                     <Zap size={18} />
                     Automation Rules
                 </h3>
 
                 <div className="space-y-6">
                     {/* Late Checkout Fee */}
-                    <div className="bg-slate-700/50 rounded-lg p-4">
+                    <div className="bg-surface-raised/50 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
                                 <Clock size={18} className="text-primary-400" />
-                                <h4 className="text-white font-medium">Auto Late Checkout Fee</h4>
+                                <h4 className="text-heading font-medium">Auto Late Checkout Fee</h4>
                             </div>
                             <button
                                 onClick={() => setLateCheckoutEnabled(!lateCheckoutEnabled)}
-                                className={`transition-colors ${lateCheckoutEnabled ? 'text-status-available' : 'text-slate-500'}`}
+                                className={`transition-colors ${lateCheckoutEnabled ? 'text-status-available' : 'text-muted'}`}
                             >
                                 {lateCheckoutEnabled ? <ToggleRight size={28} /> : <ToggleLeft size={28} />}
                             </button>
                         </div>
-                        <p className="text-sm text-slate-400 mb-3">
+                        <p className="text-sm text-muted mb-3">
                             Automatically add a fee when guests checkout after the standard checkout time.
                         </p>
                         {lateCheckoutEnabled && (
                             <div className="flex items-center gap-3">
-                                <label className="text-sm text-slate-300">Fee per hour:</label>
+                                <label className="text-sm text-muted">Fee per hour:</label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₦</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">₦</span>
                                     <input
                                         type="number"
                                         value={lateCheckoutFee}
@@ -107,25 +107,25 @@ export function AutomationPanel() {
                     </div>
 
                     {/* Service Charge */}
-                    <div className="bg-slate-700/50 rounded-lg p-4">
+                    <div className="bg-surface-raised/50 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
                                 <Percent size={18} className="text-primary-400" />
-                                <h4 className="text-white font-medium">Auto Service Charge</h4>
+                                <h4 className="text-heading font-medium">Auto Service Charge</h4>
                             </div>
                             <button
                                 onClick={() => setServiceChargeEnabled(!serviceChargeEnabled)}
-                                className={`transition-colors ${serviceChargeEnabled ? 'text-status-available' : 'text-slate-500'}`}
+                                className={`transition-colors ${serviceChargeEnabled ? 'text-status-available' : 'text-muted'}`}
                             >
                                 {serviceChargeEnabled ? <ToggleRight size={28} /> : <ToggleLeft size={28} />}
                             </button>
                         </div>
-                        <p className="text-sm text-slate-400 mb-3">
+                        <p className="text-sm text-muted mb-3">
                             Automatically add a service charge percentage to restaurant/bar orders.
                         </p>
                         {serviceChargeEnabled && (
                             <div className="flex items-center gap-3">
-                                <label className="text-sm text-slate-300">Service charge:</label>
+                                <label className="text-sm text-muted">Service charge:</label>
                                 <div className="relative">
                                     <input
                                         type="number"
@@ -135,7 +135,7 @@ export function AutomationPanel() {
                                         min={0}
                                         max={100}
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">%</span>
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted">%</span>
                                 </div>
                             </div>
                         )}

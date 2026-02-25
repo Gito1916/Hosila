@@ -49,8 +49,8 @@ export function RoomTypeManagement() {
 
     return (
         <div className="card">
-            <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-                <h3 className="font-semibold text-white flex items-center gap-2">
+            <div className="p-4 border-b border-border flex justify-between items-center">
+                <h3 className="font-semibold text-heading flex items-center gap-2">
                     <Tag size={18} />
                     Room Types
                 </h3>
@@ -69,12 +69,12 @@ export function RoomTypeManagement() {
                         {roomTypes.map((rt) => (
                             <div
                                 key={rt.id}
-                                className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg"
+                                className="flex items-center justify-between p-3 bg-surface-raised/30 rounded-lg"
                             >
                                 <div>
-                                    <div className="text-white font-medium">{rt.name}</div>
+                                    <div className="text-heading font-medium">{rt.name}</div>
                                     {rt.description && (
-                                        <div className="text-xs text-slate-400">{rt.description}</div>
+                                        <div className="text-xs text-muted">{rt.description}</div>
                                     )}
                                     <div className="text-sm text-status-available mt-1">
                                         Base Rate: ₦{rt.base_rate.toLocaleString()}
@@ -83,13 +83,13 @@ export function RoomTypeManagement() {
                                 <div className="flex gap-1">
                                     <button
                                         onClick={() => handleEdit(rt)}
-                                        className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg"
+                                        className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(rt)}
-                                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg"
+                                        className="p-2 text-muted hover:text-red-400 hover:bg-surface-raised rounded-lg"
                                     >
                                         <Trash2 size={16} />
                                     </button>
@@ -98,7 +98,7 @@ export function RoomTypeManagement() {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-8 text-slate-500">
+                    <div className="text-center py-8 text-muted">
                         <Tag size={32} className="mx-auto mb-2 opacity-50" />
                         <p>No room types defined</p>
                         <p className="text-xs mt-1">Add room types like "Standard", "Deluxe", "Suite"</p>
@@ -166,10 +166,10 @@ function RoomTypeForm({
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md">
-                <div className="flex items-center justify-between p-4 border-b border-slate-700">
-                    <h2 className="text-xl font-bold text-white">{roomType ? 'Edit Room Type' : 'Add Room Type'}</h2>
-                    <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg">
+            <div className="bg-surface-card rounded-xl border border-border w-full max-w-md">
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                    <h2 className="text-xl font-bold text-heading">{roomType ? 'Edit Room Type' : 'Add Room Type'}</h2>
+                    <button onClick={onClose} className="p-2 text-muted hover:text-heading hover:bg-surface-raised rounded-lg">
                         <X size={20} />
                     </button>
                 </div>

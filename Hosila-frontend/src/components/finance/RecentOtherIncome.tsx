@@ -30,7 +30,7 @@ export function RecentOtherIncome() {
 
     if (!otherIncomes || otherIncomes.length === 0) {
         return (
-            <div className="text-center py-8 text-slate-500">
+            <div className="text-center py-8 text-muted">
                 <DollarSign size={32} className="mx-auto mb-2 opacity-50" />
                 <p>No other income recorded yet</p>
             </div>
@@ -42,7 +42,7 @@ export function RecentOtherIncome() {
             {otherIncomes.map((income) => (
                 <div
                     key={income.id}
-                    className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors"
+                    className="flex items-center justify-between p-3 bg-surface-raised/50 rounded-lg hover:bg-surface-raised transition-colors"
                 >
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -53,7 +53,7 @@ export function RecentOtherIncome() {
                                 {categoryLabels[income.category] ?? income.category}
                             </span>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
+                        <div className="flex items-center gap-2 text-xs text-muted mt-1">
                             <Calendar size={12} />
                             <span>{format(new Date(income.date), 'MMM d, yyyy')}</span>
                             {income.description && (
@@ -66,7 +66,7 @@ export function RecentOtherIncome() {
                     </div>
                     <button
                         onClick={() => handleDelete(income.id)}
-                        className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-600 rounded-lg transition-colors"
+                        className="p-2 text-muted hover:text-red-400 hover:bg-surface-card rounded-lg transition-colors"
                     >
                         <Trash2 size={16} />
                     </button>

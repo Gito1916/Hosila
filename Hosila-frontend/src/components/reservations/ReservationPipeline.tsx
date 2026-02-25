@@ -62,8 +62,8 @@ const pipelineColumns: PipelineColumn[] = [
     {
         status: 'cancelled',
         label: 'Cancelled',
-        color: 'text-slate-400',
-        bgColor: 'bg-slate-500/10 border-slate-500/30',
+        color: 'text-muted',
+        bgColor: 'bg-surface-inset0/10 border-border-subtle0/30',
         icon: <XCircle size={16} />,
     },
 ];
@@ -116,9 +116,9 @@ export function ReservationPipeline({ onReservationClick, onCheckIn, onEdit, pro
                         </div>
 
                         {/* Column Body */}
-                        <div className="bg-slate-800/50 border-x border-b border-slate-700 rounded-b-lg p-2 min-h-[300px] max-h-[500px] overflow-y-auto space-y-2">
+                        <div className="bg-surface-card/50 border-x border-b border-border rounded-b-lg p-2 min-h-[300px] max-h-[500px] overflow-y-auto space-y-2">
                             {column.reservations.length === 0 ? (
-                                <div className="text-center py-8 text-slate-500 text-sm">
+                                <div className="text-center py-8 text-muted text-sm">
                                     No reservations
                                 </div>
                             ) : (
@@ -164,32 +164,32 @@ function PipelineCard({ reservation, onClick, onCheckIn, onEdit, isProcessing }:
     return (
         <button
             onClick={onClick}
-            className={`w-full p-3 rounded-lg border text-left transition-all hover:bg-slate-700/50 ${isPastDue
+            className={`w-full p-3 rounded-lg border text-left transition-all hover:bg-surface-raised ${isPastDue
                 ? 'border-red-500/50 bg-red-500/5'
                 : isArrivalToday
                     ? 'border-green-500/50 bg-green-500/5'
-                    : 'border-slate-600 bg-slate-700/30'
+                    : 'border-border-strong bg-surface-raised/30'
                 }`}
         >
             {/* Guest & Room */}
             <div className="flex items-start justify-between mb-2">
                 <div>
-                    <p className="font-medium text-white text-sm truncate" style={{ maxWidth: '180px' }}>
+                    <p className="font-medium text-heading text-sm truncate" style={{ maxWidth: '180px' }}>
                         {reservation.guestName}
                     </p>
-                    <p className="text-xs text-slate-400">Room {reservation.roomNumber}</p>
+                    <p className="text-xs text-muted">Room {reservation.roomNumber}</p>
                 </div>
-                <ChevronRight size={16} className="text-slate-500 flex-shrink-0" />
+                <ChevronRight size={16} className="text-muted flex-shrink-0" />
             </div>
 
             {/* Date */}
             <div className="flex items-center gap-1 text-xs mb-2">
-                <Calendar size={12} className={isArrivalToday ? 'text-green-400' : 'text-slate-400'} />
-                <span className={isArrivalToday ? 'text-green-400 font-medium' : 'text-slate-400'}>
+                <Calendar size={12} className={isArrivalToday ? 'text-green-400' : 'text-muted'} />
+                <span className={isArrivalToday ? 'text-green-400 font-medium' : 'text-muted'}>
                     {isArrivalToday ? 'TODAY' : format(checkInDate, 'MMM d')}
                 </span>
-                <span className="text-slate-500">→</span>
-                <span className="text-slate-400">
+                <span className="text-muted">→</span>
+                <span className="text-muted">
                     {format(new Date(reservation.check_out_date), 'MMM d')}
                 </span>
             </div>
@@ -207,7 +207,7 @@ function PipelineCard({ reservation, onClick, onCheckIn, onEdit, isProcessing }:
                     {paymentStatus === 'unpaid' && 'No deposit'}
                 </span>
                 {balance > 0 && (
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-muted">
                         Due: ₦{balance.toLocaleString()}
                     </span>
                 )}
@@ -223,13 +223,13 @@ function PipelineCard({ reservation, onClick, onCheckIn, onEdit, isProcessing }:
 
             {/* Quick Actions */}
             {(reservation.status === 'confirmed' || reservation.status === 'pending') && (
-                <div className="mt-2 pt-2 border-t border-slate-600 flex items-center gap-2">
+                <div className="mt-2 pt-2 border-t border-border-strong flex items-center gap-2">
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
                             onEdit?.(reservation);
                         }}
-                        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-600 rounded transition-colors"
+                        className="p-1.5 text-muted hover:text-heading hover:bg-surface-card rounded transition-colors"
                         title="Edit Reservation"
                     >
                         <Edit3 size={14} />
@@ -242,7 +242,7 @@ function PipelineCard({ reservation, onClick, onCheckIn, onEdit, isProcessing }:
                                 onCheckIn?.(reservation);
                             }}
                             disabled={isProcessing}
-                            className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white text-xs font-bold rounded transition-colors"
+                            className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-heading text-xs font-bold rounded transition-colors"
                         >
                             {isProcessing ? <Loader2 size={12} className="animate-spin" /> : <LogIn size={12} />}
                             {isProcessing ? 'Processing' : 'Check In'}

@@ -129,33 +129,33 @@ export function AdvancedPanel() {
     return (
         <div className="space-y-3">
             <div className="mb-4">
-                <h3 className="text-lg font-semibold text-white">Advanced</h3>
-                <p className="text-sm text-slate-400">Backup, email import, guest emails, and API settings</p>
+                <h3 className="text-lg font-semibold text-heading">Advanced</h3>
+                <p className="text-sm text-muted">Backup, email import, guest emails, and API settings</p>
             </div>
 
             {/* Backup & Restore Section */}
             <div className="card overflow-hidden">
                 <button
                     onClick={() => toggleSection('backup')}
-                    className="w-full flex items-center gap-3 p-4 hover:bg-slate-700/30 transition-colors text-left"
+                    className="w-full flex items-center gap-3 p-4 hover:bg-surface-raised/30 transition-colors text-left"
                 >
                     <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center shrink-0">
                         <Database className="text-amber-400" size={18} />
                     </div>
                     <div className="flex-1">
-                        <h4 className="text-white font-medium text-sm">Backup & Restore</h4>
-                        <p className="text-xs text-slate-400">Export and import hotel data</p>
+                        <h4 className="text-heading font-medium text-sm">Backup & Restore</h4>
+                        <p className="text-xs text-muted">Export and import hotel data</p>
                     </div>
                     {expandedSection === 'backup'
-                        ? <ChevronDown size={18} className="text-slate-400" />
-                        : <ChevronRight size={18} className="text-slate-400" />
+                        ? <ChevronDown size={18} className="text-muted" />
+                        : <ChevronRight size={18} className="text-muted" />
                     }
                 </button>
                 {expandedSection === 'backup' && (
-                    <div className="px-4 pb-4 border-t border-slate-700/50 pt-4 space-y-4">
-                        <div className="bg-slate-700/50 rounded-lg p-4">
-                            <h4 className="text-white font-medium mb-2">Export Data</h4>
-                            <p className="text-sm text-slate-400 mb-4">
+                    <div className="px-4 pb-4 border-t border-border/50 pt-4 space-y-4">
+                        <div className="bg-surface-raised/50 rounded-lg p-4">
+                            <h4 className="text-heading font-medium mb-2">Export Data</h4>
+                            <p className="text-sm text-muted mb-4">
                                 Download a complete backup of your hotel data.
                             </p>
                             <button onClick={handleExport} disabled={isExporting} className="btn btn-primary">
@@ -168,9 +168,9 @@ export function AdvancedPanel() {
                             )}
                         </div>
 
-                        <div className="bg-slate-700/50 rounded-lg p-4">
-                            <h4 className="text-white font-medium mb-2">Restore Data</h4>
-                            <p className="text-sm text-slate-400 mb-4">
+                        <div className="bg-surface-raised/50 rounded-lg p-4">
+                            <h4 className="text-heading font-medium mb-2">Restore Data</h4>
+                            <p className="text-sm text-muted mb-4">
                                 Restore from a backup file. <span className="text-amber-400">Warning: This will overwrite current data.</span>
                             </p>
                             <input ref={fileInputRef} type="file" accept=".json" onChange={handleFileSelect} className="hidden" />
@@ -179,7 +179,7 @@ export function AdvancedPanel() {
                             </button>
                         </div>
 
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-muted">
                             <p>• Backups should be stored in cloud storage</p>
                             <p>• Recommended: Export data at least weekly</p>
                         </div>
@@ -191,22 +191,22 @@ export function AdvancedPanel() {
             <div className="card overflow-hidden">
                 <button
                     onClick={() => toggleSection('email_import')}
-                    className="w-full flex items-center gap-3 p-4 hover:bg-slate-700/30 transition-colors text-left"
+                    className="w-full flex items-center gap-3 p-4 hover:bg-surface-raised/30 transition-colors text-left"
                 >
                     <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center shrink-0">
                         <Mail className="text-purple-400" size={18} />
                     </div>
                     <div className="flex-1">
-                        <h4 className="text-white font-medium text-sm">Email Import</h4>
-                        <p className="text-xs text-slate-400">Auto-import OTA reservations from Gmail</p>
+                        <h4 className="text-heading font-medium text-sm">Email Import</h4>
+                        <p className="text-xs text-muted">Auto-import OTA reservations from Gmail</p>
                     </div>
                     {expandedSection === 'email_import'
-                        ? <ChevronDown size={18} className="text-slate-400" />
-                        : <ChevronRight size={18} className="text-slate-400" />
+                        ? <ChevronDown size={18} className="text-muted" />
+                        : <ChevronRight size={18} className="text-muted" />
                     }
                 </button>
                 {expandedSection === 'email_import' && (
-                    <div className="px-4 pb-4 border-t border-slate-700/50 pt-4">
+                    <div className="px-4 pb-4 border-t border-border/50 pt-4">
                         <EmailImportPanel />
                     </div>
                 )}
@@ -216,22 +216,22 @@ export function AdvancedPanel() {
             <div className="card overflow-hidden">
                 <button
                     onClick={() => toggleSection('website_api')}
-                    className="w-full flex items-center gap-3 p-4 hover:bg-slate-700/30 transition-colors text-left"
+                    className="w-full flex items-center gap-3 p-4 hover:bg-surface-raised/30 transition-colors text-left"
                 >
                     <div className="w-8 h-8 bg-cyan-500/20 rounded-lg flex items-center justify-center shrink-0">
                         <Globe className="text-cyan-400" size={18} />
                     </div>
                     <div className="flex-1">
-                        <h4 className="text-white font-medium text-sm">Website API</h4>
-                        <p className="text-xs text-slate-400">API keys & endpoints for your hotel website</p>
+                        <h4 className="text-heading font-medium text-sm">Website API</h4>
+                        <p className="text-xs text-muted">API keys & endpoints for your hotel website</p>
                     </div>
                     {expandedSection === 'website_api'
-                        ? <ChevronDown size={18} className="text-slate-400" />
-                        : <ChevronRight size={18} className="text-slate-400" />
+                        ? <ChevronDown size={18} className="text-muted" />
+                        : <ChevronRight size={18} className="text-muted" />
                     }
                 </button>
                 {expandedSection === 'website_api' && (
-                    <div className="px-4 pb-4 border-t border-slate-700/50 pt-4">
+                    <div className="px-4 pb-4 border-t border-border/50 pt-4">
                         <ApiKeyPanel />
                     </div>
                 )}
@@ -241,22 +241,22 @@ export function AdvancedPanel() {
             <div className="card overflow-hidden">
                 <button
                     onClick={() => toggleSection('guest_emails')}
-                    className="w-full flex items-center gap-3 p-4 hover:bg-slate-700/30 transition-colors text-left"
+                    className="w-full flex items-center gap-3 p-4 hover:bg-surface-raised/30 transition-colors text-left"
                 >
                     <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center shrink-0">
                         <Send className="text-blue-400" size={18} />
                     </div>
                     <div className="flex-1">
-                        <h4 className="text-white font-medium text-sm">Guest Email Automation</h4>
-                        <p className="text-xs text-slate-400">Auto-send confirmation, welcome & receipt emails</p>
+                        <h4 className="text-heading font-medium text-sm">Guest Email Automation</h4>
+                        <p className="text-xs text-muted">Auto-send confirmation, welcome & receipt emails</p>
                     </div>
                     {expandedSection === 'guest_emails'
-                        ? <ChevronDown size={18} className="text-slate-400" />
-                        : <ChevronRight size={18} className="text-slate-400" />
+                        ? <ChevronDown size={18} className="text-muted" />
+                        : <ChevronRight size={18} className="text-muted" />
                     }
                 </button>
                 {expandedSection === 'guest_emails' && (
-                    <div className="px-4 pb-4 border-t border-slate-700/50 pt-4">
+                    <div className="px-4 pb-4 border-t border-border/50 pt-4">
                         <EmailSettingsPanel />
                     </div>
                 )}
@@ -265,23 +265,23 @@ export function AdvancedPanel() {
             {/* Restore Confirmation Modal */}
             {showRestoreConfirm && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md p-6">
+                    <div className="bg-surface-card rounded-xl border border-border w-full max-w-md p-6">
                         <div className="flex items-start gap-3 mb-4">
                             <div className="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center">
                                 <AlertTriangle size={20} className="text-amber-400" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-semibold text-white">Confirm Restore</h3>
-                                <p className="text-sm text-slate-400 mt-1">
+                                <h3 className="text-lg font-semibold text-heading">Confirm Restore</h3>
+                                <p className="text-sm text-muted mt-1">
                                     This will <strong>permanently replace</strong> all current data.
                                 </p>
                             </div>
                         </div>
 
                         {restoreFile && (
-                            <div className="bg-slate-700/50 rounded-lg p-3 mb-4">
-                                <p className="text-sm text-slate-300">File: <span className="font-mono">{restoreFile.name}</span></p>
-                                <p className="text-xs text-slate-500">Size: {(restoreFile.size / 1024).toFixed(1)} KB</p>
+                            <div className="bg-surface-raised/50 rounded-lg p-3 mb-4">
+                                <p className="text-sm text-muted">File: <span className="font-mono">{restoreFile.name}</span></p>
+                                <p className="text-xs text-muted">Size: {(restoreFile.size / 1024).toFixed(1)} KB</p>
                             </div>
                         )}
 
