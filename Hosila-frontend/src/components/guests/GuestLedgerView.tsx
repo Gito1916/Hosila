@@ -3,8 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/authStore';
 import { calculateFolio, formatCurrency, type FolioCalculations } from '@/utils/folio';
 import { recordPayment, extendNightStay, extendShortRest } from '@/db/bookings';
-import { issueAmenity } from '@/db/inventory';
+import { issueAmenity, getUnresolvedReturnables } from '@/db/inventory';
 import { createServiceCharge } from '@/db/services';
+import { createInvoiceFromBooking, createReceipt, getInvoiceByBooking } from '@/db/billing';
+import { getGuestById } from '@/db/guests';
+import { CheckoutReconciliation } from './CheckoutReconciliation';
 import { toast } from '@/lib/errorMessages';
 import type { Guest, Booking, Room, PaymentMethod } from '@/types';
 import { format } from 'date-fns';
@@ -64,6 +67,9 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
 
     const [showAmenities, setShowAmenities] = useState(false);
     const [amenitySelections, setAmenitySelections] = useState<AmenitySelection[]>([]);
+
+    // Checkout flow states
+    const [showReconciliation, setShowReconciliation] = useState(false);
 
     // Get hotel settings for credit limit
     const { data: hotel } = useQuery({ queryKey: ['hotel'], queryFn: getHotel });
@@ -188,24 +194,77 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
         setAmenitySelections(selections);
     }, []);
 
+    // ── Multi-step checkout flow ──
     const handleCheckOut = async () => {
         if (!user || !folio) return;
 
-        // Check balance
+        // Step 1: Balance check — offer option to pay or waive
         if (folio.balance > 0) {
-            toast.warn('Outstanding balance', `Cannot check out. Outstanding balance: ${formatCurrency(folio.balance)}. Please collect payment first.`);
-            return;
+            const proceed = confirm(
+                `Guest has outstanding balance of ${formatCurrency(folio.balance)}.\n\n` +
+                `Click OK to proceed with checkout anyway (balance will be waived).\n` +
+                `Click Cancel to record payment first.`
+            );
+            if (!proceed) {
+                setPaymentAmount(folio.balance);
+                setShowPayment(true);
+                return;
+            }
         }
 
-        if (!confirm('Are you sure you want to check out this guest? This will release the room.')) {
-            return;
+        // Step 2: Check for unreturned amenities
+        try {
+            const unresolvedReturnables = await getUnresolvedReturnables(booking.id);
+            if (unresolvedReturnables.length > 0) {
+                setShowReconciliation(true);
+                return;
+            }
+        } catch {
+            // If amenity check fails, proceed anyway
         }
 
+        // Step 3: Final checkout
+        await handleFinalCheckout();
+    };
+
+    const handleFinalCheckout = async () => {
+        if (!user) return;
+        setShowReconciliation(false);
         setIsLoading(true);
         try {
+            // Auto-generate invoice
+            const guestData = await getGuestById(guest.id);
+            let invoice = await getInvoiceByBooking(booking.id);
+            if (!invoice) {
+                invoice = await createInvoiceFromBooking(
+                    booking.id,
+                    guestData?.name ?? guest.name,
+                    guestData?.phone
+                );
+            }
+
+            // Perform checkout
             const { checkOut } = await import('@/db/bookings');
             await checkOut(booking.id, user.id);
-            navigate('/rooms');
+
+            // Auto-generate receipt if fully paid
+            if (booking.total_paid > 0) {
+                try {
+                    await createReceipt(
+                        'checkout-final',
+                        invoice.id,
+                        booking.id,
+                        guestData?.name ?? guest.name,
+                        booking.total_paid,
+                        'cash'
+                    );
+                } catch {
+                    // Receipt generation is non-critical
+                }
+            }
+
+            toast.success('Checked out', 'Guest has been checked out and room released.');
+            navigate('/bookings');
         } catch (err) {
             toast.error('Checkout failed', err);
         } finally {
@@ -739,6 +798,22 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                                 {isLoading ? <Loader2 size={18} className="animate-spin" /> : 'Issue Items'}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Checkout Reconciliation Modal */}
+            {showReconciliation && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-lg p-4 space-y-4 max-h-[80vh] overflow-y-auto animate-scale-up">
+                        <h3 className="text-lg font-bold text-white">Return Amenities Before Checkout</h3>
+                        <p className="text-sm text-slate-400">Please confirm the status of items issued to this guest.</p>
+                        <CheckoutReconciliation
+                            bookingId={booking.id}
+                            performedBy={user?.id ?? ''}
+                            onComplete={handleFinalCheckout}
+                            onCancel={() => setShowReconciliation(false)}
+                        />
                     </div>
                 </div>
             )}

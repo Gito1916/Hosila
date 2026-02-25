@@ -60,43 +60,44 @@ export function BookingsPage() {
 
     return (
         <div className="space-y-4">
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-2">
-                <button
-                    onClick={handleCheckInClick}
-                    className="btn btn-primary flex items-center gap-2"
-                >
-                    <LogIn size={18} />
-                    Check In
-                </button>
-                <button
-                    onClick={() => {
-                        setSelectedRoom(null);
-                        setSelectedDate(null);
-                        setShowReservationModal(true);
-                    }}
-                    className="btn btn-secondary flex items-center gap-2"
-                >
-                    <CalendarPlus size={18} />
-                    Reserve
-                </button>
-            </div>
+            {/* Tab Navigation + Action Buttons */}
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex gap-1 bg-slate-800 p-1 rounded-lg w-fit">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${activeTab === tab.id
+                                ? 'bg-primary-500 text-white'
+                                : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                                }`}
+                        >
+                            <tab.icon size={18} />
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
 
-            {/* Tab Navigation */}
-            <div className="flex gap-1 bg-slate-800 p-1 rounded-lg w-fit">
-                {tabs.map(tab => (
+                <div className="flex gap-2">
                     <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`px-4 py-2 rounded-md flex items-center gap-2 transition-colors ${activeTab === tab.id
-                            ? 'bg-primary-500 text-white'
-                            : 'text-slate-400 hover:text-white hover:bg-slate-700'
-                            }`}
+                        onClick={handleCheckInClick}
+                        className="btn btn-primary flex items-center gap-2"
                     >
-                        <tab.icon size={18} />
-                        {tab.label}
+                        <LogIn size={18} />
+                        Check In
                     </button>
-                ))}
+                    <button
+                        onClick={() => {
+                            setSelectedRoom(null);
+                            setSelectedDate(null);
+                            setShowReservationModal(true);
+                        }}
+                        className="btn btn-secondary flex items-center gap-2"
+                    >
+                        <CalendarPlus size={18} />
+                        Reserve
+                    </button>
+                </div>
             </div>
 
             {/* Tab Content */}
@@ -111,90 +112,101 @@ export function BookingsPage() {
                             // No-op — room details handled by RoomStatusGrid's own click handlers
                         }}
                     />
-                )}
+                )
+                }
 
-                {activeTab === 'calendar' && (
-                    <AvailabilityCalendar
-                        onReserve={handleCalendarReservation}
-                        onOpenGuestLedger={handleOpenGuestLedger}
-                    />
-                )}
+                {
+                    activeTab === 'calendar' && (
+                        <AvailabilityCalendar
+                            onReserve={handleCalendarReservation}
+                            onOpenGuestLedger={handleOpenGuestLedger}
+                        />
+                    )
+                }
 
-                {activeTab === 'reservations' && (
-                    <ReservationList
-                        onCheckIn={(reservation: Reservation) => {
-                            // Get the room and open check-in modal
-                            fetchById<Room>('rooms', reservation.room_id).then(room => {
-                                if (room) {
-                                    setSelectedRoom(room);
-                                    setShowCheckInModal(true);
-                                }
-                            });
-                        }}
-                    />
-                )}
+                {
+                    activeTab === 'reservations' && (
+                        <ReservationList
+                            onCheckIn={(reservation: Reservation) => {
+                                // Get the room and open check-in modal
+                                fetchById<Room>('rooms', reservation.room_id).then(room => {
+                                    if (room) {
+                                        setSelectedRoom(room);
+                                        setShowCheckInModal(true);
+                                    }
+                                });
+                            }}
+                        />
+                    )
+                }
             </div>
 
             {/* Check-in Modal */}
-            {showCheckInModal && selectedRoom && (
-                <UnifiedCheckInModal
-                    room={selectedRoom}
-                    onClose={() => {
-                        setShowCheckInModal(false);
-                        setSelectedRoom(null);
-                    }}
-                    onSuccess={() => {
-                        setShowCheckInModal(false);
-                        setSelectedRoom(null);
-                    }}
-                />
-            )}
+            {
+                showCheckInModal && selectedRoom && (
+                    <UnifiedCheckInModal
+                        room={selectedRoom}
+                        onClose={() => {
+                            setShowCheckInModal(false);
+                            setSelectedRoom(null);
+                        }}
+                        onSuccess={() => {
+                            setShowCheckInModal(false);
+                            setSelectedRoom(null);
+                        }}
+                    />
+                )
+            }
 
             {/* Room Picker for Check-in when no room selected */}
-            {showCheckInModal && !selectedRoom && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md p-4">
-                        <h3 className="text-lg font-bold text-white mb-4">Select Room for Check-in</h3>
-                        <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
-                            {availableRooms?.map(room => (
-                                <button
-                                    key={room.id}
-                                    onClick={() => setSelectedRoom(room)}
-                                    className="p-3 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-left"
-                                >
-                                    <p className="font-medium text-white">Room {room.room_number}</p>
-                                    <p className="text-xs text-slate-400">{room.room_type}</p>
-                                    <p className="text-xs text-green-400">₦{room.night_rate.toLocaleString()}/night</p>
-                                </button>
-                            ))}
+            {
+                showCheckInModal && !selectedRoom && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-slate-800 rounded-xl border border-slate-700 w-full max-w-md p-4">
+                            <h3 className="text-lg font-bold text-white mb-4">Select Room for Check-in</h3>
+                            <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+                                {availableRooms?.map(room => (
+                                    <button
+                                        key={room.id}
+                                        onClick={() => setSelectedRoom(room)}
+                                        className="p-3 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-left"
+                                    >
+                                        <p className="font-medium text-white">Room {room.room_number}</p>
+                                        <p className="text-xs text-slate-400">{room.room_type}</p>
+                                        <p className="text-xs text-green-400">₦{room.night_rate.toLocaleString()}/night</p>
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => setShowCheckInModal(false)}
+                                className="btn btn-secondary w-full mt-4"
+                            >
+                                Cancel
+                            </button>
                         </div>
-                        <button
-                            onClick={() => setShowCheckInModal(false)}
-                            className="btn btn-secondary w-full mt-4"
-                        >
-                            Cancel
-                        </button>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Reservation Modal */}
-            {showReservationModal && (
-                <UnifiedReservationModal
-                    onClose={() => {
-                        setShowReservationModal(false);
-                        setSelectedRoom(null);
-                        setSelectedDate(null);
-                    }}
-                    onSuccess={() => {
-                        setShowReservationModal(false);
-                        setSelectedRoom(null);
-                        setSelectedDate(null);
-                    }}
-                    preselectedRoomId={selectedRoom?.id}
-                    preselectedDate={selectedDate ?? undefined}
-                />
-            )}
+            {
+                showReservationModal && (
+                    <UnifiedReservationModal
+                        onClose={() => {
+                            setShowReservationModal(false);
+                            setSelectedRoom(null);
+                            setSelectedDate(null);
+                        }}
+                        onSuccess={() => {
+                            setShowReservationModal(false);
+                            setSelectedRoom(null);
+                            setSelectedDate(null);
+                        }}
+                        preselectedRoomId={selectedRoom?.id}
+                        preselectedDate={selectedDate ?? undefined}
+                    />
+                )
+            }
         </div>
     );
 }

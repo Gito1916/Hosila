@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { getAllRooms } from '@/db/rooms';
 import { requireSupabase, getHotelId } from '@/lib/api';
 import { RoomCard } from '@/components/rooms/RoomCard';
@@ -24,7 +25,7 @@ interface RoomStatusGridProps {
     onOpenDetails?: (room: RoomWithBooking) => void;
 }
 
-type GroupMode = 'none' | 'type' | 'floor';
+type GroupMode = 'none' | 'floor';
 
 const statusOptions: { value: RoomStatus | 'all'; label: string }[] = [
     { value: 'all', label: 'All Rooms' },
@@ -37,13 +38,12 @@ const statusOptions: { value: RoomStatus | 'all'; label: string }[] = [
 
 const groupLabel: Record<GroupMode, string> = {
     none: 'No Grouping',
-    type: 'By Type',
     floor: 'By Floor',
 };
 
 export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps) {
+    const navigate = useNavigate();
     const [filterStatus, setFilterStatus] = useState<RoomStatus | 'all'>('all');
-    const [filterFloor, setFilterFloor] = useState<number | 'all'>('all');
     const [filterType, setFilterType] = useState<string | 'all'>('all');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [groupBy, setGroupBy] = useState<GroupMode>('none');
@@ -93,15 +93,10 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
     const filteredRooms = useMemo(() =>
         (rooms ?? []).filter(room => {
             if (filterStatus !== 'all' && room.status !== filterStatus) return false;
-            if (filterFloor !== 'all' && room.floor_number !== filterFloor) return false;
             if (filterType !== 'all' && room.room_type !== filterType) return false;
             return true;
         }),
-        [rooms, filterStatus, filterFloor, filterType]);
-
-    const floors = useMemo(() =>
-        Array.from(new Set((rooms ?? []).map(r => r.floor_number ?? 1))).sort((a, b) => a - b),
-        [rooms]);
+        [rooms, filterStatus, filterType]);
 
     const roomTypes = useMemo(() =>
         Array.from(new Set((rooms ?? []).map(r => r.room_type))).sort(),
@@ -118,14 +113,15 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
     const handleRoomClick = (room: RoomWithBooking) => {
         if (room.status === 'available' && onCheckIn) {
             onCheckIn(room);
+        } else if ((room.status === 'occupied' || room.status === 'short_rest') && room.activeBooking) {
+            navigate(`/bookings/${room.activeBooking.id}/ledger`);
         } else if (onOpenDetails) {
             onOpenDetails(room);
         }
     };
 
     const cycleGroupBy = () => {
-        if (groupBy === 'none') setGroupBy('type');
-        else if (groupBy === 'type') setGroupBy('floor');
+        if (groupBy === 'none') setGroupBy('floor');
         else setGroupBy('none');
     };
 
@@ -135,32 +131,7 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
 
     // ── Grouped rendering ──
     const renderGroupedRooms = () => {
-        if (groupBy === 'type') {
-            const types = Array.from(new Set(filteredRooms.map(r => r.room_type))).sort();
-            return (
-                <div className="space-y-6">
-                    {types.map(type => {
-                        const ofType = filteredRooms.filter(r => r.room_type === type);
-                        if (ofType.length === 0) return null;
-                        return (
-                            <div key={type}>
-                                <h3 className="text-sm font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                                    {type}
-                                    <span className="text-xs font-normal text-gray-400 dark:text-slate-500 normal-case">
-                                        ({ofType.length} room{ofType.length !== 1 ? 's' : ''})
-                                    </span>
-                                </h3>
-                                <div className={gridCls}>
-                                    {ofType.map(room => (
-                                        <RoomCard key={room.id} room={room} onClick={() => handleRoomClick(room)} />
-                                    ))}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            );
-        }
+        // No type grouping — removed per user request
 
         if (groupBy === 'floor') {
             const floorList = Array.from(new Set(filteredRooms.map(r => r.floor_number ?? 1))).sort((a, b) => a - b);
@@ -223,16 +194,17 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
             </div>
 
             {/* Toolbar: Filters + View/Group controls */}
-            <div className="flex flex-wrap items-center gap-3 justify-between">
-                {/* Filters */}
-                <div className="flex items-center gap-2 flex-wrap">
-                    <Filter size={16} className="text-gray-400 dark:text-slate-500" />
+            <div className="flex items-center gap-2 justify-between flex-wrap">
+                {/* Filters — compact pill style */}
+                <div className="flex items-center gap-2">
+                    <Filter size={14} className="text-gray-400 dark:text-slate-500" />
 
                     {/* Status filter */}
                     <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value as RoomStatus | 'all')}
-                        className="input py-1.5 pr-8 text-sm"
+                        className="text-sm px-3 py-1.5 rounded-lg border border-gray-200 bg-white dark:bg-navy-800 dark:border-navy-600 dark:text-slate-300 focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
+                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
                     >
                         {statusOptions.map((opt) => (
                             <option key={opt.value} value={opt.value}>
@@ -246,28 +218,13 @@ export function RoomStatusGrid({ onCheckIn, onOpenDetails }: RoomStatusGridProps
                         <select
                             value={filterType}
                             onChange={(e) => setFilterType(e.target.value)}
-                            className="input py-1.5 text-sm"
+                            className="text-sm px-3 py-1.5 rounded-lg border border-gray-200 bg-white dark:bg-navy-800 dark:border-navy-600 dark:text-slate-300 focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
+                            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
                         >
                             <option value="all">All Types</option>
                             {roomTypes.map((type) => (
                                 <option key={type} value={type}>
                                     {type}
-                                </option>
-                            ))}
-                        </select>
-                    )}
-
-                    {/* Floor filter */}
-                    {floors.length > 1 && (
-                        <select
-                            value={filterFloor === 'all' ? 'all' : filterFloor}
-                            onChange={(e) => setFilterFloor(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-                            className="input py-1.5 text-sm"
-                        >
-                            <option value="all">All Floors</option>
-                            {floors.map((floor) => (
-                                <option key={floor} value={floor}>
-                                    Floor {floor}
                                 </option>
                             ))}
                         </select>
