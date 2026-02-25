@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useAuthStore } from '@/stores/authStore';
@@ -135,7 +135,7 @@ function AppInner() {
                 </div>
             )}
             <UpdatePrompt />
-            <HashRouter>
+            <BrowserRouter>
                 {/* Session timeout warning - shown when session is about to expire */}
                 <SessionTimeoutWarning />
                 {/* Realtime notification toasts */}
@@ -190,7 +190,7 @@ function AppInner() {
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </Suspense>
-            </HashRouter>
+            </BrowserRouter>
         </ErrorBoundary>
     );
 }

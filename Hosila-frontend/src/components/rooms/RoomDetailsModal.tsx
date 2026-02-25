@@ -11,7 +11,7 @@ import { updateRoomStatus } from '@/db/rooms';
 import { getGuestById } from '@/db/guests';
 import { requireSupabase } from '@/lib/api';
 import { InvoiceView, ReceiptView } from '@/components/billing';
-import { CheckoutReconciliation } from './CheckoutReconciliation';
+import { CheckoutReconciliation } from '@/components/guests/CheckoutReconciliation';
 import type { Room, Booking, RoomStatus, Invoice, Receipt } from '@/types';
 import { format } from 'date-fns';
 import {
