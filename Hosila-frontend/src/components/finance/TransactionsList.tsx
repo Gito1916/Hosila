@@ -238,41 +238,42 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
                 </div>
             )}
 
-            {/* Filters */}
-            <div className="flex flex-wrap gap-3">
-                {/* Search */}
-                <div className="relative flex-1 min-w-[200px]">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            {/* Filters — compact inline */}
+            <div className="flex items-center gap-2 flex-wrap">
+                {/* Search — compact */}
+                <div className="relative w-56">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
                         type="text"
-                        placeholder="Search transactions..."
+                        placeholder="Search..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="input pl-9 w-full"
+                        className="text-sm w-full pl-8 pr-3 py-1.5 rounded-lg border border-gray-200 bg-white dark:bg-navy-800 dark:border-navy-600 dark:text-slate-300 focus:outline-none focus:border-primary-400"
                     />
                 </div>
 
+                <Filter size={14} className="text-slate-400" />
+
                 {/* Department Filter */}
-                <div className="flex items-center gap-2">
-                    <Filter size={16} className="text-slate-400" />
-                    <select
-                        value={departmentFilter}
-                        onChange={(e) => setDepartmentFilter(e.target.value)}
-                        className="input py-2"
-                    >
-                        <option value="all">All Departments</option>
-                        <option value="accommodation">Accommodation</option>
-                        <option value="restaurant">Restaurant</option>
-                        <option value="payment">Payments</option>
-                        <option value="expense">Expenses</option>
-                    </select>
-                </div>
+                <select
+                    value={departmentFilter}
+                    onChange={(e) => setDepartmentFilter(e.target.value)}
+                    className="text-sm px-3 py-1.5 rounded-lg border border-gray-200 bg-white dark:bg-navy-800 dark:border-navy-600 dark:text-slate-300 focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
+                >
+                    <option value="all">All Departments</option>
+                    <option value="accommodation">Accommodation</option>
+                    <option value="restaurant">Restaurant</option>
+                    <option value="payment">Payments</option>
+                    <option value="expense">Expenses</option>
+                </select>
 
                 {/* Type Filter */}
                 <select
                     value={typeFilter}
                     onChange={(e) => setTypeFilter(e.target.value)}
-                    className="input py-2"
+                    className="text-sm px-3 py-1.5 rounded-lg border border-gray-200 bg-white dark:bg-navy-800 dark:border-navy-600 dark:text-slate-300 focus:outline-none focus:border-primary-400 cursor-pointer appearance-none pr-7"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
                 >
                     <option value="all">All Types</option>
                     <option value="charge">Charges</option>
