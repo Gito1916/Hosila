@@ -55,7 +55,8 @@
 
 /* Base styles */
 body {
-  @apply bg-slate-900 text-slate-100 antialiased;
+  background-color: #16243D;
+  @apply text-slate-100 antialiased;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -215,9 +216,8 @@ html.light-mode body {
   @apply text-slate-600 hover:bg-slate-100 hover:text-slate-900;
 }
 
-/* Light mode sidebar & Nav */
-.light-mode aside,
-.light-mode nav {
+/* Light mode nav only — sidebar stays dark navy in ALL modes */
+.light-mode nav:not(aside nav) {
   @apply bg-white/80 border-slate-200 backdrop-blur-md shadow-premium-r;
 }
 
@@ -261,7 +261,8 @@ html.light-mode body {
 }
 
 /* Light mode backgrounds */
-.light-mode .bg-slate-900 {
+.light-mode .bg-slate-900,
+.light-mode body {
   background-color: #f6fffd !important;
   /* Brand off-white - Main background */
 }

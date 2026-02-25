@@ -137,7 +137,7 @@ export function NotificationPanel() {
                                 <div
                                     key={notification.id}
                                     onClick={() => handleNotificationClick(notification)}
-                                    className={`p-3 border-b border-slate-700 cursor-pointer hover:bg-slate-700/50 transition-colors ${!notification.read ? 'bg-slate-700/30' : ''
+                                    className={`p-3 border-b border-slate-700 cursor-pointer hover:bg-slate-700/50 transition-colors ${!notification.read ? 'bg-lime-500/10 border-l-2 border-l-lime-400' : ''
                                         }`}
                                 >
                                     <div className="flex gap-3">
@@ -150,7 +150,7 @@ export function NotificationPanel() {
                                                     {notification.title}
                                                 </p>
                                                 {!notification.read && (
-                                                    <span className="w-2 h-2 bg-primary-500 rounded-full flex-shrink-0 mt-1.5" />
+                                                    <span className="w-2 h-2 bg-lime-400 rounded-full flex-shrink-0 mt-1.5" />
                                                 )}
                                             </div>
                                             <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">
