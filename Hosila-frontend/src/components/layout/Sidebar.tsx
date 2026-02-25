@@ -85,14 +85,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     }`}
             >
                 {/* Logo */}
-                <div className="p-4 border-b border-white/10 flex items-center justify-between">
-                    <Link to="/" className="flex items-center justify-center w-full lg:w-auto">
+                <div className="h-16 px-4 border-b border-white/10 flex flex-col items-center justify-center relative">
+                    <Link to="/" className="flex items-center justify-center">
                         <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-9 h-9 rounded" />
                     </Link>
                     {/* Close button - mobile only */}
                     <button
                         onClick={onClose}
-                        className="lg:hidden absolute right-3 top-4 p-2 text-white hover:bg-white/10 rounded-lg"
+                        className="lg:hidden absolute right-3 top-1/2 -translate-y-1/2 p-2 text-white hover:bg-white/10 rounded-lg"
                     >
                         <X size={20} />
                     </button>
