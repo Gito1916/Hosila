@@ -40,7 +40,7 @@ async def generate_restaurant_report(
                 SUM(so.quantity) as quantity_sold,
                 SUM(so.total_price) as revenue
             FROM service_orders so
-            JOIN services s ON so.service_id = s.id
+            JOIN services s ON so.service_id::uuid = s.id
             WHERE so.hotel_id = :hotel_id
               AND so.status != 'cancelled'
               AND so.ordered_at >= :start_ts
@@ -168,13 +168,15 @@ async def generate_restaurant_report(
     tax_result = await db.execute(
         text("""
             SELECT
-                COALESCE(SUM(CASE WHEN tax_type IN ('vat', 'tdl') THEN tax_amount ELSE 0 END), 0) as tax,
-                COALESCE(SUM(CASE WHEN tax_type = 'service_charge' THEN tax_amount ELSE 0 END), 0) as sc
-            FROM tax_transactions
+                COALESCE(SUM(tax_amount), 0) as vat,
+                COALESCE(SUM(service_charge_amount), 0) as sc,
+                COALESCE(SUM(tdl_amount), 0) as tdl
+            FROM charges
             WHERE hotel_id = :hotel_id
               AND department = 'restaurant'
-              AND transaction_date >= :start_ts
-              AND transaction_date < :end_ts
+              AND status != 'cancelled'
+              AND charge_date >= :start_ts
+              AND charge_date < :end_ts
         """),
         {
             "hotel_id": hotel_id,
@@ -195,6 +197,6 @@ async def generate_restaurant_report(
         all_items=all_items,
         payment_split=payment_split,
         daily_breakdown=daily_breakdown,
-        tax_collected=Decimal(str(tax_row["tax"])) if tax_row else Decimal("0"),
+        tax_collected=Decimal(str(tax_row["vat"])) + Decimal(str(tax_row["tdl"])) if tax_row else Decimal("0"),
         service_charge_collected=Decimal(str(tax_row["sc"])) if tax_row else Decimal("0"),
     )

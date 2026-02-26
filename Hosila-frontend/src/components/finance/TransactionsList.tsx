@@ -79,6 +79,9 @@ interface TransactionRow {
     grossAmount: number;
     netRevenue: number;
     taxAmount: number;
+    scAmount: number;
+    vatAmount: number;
+    tdlAmount: number;
     paymentMethod?: PaymentMethod;
 }
 
@@ -113,6 +116,9 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
             grossAmount: charge.gross_amount,
             netRevenue: charge.net_revenue,
             taxAmount: charge.tax_amount,
+            scAmount: charge.service_charge_amount ?? 0,
+            vatAmount: charge.tax_amount ?? 0,
+            tdlAmount: charge.tdl_amount ?? 0,
         });
     }
 
@@ -130,6 +136,9 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
             grossAmount: payment.amount,
             netRevenue: 0,
             taxAmount: 0,
+            scAmount: 0,
+            vatAmount: 0,
+            tdlAmount: 0,
             paymentMethod: payment.payment_method,
         });
     }
@@ -148,6 +157,9 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
             grossAmount: expense.amount,
             netRevenue: 0,
             taxAmount: 0,
+            scAmount: 0,
+            vatAmount: 0,
+            tdlAmount: 0,
             paymentMethod: expense.payment_method as PaymentMethod,
         });
     }
@@ -232,7 +244,7 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
                 <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-amber-400 text-sm">
                         <Receipt size={16} />
-                        <span className="font-medium">Tax Collected (VAT Liability)</span>
+                        <span className="font-medium">Tax Collected (SC + VAT + TDL)</span>
                     </div>
                     <span className="text-amber-400 font-bold">₦{totalTax.toLocaleString()}</span>
                 </div>
@@ -301,7 +313,9 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
                                     <th className="px-4 py-3 font-medium">Description</th>
                                     <th className="px-4 py-3 font-medium text-right">Gross</th>
                                     <th className="px-4 py-3 font-medium text-right">Net Revenue</th>
+                                    <th className="px-4 py-3 font-medium text-right">SC</th>
                                     <th className="px-4 py-3 font-medium text-right">VAT</th>
+                                    <th className="px-4 py-3 font-medium text-right">TDL</th>
                                     <th className="px-4 py-3 font-medium">Method</th>
                                 </tr>
                             </thead>
@@ -352,8 +366,14 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
                                             <td className="px-4 py-3 text-right text-muted">
                                                 {row.netRevenue > 0 ? `₦${row.netRevenue.toLocaleString()}` : '-'}
                                             </td>
-                                            <td className="px-4 py-3 text-right text-muted">
-                                                {row.taxAmount > 0 ? `₦${row.taxAmount.toLocaleString()}` : '-'}
+                                            <td className="px-4 py-3 text-right text-amber-400 text-xs">
+                                                {row.scAmount > 0 ? `₦${row.scAmount.toLocaleString()}` : '-'}
+                                            </td>
+                                            <td className="px-4 py-3 text-right text-amber-400 text-xs">
+                                                {row.vatAmount > 0 ? `₦${row.vatAmount.toLocaleString()}` : '-'}
+                                            </td>
+                                            <td className="px-4 py-3 text-right text-amber-400 text-xs">
+                                                {row.tdlAmount > 0 ? `₦${row.tdlAmount.toLocaleString()}` : '-'}
                                             </td>
                                             <td className="px-4 py-3 text-muted">
                                                 {row.paymentMethod ? paymentMethodLabels[row.paymentMethod] : '-'}

@@ -76,7 +76,9 @@ export interface Charge {
     description: string;
     gross_amount: number;      // Total including tax
     net_revenue: number;       // Revenue excluding tax
-    tax_amount: number;        // Tax portion
+    tax_amount: number;        // VAT portion
+    service_charge_amount?: number; // Service charge portion
+    tdl_amount?: number;       // Tourism Development Levy portion
     tax_rate: number;          // Rate used (stored at transaction time)
     status: ChargeStatus;
     reference_id?: string;     // service_order_id, booking_id, etc.
