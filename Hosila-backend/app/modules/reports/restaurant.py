@@ -31,21 +31,27 @@ async def generate_restaurant_report(
     end_dt = datetime.combine(end, time(23, 59, 59))
 
     # ── Item-level sales ──────────────────────────
+    # service_orders.service_id is text and can be either:
+    #   - a plain UUID matching services.id  (menu items)
+    #   - "inv_<uuid>" matching inventory_items.id (beverages from inventory)
     items_result = await db.execute(
         text("""
             SELECT
-                s.name as item_name,
-                s.category,
-                COALESCE(s.cost_price, 0) as cost_price,
+                COALESCE(s.name, ii.name, 'Unknown') as item_name,
+                COALESCE(s.category, ii.category, 'other') as category,
+                COALESCE(s.cost_price, ii.unit_cost, 0) as cost_price,
                 SUM(so.quantity) as quantity_sold,
                 SUM(so.total_price) as revenue
             FROM service_orders so
-            JOIN services s ON so.service_id::uuid = s.id
+            LEFT JOIN services s ON s.id::text = so.service_id
+            LEFT JOIN inventory_items ii ON 'inv_' || ii.id::text = so.service_id
             WHERE so.hotel_id = :hotel_id
               AND so.status != 'cancelled'
               AND so.ordered_at >= :start_ts
               AND so.ordered_at < :end_ts
-            GROUP BY s.name, s.category, s.cost_price
+            GROUP BY COALESCE(s.name, ii.name, 'Unknown'),
+                     COALESCE(s.category, ii.category, 'other'),
+                     COALESCE(s.cost_price, ii.unit_cost, 0)
             ORDER BY revenue DESC
         """),
         {
