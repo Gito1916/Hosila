@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     # ── Email (Resend) ───────────────────────────────────────
     resend_api_key: str = ""
-    hosila_logo_url: str = "https://ywxsopiokkdytgsvyacg.supabase.co/storage/v1/object/public/hotel-assets/hosila-logo.png"
+    hosila_logo_url: str = "https://ywxsopiokkdytgsvyacg.supabase.co/storage/v1/object/public/hotel-assets/Hosila-icon-logo.png"
     email_from_address: str = "notifications@mail.hosila.com"
     email_from_name: str = "Hosila"
 
