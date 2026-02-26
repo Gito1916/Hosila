@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
 import type { OtherIncome, IncomeCategory, Charge } from '@/types';
@@ -8,12 +8,18 @@ import {
     MoreHorizontal,
     Plus,
     Receipt,
+    Loader2,
+    TrendingUp,
+    BarChart3,
+    Users,
+    BedDouble,
 } from 'lucide-react';
 import { OtherIncomeForm } from './OtherIncomeForm';
 import { getAllBookings } from '@/db/bookings';
 import { getAllRooms } from '@/db/rooms';
 import { getAllGuests } from '@/db/guests';
 import { requireSupabase, getHotelId } from '@/lib/api';
+import { useAccommodationReport, useRestaurantReport } from '@/hooks/useHosilaApi';
 
 type DateFilter = 'daily' | 'weekly' | 'monthly' | 'yearly';
 type IncomeSection = 'accommodation' | 'restaurant' | 'other';
@@ -49,6 +55,8 @@ function getDateRange(filter: DateFilter): { start: Date; end: Date } {
     }
 }
 
+const f = (n: number) => `₦${(n ?? 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+
 export function IncomeTab({ dateFilter = 'daily', activeSection: controlledSection, onSectionChange }: IncomeTabProps) {
     const [internalSection, setInternalSection] = useState<IncomeSection>('accommodation');
 
@@ -58,6 +66,8 @@ export function IncomeTab({ dateFilter = 'daily', activeSection: controlledSecti
     const [showOtherIncomeForm, setShowOtherIncomeForm] = useState(false);
 
     const { start, end } = getDateRange(dateFilter);
+    const startStr = format(start, 'yyyy-MM-dd');
+    const endStr = format(end, 'yyyy-MM-dd');
 
     // === ACCOUNTING v2: Revenue from charges table ===
     const { data: charges } = useQuery({
@@ -124,20 +134,30 @@ export function IncomeTab({ dateFilter = 'daily', activeSection: controlledSecti
             </div>
 
             {/* Section Content */}
-            <div className="bg-surface-card/50 rounded-lg border border-border">
-                {activeSection === 'accommodation' && (
-                    <ChargeSection charges={accommodationCharges} department="accommodation" />
-                )}
-                {activeSection === 'restaurant' && (
-                    <ChargeSection charges={restaurantCharges} department="restaurant" />
-                )}
-                {activeSection === 'other' && (
+            {activeSection === 'accommodation' && (
+                <div className="space-y-4">
+                    <AccommodationAnalytics start={startStr} end={endStr} />
+                    <div className="bg-surface-card/50 rounded-lg border border-border">
+                        <ChargeSection charges={accommodationCharges} department="accommodation" />
+                    </div>
+                </div>
+            )}
+            {activeSection === 'restaurant' && (
+                <div className="space-y-4">
+                    <RestaurantAnalytics start={startStr} end={endStr} />
+                    <div className="bg-surface-card/50 rounded-lg border border-border">
+                        <ChargeSection charges={restaurantCharges} department="restaurant" />
+                    </div>
+                </div>
+            )}
+            {activeSection === 'other' && (
+                <div className="bg-surface-card/50 rounded-lg border border-border">
                     <OtherIncomeSection
                         incomeList={otherIncomeList ?? []}
                         onAddNew={() => setShowOtherIncomeForm(true)}
                     />
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Other Income Form Modal */}
             {showOtherIncomeForm && (
@@ -145,6 +165,201 @@ export function IncomeTab({ dateFilter = 'daily', activeSection: controlledSecti
                     onClose={() => setShowOtherIncomeForm(false)}
                     onSuccess={() => setShowOtherIncomeForm(false)}
                 />
+            )}
+        </div>
+    );
+}
+
+// ── Accommodation Analytics Panel ──────────────
+function AccommodationAnalytics({ start, end }: { start: string; end: string }) {
+    const { data: report, isLoading } = useAccommodationReport(start, end) as {
+        data: {
+            total_revenue: number;
+            total_rooms_available: number;
+            total_room_nights: number;
+            rooms_sold: number;
+            occupancy_rate: number;
+            adr: number;
+            revpar: number;
+            revenue_by_room_type: Array<{ room_type: string; total_revenue: number; nights_sold: number; average_rate: number }>;
+            tax_collected: number;
+            service_charge_collected: number;
+        } | undefined;
+        isLoading: boolean;
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center gap-2 p-4 text-muted text-sm">
+                <Loader2 size={14} className="animate-spin" /> Loading analytics...
+            </div>
+        );
+    }
+    if (!report) return null;
+
+    return (
+        <div className="space-y-3">
+            {/* KPI Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="bg-surface-card rounded-lg p-3 border border-border">
+                    <div className="flex items-center gap-1.5 mb-1">
+                        <TrendingUp size={14} className="text-green-400" />
+                        <span className="text-xs text-muted">Revenue</span>
+                    </div>
+                    <p className="text-lg font-bold text-heading">{f(report.total_revenue)}</p>
+                </div>
+                <div className="bg-surface-card rounded-lg p-3 border border-border">
+                    <div className="flex items-center gap-1.5 mb-1">
+                        <BedDouble size={14} className="text-blue-400" />
+                        <span className="text-xs text-muted">Occupancy</span>
+                    </div>
+                    <p className="text-lg font-bold text-heading">{Number(report.occupancy_rate).toFixed(1)}%</p>
+                </div>
+                <div className="bg-surface-card rounded-lg p-3 border border-border">
+                    <div className="flex items-center gap-1.5 mb-1">
+                        <BarChart3 size={14} className="text-purple-400" />
+                        <span className="text-xs text-muted">ADR</span>
+                    </div>
+                    <p className="text-lg font-bold text-heading">{f(report.adr)}</p>
+                </div>
+                <div className="bg-surface-card rounded-lg p-3 border border-border">
+                    <div className="flex items-center gap-1.5 mb-1">
+                        <BarChart3 size={14} className="text-amber-400" />
+                        <span className="text-xs text-muted">RevPAR</span>
+                    </div>
+                    <p className="text-lg font-bold text-heading">{f(report.revpar)}</p>
+                </div>
+            </div>
+
+            {/* Revenue by Room Type */}
+            {report.revenue_by_room_type?.length > 0 && (
+                <div className="bg-surface-card rounded-lg border border-border overflow-hidden">
+                    <div className="px-4 py-2.5 border-b border-border bg-surface-raised/30">
+                        <h4 className="text-xs font-semibold text-muted uppercase">Revenue by Room Type</h4>
+                    </div>
+                    <div className="divide-y divide-border/50">
+                        {report.revenue_by_room_type.map((rt) => (
+                            <div key={rt.room_type} className="flex items-center justify-between px-4 py-2.5 text-sm">
+                                <span className="text-heading font-medium capitalize">{rt.room_type.replace(/_/g, ' ')}</span>
+                                <div className="flex items-center gap-4">
+                                    <span className="text-muted text-xs">{rt.nights_sold} nights</span>
+                                    <span className="text-muted text-xs">ADR {f(rt.average_rate)}</span>
+                                    <span className="text-green-400 font-medium">{f(rt.total_revenue)}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ── Restaurant Analytics Panel ──────────────
+function RestaurantAnalytics({ start, end }: { start: string; end: string }) {
+    const { data: report, isLoading } = useRestaurantReport(start, end) as {
+        data: {
+            total_revenue: number;
+            total_orders: number;
+            average_order_value: number;
+            top_sellers: Array<{ item_name: string; category: string; quantity_sold: number; revenue: number; margin_percent: number | null }>;
+            payment_split: Array<{ method: string; amount: number; count: number }>;
+            tax_collected: number;
+            service_charge_collected: number;
+        } | undefined;
+        isLoading: boolean;
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center gap-2 p-4 text-muted text-sm">
+                <Loader2 size={14} className="animate-spin" /> Loading analytics...
+            </div>
+        );
+    }
+    if (!report) return null;
+
+    return (
+        <div className="space-y-3">
+            {/* KPI Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="bg-surface-card rounded-lg p-3 border border-border">
+                    <div className="flex items-center gap-1.5 mb-1">
+                        <TrendingUp size={14} className="text-green-400" />
+                        <span className="text-xs text-muted">Revenue</span>
+                    </div>
+                    <p className="text-lg font-bold text-heading">{f(report.total_revenue)}</p>
+                </div>
+                <div className="bg-surface-card rounded-lg p-3 border border-border">
+                    <div className="flex items-center gap-1.5 mb-1">
+                        <Receipt size={14} className="text-blue-400" />
+                        <span className="text-xs text-muted">Orders</span>
+                    </div>
+                    <p className="text-lg font-bold text-heading">{report.total_orders}</p>
+                </div>
+                <div className="bg-surface-card rounded-lg p-3 border border-border">
+                    <div className="flex items-center gap-1.5 mb-1">
+                        <BarChart3 size={14} className="text-purple-400" />
+                        <span className="text-xs text-muted">Avg Order</span>
+                    </div>
+                    <p className="text-lg font-bold text-heading">{f(report.average_order_value)}</p>
+                </div>
+                <div className="bg-surface-card rounded-lg p-3 border border-border">
+                    <div className="flex items-center gap-1.5 mb-1">
+                        <Users size={14} className="text-amber-400" />
+                        <span className="text-xs text-muted">Tax Collected</span>
+                    </div>
+                    <p className="text-lg font-bold text-heading">{f(report.tax_collected)}</p>
+                </div>
+            </div>
+
+            {/* Top Sellers */}
+            {report.top_sellers?.length > 0 && (
+                <div className="bg-surface-card rounded-lg border border-border overflow-hidden">
+                    <div className="px-4 py-2.5 border-b border-border bg-surface-raised/30">
+                        <h4 className="text-xs font-semibold text-muted uppercase">Top Sellers</h4>
+                    </div>
+                    <div className="divide-y divide-border/50">
+                        {report.top_sellers.slice(0, 8).map((item, i) => (
+                            <div key={i} className="flex items-center justify-between px-4 py-2.5 text-sm">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-muted text-xs w-5">#{i + 1}</span>
+                                    <div>
+                                        <span className="text-heading font-medium">{item.item_name}</span>
+                                        <span className="text-muted text-xs ml-2 capitalize">{item.category}</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <span className="text-muted text-xs">{item.quantity_sold} sold</span>
+                                    {item.margin_percent != null && (
+                                        <span className="text-muted text-xs">{Number(item.margin_percent).toFixed(0)}% margin</span>
+                                    )}
+                                    <span className="text-green-400 font-medium">{f(item.revenue)}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Payment Split */}
+            {report.payment_split?.length > 0 && (
+                <div className="bg-surface-card rounded-lg border border-border overflow-hidden">
+                    <div className="px-4 py-2.5 border-b border-border bg-surface-raised/30">
+                        <h4 className="text-xs font-semibold text-muted uppercase">Payment Methods</h4>
+                    </div>
+                    <div className="divide-y divide-border/50">
+                        {report.payment_split.map((pm) => (
+                            <div key={pm.method} className="flex items-center justify-between px-4 py-2.5 text-sm">
+                                <span className="text-heading font-medium capitalize">{pm.method.replace(/_/g, ' ')}</span>
+                                <div className="flex items-center gap-4">
+                                    <span className="text-muted text-xs">{pm.count} txns</span>
+                                    <span className="text-green-400 font-medium">{f(pm.amount)}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             )}
         </div>
     );
