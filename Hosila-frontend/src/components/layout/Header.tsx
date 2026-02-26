@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useThemeStore } from '@/stores/themeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { NotificationPanel } from './NotificationPanel';
 import { format } from 'date-fns';
-import { Menu, Sun, Moon, Cloud, CloudOff, RefreshCw } from 'lucide-react';
+import { Menu, Sun, Moon, RefreshCw } from 'lucide-react';
 
 
 interface HeaderProps {
@@ -12,20 +12,8 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
-    const [isOnline, setIsOnline] = useState(navigator.onLine);
     const { theme, toggleTheme } = useThemeStore();
     const hotelName = useAuthStore((state) => state.activeHotelName);
-
-    useEffect(() => {
-        const handleOnline = () => setIsOnline(true);
-        const handleOffline = () => setIsOnline(false);
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
-        return () => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
-        };
-    }, []);
 
     const queryClient = useQueryClient();
     const [isRefreshing, setIsRefreshing] = useState(false);
