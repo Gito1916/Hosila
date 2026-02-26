@@ -96,174 +96,128 @@ export function LoginPage() {
     const hasHotelBranding = hotel && hotel.name && hotel.name !== 'My Hotel';
 
     return (
-        <div className="min-h-screen bg-surface-base flex">
-            {/* Left Side — Hosila Branding */}
-            <div className="hidden lg:flex flex-col justify-center items-center w-1/2 bg-gradient-to-br from-slate-900 via-slate-800 to-primary-900/30 p-12 relative overflow-hidden">
-                {/* Background decorations */}
-                <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-                    <div className="absolute top-20 left-10 w-72 h-72 bg-primary-500/5 rounded-full blur-3xl" />
-                    <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl" />
-                </div>
+        <div className="min-h-screen bg-surface-base flex items-center justify-center p-6">
+            <div className="w-full max-w-md">
+                {/* Hotel Identity */}
+                <div className="text-center mb-8">
+                    {hotel?.logo_url ? (
+                        <img
+                            src={hotel.logo_url}
+                            alt={hotel.name}
+                            className="w-20 h-20 rounded-2xl object-cover mx-auto mb-4 border-2 border-border"
+                        />
+                    ) : (
+                        <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-20 h-20 rounded-2xl mx-auto mb-4 border-2 border-border bg-surface-card p-2" />
+                    )}
+                    <h2 className="text-2xl font-bold text-heading">
+                        {hasHotelBranding ? hotel.name : 'Hosila'}
+                    </h2>
+                    {!hasHotelBranding && (
+                        <p className="text-muted mt-1">Sign in to your hotel</p>
+                    )}
 
-                <div className="relative z-10 max-w-md text-center">
-                    <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-20 h-20 rounded-2xl mx-auto mb-6 shadow-lg shadow-primary-500/25" />
-                    <h1 className="text-4xl font-bold text-heading mb-3">Hosila</h1>
-                    <p className="text-lg text-muted mb-8">
-                        Property Management System
-                    </p>
-
-                    <div className="space-y-4 text-left">
-                        {[
-                            { emoji: '🏨', text: 'Complete front desk & booking management' },
-                            { emoji: '🍽️', text: 'Restaurant POS with guest charging' },
-                            { emoji: '📊', text: 'Financial reports & analytics' },
-                            { emoji: '☁️', text: 'Cloud-powered across multiple devices' },
-                            { emoji: '🔒', text: 'Real-time data with Supabase backend' },
-                        ].map((feature) => (
-                            <div key={feature.text} className="flex items-center gap-3 text-muted">
-                                <span className="text-lg">{feature.emoji}</span>
-                                <span className="text-sm">{feature.text}</span>
-                            </div>
-                        ))}
+                    {/* Connection indicator */}
+                    <div className="flex items-center justify-center gap-1.5 mt-2">
+                        {isOnline ? (
+                            <>
+                                <Wifi size={12} className="text-emerald-400" />
+                                <span className="text-xs text-emerald-400">Online</span>
+                            </>
+                        ) : (
+                            <>
+                                <WifiOff size={12} className="text-muted" />
+                                <span className="text-xs text-muted">Offline Mode</span>
+                            </>
+                        )}
                     </div>
                 </div>
 
-                <p className="absolute bottom-6 text-muted text-xs">
-                    © 2026 Hosila. All rights reserved.
-                </p>
-            </div>
 
-            {/* Right Side — Hotel Login */}
-            <div className="flex-1 flex items-center justify-center p-6">
-                <div className="w-full max-w-md">
-                    {/* Hotel Identity */}
-                    <div className="text-center mb-8">
-                        {hotel?.logo_url ? (
-                            <img
-                                src={hotel.logo_url}
-                                alt={hotel.name}
-                                className="w-20 h-20 rounded-2xl object-cover mx-auto mb-4 border-2 border-border"
-                            />
-                        ) : (
-                            <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-20 h-20 rounded-2xl mx-auto mb-4 border-2 border-border bg-surface-card p-2" />
-                        )}
-                        <h2 className="text-2xl font-bold text-heading">
-                            {hasHotelBranding ? hotel.name : 'Hosila'}
-                        </h2>
-                        {!hasHotelBranding && (
-                            <p className="text-muted mt-1">Sign in to your hotel</p>
+                {/* Login Form */}
+                <div className="bg-surface-card rounded-2xl border border-border p-6">
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        {/* Error message */}
+                        {error && (
+                            <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
+                                {error}
+                            </div>
                         )}
 
-                        {/* Connection indicator */}
-                        <div className="flex items-center justify-center gap-1.5 mt-2">
-                            {isOnline ? (
+                        {/* Role Dropdown */}
+                        <div>
+                            <label htmlFor="user-select" className="label">
+                                Sign in as
+                            </label>
+                            <div className="relative">
+                                <select
+                                    id="user-select"
+                                    value={selectedUserId}
+                                    onChange={(e) => setSelectedUserId(e.target.value)}
+                                    className="input appearance-none pr-10 cursor-pointer"
+                                    required
+                                >
+                                    <option value="" disabled>Select your account...</option>
+                                    {users?.map(u => (
+                                        <option key={u.id} value={u.id}>
+                                            {u.name} ({u.role})
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown
+                                    size={18}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Password */}
+                        <div>
+                            <label htmlFor="password" className="label">
+                                Password
+                            </label>
+                            <div className="relative">
+                                <input
+                                    id="password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="input pr-10"
+                                    placeholder="Enter your password"
+                                    required
+                                    autoComplete="current-password"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-heading"
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Submit */}
+                        <button
+                            type="submit"
+                            disabled={isSubmitting || !selectedUserId}
+                            className="btn btn-primary w-full mt-2"
+                        >
+                            {isSubmitting ? (
                                 <>
-                                    <Wifi size={12} className="text-emerald-400" />
-                                    <span className="text-xs text-emerald-400">Online</span>
+                                    <Loader2 size={18} className="animate-spin mr-2" />
+                                    Signing in...
                                 </>
                             ) : (
-                                <>
-                                    <WifiOff size={12} className="text-muted" />
-                                    <span className="text-xs text-muted">Offline Mode</span>
-                                </>
+                                'Sign In'
                             )}
-                        </div>
-                    </div>
-
-                    {/* Mobile Hosila logo (shown only on small screens) */}
-                    <div className="lg:hidden text-center mb-6">
-                        <div className="inline-flex items-center gap-2 text-muted text-sm">
-                            <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-4 h-4" />
-                            Powered by Hosila
-                        </div>
-                    </div>
-
-                    {/* Login Form */}
-                    <div className="bg-surface-card rounded-2xl border border-border p-6">
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            {/* Error message */}
-                            {error && (
-                                <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
-                                    {error}
-                                </div>
-                            )}
-
-                            {/* Role Dropdown */}
-                            <div>
-                                <label htmlFor="user-select" className="label">
-                                    Sign in as
-                                </label>
-                                <div className="relative">
-                                    <select
-                                        id="user-select"
-                                        value={selectedUserId}
-                                        onChange={(e) => setSelectedUserId(e.target.value)}
-                                        className="input appearance-none pr-10 cursor-pointer"
-                                        required
-                                    >
-                                        <option value="" disabled>Select your account...</option>
-                                        {users?.map(u => (
-                                            <option key={u.id} value={u.id}>
-                                                {u.name} ({u.role})
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown
-                                        size={18}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Password */}
-                            <div>
-                                <label htmlFor="password" className="label">
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        id="password"
-                                        type={showPassword ? 'text' : 'password'}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="input pr-10"
-                                        placeholder="Enter your password"
-                                        required
-                                        autoComplete="current-password"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-heading"
-                                    >
-                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Submit */}
-                            <button
-                                type="submit"
-                                disabled={isSubmitting || !selectedUserId}
-                                className="btn btn-primary w-full mt-2"
-                            >
-                                {isSubmitting ? (
-                                    <>
-                                        <Loader2 size={18} className="animate-spin mr-2" />
-                                        Signing in...
-                                    </>
-                                ) : (
-                                    'Sign In'
-                                )}
-                            </button>
-                        </form>
-                    </div>
-
-                    {/* Status footer */}
-                    <p className="text-center text-muted text-xs mt-6">
-                        Powered by Supabase • Real-time cloud data
-                    </p>
+                        </button>
+                    </form>
                 </div>
+
+                {/* Status footer */}
+                <p className="text-center text-muted text-xs mt-6">
+                    Powered by Supabase • Real-time cloud data
+                </p>
             </div>
         </div>
     );

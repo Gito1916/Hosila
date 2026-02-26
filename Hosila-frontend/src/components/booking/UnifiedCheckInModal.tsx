@@ -329,52 +329,52 @@ export function UnifiedCheckInModal({ room, onClose, onSuccess, prefilledGuest }
                         )}
                     </div>
 
-                    {/* Number of Guests */}
-                    <div>
-                        <label className="label">Number of Guests</label>
-                        <select {...register('numGuests', { valueAsNumber: true })} className="input">
-                            {Array.from({ length: room.max_occupancy }, (_, i) => i + 1).map((n) => (
-                                <option key={n} value={n}>
-                                    {n} {n === 1 ? 'guest' : 'guests'}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    {/* Guests + Booking Type Row */}
+                    <div className="grid grid-cols-[120px_1fr] gap-3 items-end">
+                        <div>
+                            <label className="label">Guests</label>
+                            <select {...register('numGuests', { valueAsNumber: true })} className="input">
+                                {Array.from({ length: room.max_occupancy }, (_, i) => i + 1).map((n) => (
+                                    <option key={n} value={n}>
+                                        {n} {n === 1 ? 'guest' : 'guests'}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="label">Booking Type</label>
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setValue('bookingType', 'night');
+                                        const nights = watch('numNights') || 1;
+                                        const rate = room.night_rate * nights;
+                                        setValue('customRate', rate);
+                                    }}
+                                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${bookingType === 'night'
+                                        ? 'border-primary-500 bg-primary-500/20 text-primary-400'
+                                        : 'border-border bg-surface-raised/50 text-muted hover:border-border-strong'
+                                        }`}
+                                >
+                                    Night Stay
+                                </button>
 
-                    {/* Booking Type */}
-                    <div>
-                        <label className="label">Booking Type</label>
-                        <div className="flex gap-2">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setValue('bookingType', 'night');
-                                    const nights = watch('numNights') || 1;
-                                    const rate = room.night_rate * nights;
-                                    setValue('customRate', rate);
-                                }}
-                                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${bookingType === 'night'
-                                    ? 'border-primary-500 bg-primary-500/20 text-primary-400'
-                                    : 'border-border bg-surface-raised/50 text-muted hover:border-border-strong'
-                                    }`}
-                            >
-                                Night Stay
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setValue('bookingType', 'short_rest');
-                                    const rate = calculateRate();
-                                    setValue('customRate', rate);
-                                }}
-                                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${bookingType === 'short_rest'
-                                    ? 'border-status-shortRest bg-status-shortRest/20 text-status-shortRest'
-                                    : 'border-border bg-surface-raised/50 text-muted hover:border-border-strong'
-                                    }`}
-                            >
-                                Short Rest
-                            </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setValue('bookingType', 'short_rest');
+                                        const rate = calculateRate();
+                                        setValue('customRate', rate);
+                                    }}
+                                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${bookingType === 'short_rest'
+                                        ? 'border-status-shortRest bg-status-shortRest/20 text-status-shortRest'
+                                        : 'border-border bg-surface-raised/50 text-muted hover:border-border-strong'
+                                        }`}
+                                >
+                                    Short Rest
+                                </button>
+                            </div>
                         </div>
                     </div>
 
