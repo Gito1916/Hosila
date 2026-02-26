@@ -17,7 +17,7 @@ type DateRange = 'today' | 'week' | 'month' | 'custom';
 type ReportType = 'accommodation' | 'restaurant' | 'inventory' | 'tax-remittance';
 type ExportingFormat = 'pdf' | 'excel' | null;
 
-const reportTypes: { value: ReportType; label: string; description: string; icon: typeof Receipt; formats: ('pdf' | 'excel')[] }[] = [
+const reportTypes: { value: ReportType; label: string; description: string; icon: typeof Building2; formats: ('pdf' | 'excel')[] }[] = [
     { value: 'accommodation', label: 'Accommodation Report', description: 'RevPAR, ADR, occupancy & revenue by room type', icon: Building2, formats: ['excel'] },
     { value: 'restaurant', label: 'Restaurant Report', description: 'Item sales, margins, top sellers & daily breakdown', icon: Utensils, formats: ['excel'] },
     { value: 'inventory', label: 'Inventory Report', description: 'Stock movements: opening, purchases, usage, closing', icon: Package, formats: ['excel'] },
