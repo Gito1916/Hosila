@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBookings, useGuests, useRooms } from '@/hooks/useSupabaseData';
 import { GuestDirectory, GuestHistory } from '@/components/guests';
-import { Users, History, BedDouble, ChevronRight } from 'lucide-react';
+import { GuestListPrint } from '@/components/guests/GuestListPrint';
+import { Users, History, BedDouble, ChevronRight, Printer } from 'lucide-react';
 import { format } from 'date-fns';
 
 type GuestsTab = 'in_house' | 'directory' | 'history';
@@ -10,6 +11,7 @@ type GuestsTab = 'in_house' | 'directory' | 'history';
 export function GuestsPage() {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<GuestsTab>('in_house');
+    const [showPrintModal, setShowPrintModal] = useState(false);
 
     // Get in-house guests (active bookings) from Supabase via React Query
     const { data: allBookings } = useBookings();
@@ -69,50 +71,64 @@ export function GuestsPage() {
 
             {/* Tab Content */}
             {activeTab === 'in_house' && (
-                <div className="space-y-3">
-                    {inHouseGuests?.map(({ booking, guest, room }) => (
-                        <div
-                            key={booking.id}
-                            onClick={() => guest && handleOpenLedger(booking.id)}
-                            className="card p-4 cursor-pointer hover:border-primary-500 transition-colors flex items-center justify-between"
-                        >
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-surface-raised rounded-full flex items-center justify-center">
-                                    <span className="text-lg font-bold text-heading">
-                                        {room?.room_number ?? '?'}
-                                    </span>
-                                </div>
-                                <div>
-                                    <p className="font-medium text-heading">{guest?.name}</p>
-                                    <div className="text-sm text-muted space-x-2">
-                                        <span>{room?.room_type}</span>
-                                        {guest?.gender && (
-                                            <>
-                                                <span>•</span>
-                                                <span className="capitalize">{guest.gender}</span>
-                                            </>
-                                        )}
+                <>
+                    <div className="space-y-3">
+                        {/* Print button for daily guest list */}
+                        <div className="flex justify-end">
+                            <button onClick={() => setShowPrintModal(true)} className="btn btn-secondary">
+                                <Printer size={18} className="mr-1" />
+                                Print Guest List
+                            </button>
+                        </div>
+                        {inHouseGuests?.map(({ booking, guest, room }) => (
+                            <div
+                                key={booking.id}
+                                onClick={() => guest && handleOpenLedger(booking.id)}
+                                className="card p-4 cursor-pointer hover:border-primary-500 transition-colors flex items-center justify-between"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-surface-raised rounded-full flex items-center justify-center">
+                                        <span className="text-lg font-bold text-heading">
+                                            {room?.room_number ?? '?'}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-heading">{guest?.name}</p>
+                                        <div className="text-sm text-muted space-x-2">
+                                            <span>{room?.room_type}</span>
+                                            {guest?.gender && (
+                                                <>
+                                                    <span>•</span>
+                                                    <span className="capitalize">{guest.gender}</span>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <div className="text-right">
-                                    <p className="text-sm text-muted">Checkout</p>
-                                    <p className="font-medium text-heading">
-                                        {format(new Date(booking.planned_checkout), 'MMM d, h:mm a')}
-                                    </p>
+                                <div className="flex items-center gap-3">
+                                    <div className="text-right">
+                                        <p className="text-sm text-muted">Checkout</p>
+                                        <p className="font-medium text-heading">
+                                            {format(new Date(booking.planned_checkout), 'MMM d, h:mm a')}
+                                        </p>
+                                    </div>
+                                    <ChevronRight size={20} className="text-muted" />
                                 </div>
-                                <ChevronRight size={20} className="text-muted" />
                             </div>
-                        </div>
-                    ))}
-                    {inHouseGuests?.length === 0 && (
-                        <div className="text-center py-12 text-muted">
-                            <BedDouble size={48} className="mx-auto mb-4 opacity-50" />
-                            <p>No guests currently in-house</p>
-                        </div>
+                        ))}
+                        {inHouseGuests?.length === 0 && (
+                            <div className="text-center py-12 text-muted">
+                                <BedDouble size={48} className="mx-auto mb-4 opacity-50" />
+                                <p>No guests currently in-house</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Print Modal */}
+                    {showPrintModal && (
+                        <GuestListPrint onClose={() => setShowPrintModal(false)} />
                     )}
-                </div>
+                </>
             )}
 
             {activeTab === 'directory' && <GuestDirectory />}

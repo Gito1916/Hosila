@@ -20,7 +20,7 @@ import {
     Calendar,
 } from 'lucide-react';
 import { RoomPickerModal } from './RoomPickerModal';
-import { CheckInModal } from '@/components/rooms/CheckInModal';
+import { UnifiedCheckInModal } from '@/components/booking/UnifiedCheckInModal';
 import { ReservationForm } from '@/components/reservations/ReservationForm';
 import type { Room } from '@/types';
 import { requireSupabase, getHotelId } from '@/lib/api';
@@ -321,12 +321,13 @@ export function GuestDetailsModal({ guest, onClose }: GuestDetailsModalProps) {
 
                 {/* Check-In Modal with prefilled guest */}
                 {selectedRoom && (
-                    <CheckInModal
+                    <UnifiedCheckInModal
                         room={selectedRoom}
                         prefilledGuest={{
                             id: guest.id,
                             name: guest.name,
                             phone: guest.phone,
+                            email: guest.email,
                             idType: guest.id_type,
                             idNumber: guest.id_number,
                         }}

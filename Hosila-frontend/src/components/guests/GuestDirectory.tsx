@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { GuestCard } from './GuestCard';
 import { GuestDetailsModal } from './GuestDetailsModal';
 import { GuestForm } from './GuestForm';
-import { GuestListPrint } from './GuestListPrint';
 import type { Guest, Booking } from '@/types';
 import { getAllGuests } from '@/db/guests';
 import { requireSupabase, getHotelId } from '@/lib/api';
@@ -14,7 +13,6 @@ import {
     Users,
     Filter,
     Star,
-    Printer,
 } from 'lucide-react';
 
 export function GuestDirectory() {
@@ -22,7 +20,6 @@ export function GuestDirectory() {
     const [showInHouseOnly, setShowInHouseOnly] = useState(false);
     const [showVIPOnly, setShowVIPOnly] = useState(false);
     const [showForm, setShowForm] = useState(false);
-    const [showPrintModal, setShowPrintModal] = useState(false);
     const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
 
     // Get all guests
@@ -126,10 +123,6 @@ export function GuestDirectory() {
 
                 {/* Add Guest + Print */}
                 <div className="flex items-center gap-2">
-                    <button onClick={() => setShowPrintModal(true)} className="btn btn-secondary">
-                        <Printer size={18} className="mr-1" />
-                        Print Guest List
-                    </button>
                     <button onClick={() => setShowForm(true)} className="btn btn-primary">
                         <Plus size={18} className="mr-1" />
                         Add Guest
@@ -184,9 +177,6 @@ export function GuestDirectory() {
                 />
             )}
 
-            {showPrintModal && (
-                <GuestListPrint onClose={() => setShowPrintModal(false)} />
-            )}
         </div>
     );
 }
