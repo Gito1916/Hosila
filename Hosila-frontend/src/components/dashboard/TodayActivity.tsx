@@ -24,7 +24,7 @@ export function TodayActivity({ onCheckIn, onCheckOut }: TodayActivityProps) {
                 duration: `${nights} Night${nights !== 1 ? 's' : ''}`,
                 status: 'ARRIVAL',
                 statusColor: 'bg-blue-50 text-blue-600 border-blue-200',
-                amount: `₦${a.reservation.total_price.toLocaleString()}`,
+                amount: `₦${(a.reservation.total_price ?? a.reservation.total_amount ?? 0).toLocaleString()}`,
                 action: () => onCheckIn?.(a.reservation.id)
             };
         }),

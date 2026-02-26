@@ -521,12 +521,12 @@ export function FinanceDashboard({ dateFilter = 'daily', onNavigate, onAddExpens
                 />
                 <KpiCard
                     label={`${label} Tax`}
-                    value={fmt(
-                        backendKPIs
-                            ? (backendKPIs.total_vat_collected + backendKPIs.total_tdl_collected + backendKPIs.total_service_charge)
-                            : totalTaxCollected
-                    )}
-                    trendLabel={backendKPIs ? `VAT ${fmt(backendKPIs.total_vat_collected)} · ${tdlName} ${fmt(backendKPIs.total_tdl_collected)}` : 'Collected'}
+                    value={fmt(totalTaxCollected)}
+                    trendLabel={
+                        backendKPIs && (backendKPIs.total_vat_collected + backendKPIs.total_tdl_collected + backendKPIs.total_service_charge) > 0
+                            ? `VAT ${fmt(backendKPIs.total_vat_collected)} · ${tdlName} ${fmt(backendKPIs.total_tdl_collected)}`
+                            : 'Collected'
+                    }
                     icon={Scale}
                     accentColor="#f59e0b"
                 />

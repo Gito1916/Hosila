@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/authStore';
 import { calculateFolio, formatCurrency, type FolioCalculations } from '@/utils/folio';
 import { recordPayment, extendNightStay, extendShortRest } from '@/db/bookings';
+import { emailApi } from '@/lib/apiClient';
 import { issueAmenity, getUnresolvedReturnables } from '@/db/inventory';
 import { createServiceCharge } from '@/db/services';
 import { createInvoiceFromBooking, createReceipt, getInvoiceByBooking } from '@/db/billing';
@@ -25,8 +26,12 @@ import {
     Utensils,
     LogOut,
     CreditCard,
-    AlertTriangle
+    AlertTriangle,
+    FileText,
+    Send,
+    Printer,
 } from 'lucide-react';
+import { InvoiceView } from '@/components/billing/InvoiceReceipt';
 import { AmenitiesSelection, type AmenitySelection } from '@/components/rooms/AmenitiesSelection';
 import { getHotel } from '@/db/settings';
 
@@ -67,6 +72,12 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
 
     const [showAmenities, setShowAmenities] = useState(false);
     const [amenitySelections, setAmenitySelections] = useState<AmenitySelection[]>([]);
+
+    // Invoice states
+    const [showInvoiceMenu, setShowInvoiceMenu] = useState(false);
+    const [showInvoice, setShowInvoice] = useState(false);
+    const [currentInvoice, setCurrentInvoice] = useState<any>(null);
+    const [isSendingInvoice, setIsSendingInvoice] = useState(false);
 
     // Checkout flow states
     const [showReconciliation, setShowReconciliation] = useState(false);
@@ -194,6 +205,46 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
         setAmenitySelections(selections);
     }, []);
 
+    // ── Invoice handlers ──
+    const handlePrepareInvoice = async () => {
+        try {
+            let invoice = await getInvoiceByBooking(booking.id);
+            if (!invoice) {
+                invoice = await createInvoiceFromBooking(booking.id, guest.name, guest.phone ?? undefined);
+            }
+            return invoice;
+        } catch (err) {
+            toast.error('Failed to generate invoice', err);
+            return null;
+        }
+    };
+
+    const handlePrintInvoice = async () => {
+        setShowInvoiceMenu(false);
+        const invoice = await handlePrepareInvoice();
+        if (invoice) {
+            setCurrentInvoice(invoice);
+            setShowInvoice(true);
+        }
+    };
+
+    const handleSendInvoice = async () => {
+        setShowInvoiceMenu(false);
+        if (!guest.email) {
+            toast.error('Guest has no email address on file');
+            return;
+        }
+        setIsSendingInvoice(true);
+        try {
+            await emailApi.sendCheckoutEmail(booking.id);
+            toast.success(`Invoice sent to ${guest.email}`);
+        } catch (err) {
+            toast.error('Failed to send invoice', err);
+        } finally {
+            setIsSendingInvoice(false);
+        }
+    };
+
     // ── Multi-step checkout flow ──
     const handleCheckOut = async () => {
         if (!user || !folio) return;
@@ -297,8 +348,8 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
             )}
 
             {/* Header Section */}
-            <div className="card p-5 bg-surface-card border border-border">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="card p-5 bg-surface-card border border-border overflow-visible">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 overflow-visible">
                     {/* Left: Room & Guest Info */}
                     <div>
                         <div className="flex items-center gap-3 mb-1">
@@ -317,24 +368,56 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                         </div>
                     </div>
 
-                    {/* Right: Balance & Pay Action */}
-                    <div className="flex items-center gap-6 bg-surface-raised/30 p-3 rounded-xl border border-border">
+                    {/* Right: Balance & Actions */}
+                    <div className="flex items-center gap-4 bg-surface-raised/30 p-3 rounded-xl border border-border overflow-visible">
                         <div className="text-right">
-                            <p className="text-xs text-muted uppercase font-semibold">Outstanding Balance</p>
-                            <p className={`text-2xl font-bold ${folio.balance > 0 ? 'text-status-dirty' : 'text-status-available'}`}>
+                            <p className="text-xs text-muted uppercase font-semibold">Outstanding</p>
+                            <p className={`text-xl font-bold ${folio.balance > 0 ? 'text-status-dirty' : 'text-status-available'}`}>
                                 {formatCurrency(folio.balance)}
                             </p>
                         </div>
-                        <button
-                            onClick={() => {
-                                setPaymentAmount(folio.balance);
-                                setShowPayment(true);
-                            }}
-                            className="btn bg-green-600 hover:bg-green-700 text-heading font-bold py-3 px-6 rounded-lg flex items-center gap-2 shadow-lg shadow-green-900/20"
-                        >
-                            <CreditCard size={20} />
-                            Take Payment
-                        </button>
+                        <div className="flex flex-col gap-1.5">
+                            <button
+                                onClick={() => {
+                                    setPaymentAmount(folio.balance);
+                                    setShowPayment(true);
+                                }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-600 hover:bg-green-700 text-white transition-colors"
+                            >
+                                <CreditCard size={14} />
+                                Take Payment
+                            </button>
+                            {/* Invoice Button with dropdown */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowInvoiceMenu(!showInvoiceMenu)}
+                                    disabled={isSendingInvoice}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-surface-card hover:bg-surface-raised text-heading border border-border transition-colors w-full"
+                                >
+                                    {isSendingInvoice ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
+                                    Invoice
+                                </button>
+                                {showInvoiceMenu && (
+                                    <div className="absolute right-0 top-full mt-1 bg-surface-card border border-border rounded-lg shadow-xl z-50 overflow-hidden min-w-[150px]">
+                                        <button
+                                            onClick={handleSendInvoice}
+                                            className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-heading hover:bg-surface-raised transition-colors"
+                                        >
+                                            <Send size={13} className="text-blue-400" />
+                                            Send to Email
+                                        </button>
+                                        <div className="h-px bg-border" />
+                                        <button
+                                            onClick={handlePrintInvoice}
+                                            className="w-full flex items-center gap-2 px-3 py-2.5 text-xs text-heading hover:bg-surface-raised transition-colors"
+                                        >
+                                            <Printer size={13} className="text-emerald-400" />
+                                            Print Invoice
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -816,6 +899,17 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                         />
                     </div>
                 </div>
+            )}
+
+            {/* Invoice Print Modal */}
+            {showInvoice && currentInvoice && (
+                <InvoiceView
+                    invoice={currentInvoice}
+                    onClose={() => {
+                        setShowInvoice(false);
+                        setCurrentInvoice(null);
+                    }}
+                />
             )}
         </div>
     );

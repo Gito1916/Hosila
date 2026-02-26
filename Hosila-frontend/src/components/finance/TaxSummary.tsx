@@ -89,6 +89,7 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
     const downloadMutation = useReportDownload();
 
     const [remitNotes, setRemitNotes] = useState('');
+    const [exportingFormat, setExportingFormat] = useState<'pdf' | 'excel' | null>(null);
 
     const handleMarkRemitted = async (taxType: string) => {
         try {
@@ -106,6 +107,7 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
     };
 
     const handleExport = async (fmt: 'pdf' | 'excel') => {
+        setExportingFormat(fmt);
         try {
             await downloadMutation.mutateAsync({
                 type: 'tax-remittance',
@@ -116,6 +118,8 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
             toast.success(`Report downloaded as ${fmt.toUpperCase()}`);
         } catch (err) {
             toast.error('Failed to download report', err);
+        } finally {
+            setExportingFormat(null);
         }
     };
 
@@ -228,10 +232,10 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
                     <div className="flex gap-2">
                         <button
                             onClick={() => handleExport('excel')}
-                            disabled={downloadMutation.isPending}
+                            disabled={exportingFormat !== null}
                             className="btn btn-secondary text-sm"
                         >
-                            {downloadMutation.isPending ? (
+                            {exportingFormat === 'excel' ? (
                                 <Loader2 size={14} className="mr-1.5 animate-spin" />
                             ) : (
                                 <Download size={14} className="mr-1.5" />
@@ -240,10 +244,10 @@ export function TaxSummary({ startDate, endDate }: TaxSummaryProps) {
                         </button>
                         <button
                             onClick={() => handleExport('pdf')}
-                            disabled={downloadMutation.isPending}
+                            disabled={exportingFormat !== null}
                             className="btn btn-secondary text-sm"
                         >
-                            {downloadMutation.isPending ? (
+                            {exportingFormat === 'pdf' ? (
                                 <Loader2 size={14} className="mr-1.5 animate-spin" />
                             ) : (
                                 <Download size={14} className="mr-1.5" />

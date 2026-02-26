@@ -331,6 +331,39 @@ class EmailService:
         wifi_name = hotel_settings_json.get("wifi_name")
         wifi_password = hotel_settings_json.get("wifi_password")
 
+        # Parse custom_footer into checkin_info_items
+        custom_footer = email_settings.get("custom_footer") or ""
+        checkin_info_items = []
+        if custom_footer.strip():
+            for line in custom_footer.strip().splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                # Try to split on first ':'  →  "🛎️ Front Desk: Dial 0"
+                if ":" in line:
+                    label_part, _, value_part = line.partition(":")
+                    # Extract emoji icon from start of label if present
+                    label_part = label_part.strip()
+                    value_part = value_part.strip()
+                    # Check for leading emoji
+                    icon = ""
+                    if label_part and not label_part[0].isalnum():
+                        # First char(s) is emoji/symbol
+                        icon = label_part[0]
+                        label_part = label_part[1:].strip()
+                    checkin_info_items.append({
+                        "icon": icon,
+                        "label": label_part,
+                        "value": value_part,
+                    })
+                else:
+                    # No colon — treat entire line as label
+                    checkin_info_items.append({
+                        "icon": "",
+                        "label": line,
+                        "value": "",
+                    })
+
         content_context = {
             "guest_name": row["guest_name"],
             "room_number": row.get("room_number", "N/A"),
@@ -342,6 +375,7 @@ class EmailService:
             "wifi_name": wifi_name,
             "wifi_password": wifi_password,
             "primary_color": email_settings.get("primary_color", "#2563EB"),
+            "checkin_info_items": checkin_info_items if checkin_info_items else None,
         }
         dynamic_content = _render_template("checkin_content.html", content_context)
 

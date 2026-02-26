@@ -189,7 +189,7 @@ export function EmailSettingsPanel() {
                                     <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs rounded-full font-medium">Recommended</span>
                                 </div>
                                 <p className="text-sm text-muted mt-1">
-                                    Emails sent from <strong>notifications@hosila.app</strong> with your hotel name.
+                                    Emails sent from <strong>notifications@mail.hosila.com</strong> with your hotel name.
                                     Reply-to set to your hotel's email. No domain setup needed.
                                 </p>
                             </div>
@@ -376,14 +376,17 @@ export function EmailSettingsPanel() {
                         </div>
                     </div>
 
-                    {/* Custom Footer */}
+                    {/* Additional Check-in Information */}
                     <div className="bg-surface-raised/50 rounded-lg p-4">
-                        <label className="block text-sm text-muted mb-2">Custom Footer Message (optional)</label>
+                        <label className="block text-sm text-heading font-medium mb-1">Additional Check-in Information</label>
+                        <p className="text-xs text-muted mb-2">
+                            This message appears in the check-in welcome email only. Include department dial codes, WiFi password, or any helpful info for guests.
+                        </p>
                         <textarea
                             value={customFooter}
                             onChange={(e) => setCustomFooter(e.target.value)}
-                            placeholder="Thank you for choosing Grand Palace Hotel..."
-                            className="input w-full h-20 resize-y"
+                            placeholder={"🛎️ Front Desk: Dial 0\n🍽️ Restaurant: Dial 3\n📶 WiFi: HotelGuest / password123\n🏊 Pool Hours: 7am – 9pm"}
+                            className="input w-full h-28 resize-y"
                         />
                     </div>
                 </div>

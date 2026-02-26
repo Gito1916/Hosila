@@ -57,14 +57,6 @@ export function Header({ onMenuClick }: HeaderProps) {
                     {format(new Date(), 'EEEE, MMMM d, yyyy')}
                 </div>
 
-                {/* Connection Status */}
-                <div className="flex items-center gap-2">
-                    <div className={`flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-1.5 rounded-full text-xs lg:text-sm ${isOnline ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                        }`}>
-                        {isOnline ? <Cloud size={14} /> : <CloudOff size={14} />}
-                        <span className="hidden sm:inline">{isOnline ? 'Connected' : 'Offline'}</span>
-                    </div>
-                </div>
 
                 {/* Reload / Refresh button (essential for PWA without browser chrome) */}
                 <button

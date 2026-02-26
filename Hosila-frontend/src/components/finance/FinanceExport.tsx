@@ -18,12 +18,13 @@ import {
 
 type DateRange = 'today' | 'week' | 'month' | 'custom';
 type ReportType = 'ledger' | 'income' | 'expense' | 'vat';
+type ExportingFormat = null | 'pdf' | 'excel';
 
 const reportTypes: { value: ReportType; label: string; description: string; icon: typeof Receipt }[] = [
     { value: 'ledger', label: 'Transaction Ledger', description: 'Complete audit trail of all transactions', icon: ListChecks },
     { value: 'income', label: 'Income Report', description: 'Revenue by department with guest details', icon: TrendingUp },
     { value: 'expense', label: 'Expense Report', description: 'All expenses with vendor and category', icon: TrendingDown },
-    { value: 'vat', label: 'VAT Report', description: 'Tax summary by department for compliance', icon: Calculator },
+    { value: 'vat', label: 'Tax Report', description: 'SC, VAT & TDL breakdown by department', icon: Calculator },
 ];
 
 // Unified transaction row for export reports
@@ -51,7 +52,7 @@ export function FinanceExport() {
     const [reportType, setReportType] = useState<ReportType>('ledger');
     const [customStart, setCustomStart] = useState(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
     const [customEnd, setCustomEnd] = useState(format(new Date(), 'yyyy-MM-dd'));
-    const [isExporting, setIsExporting] = useState(false);
+    const [exportingFormat, setExportingFormat] = useState<ExportingFormat>(null);
 
     const { data: hotel } = useQuery({ queryKey: ['hotel'], queryFn: getHotel });
 
@@ -358,12 +359,12 @@ export function FinanceExport() {
         return html;
     };
 
-    // Generate VAT Report
+    // Generate Tax Report (SC + VAT + TDL)
     const generateVATPDF = (data: Awaited<ReturnType<typeof fetchReportData>>) => {
         const taxableTransactions = data.transactions.filter(t => t.is_taxable && t.tax_amount);
 
         const departments = ['accommodation', 'restaurant', 'other'] as const;
-        let html = '<h2>VAT Report (Tax Compliance)</h2>';
+        let html = '<h2>Tax Report (SC + VAT + TDL)</h2>';
 
         let grandTaxable = 0;
         let grandVAT = 0;
@@ -435,7 +436,7 @@ export function FinanceExport() {
     };
 
     const exportToPDF = async () => {
-        setIsExporting(true);
+        setExportingFormat('pdf');
         try {
             const data = await fetchReportData();
 
@@ -514,12 +515,12 @@ export function FinanceExport() {
         } catch (err) {
             toast.error('PDF export failed', err);
         } finally {
-            setIsExporting(false);
+            setExportingFormat(null);
         }
     };
 
     const exportToExcel = async () => {
-        setIsExporting(true);
+        setExportingFormat('excel');
         try {
             const data = await fetchReportData();
             const lines: string[] = [];
@@ -577,7 +578,7 @@ export function FinanceExport() {
                     ].join(','));
                 });
             } else if (reportType === 'vat') {
-                lines.push('VAT REPORT');
+                lines.push('TAX REPORT');
                 lines.push('Date,Department,Description,Status,Net Revenue,VAT Rate,VAT Amount');
                 data.transactions.filter(t => t.is_taxable && t.tax_amount > 0).forEach(t => {
                     lines.push([
@@ -602,7 +603,7 @@ export function FinanceExport() {
         } catch (err) {
             toast.error('Excel export failed', err);
         } finally {
-            setIsExporting(false);
+            setExportingFormat(null);
         }
     };
 
@@ -690,10 +691,10 @@ export function FinanceExport() {
                 <div className="grid grid-cols-2 gap-3">
                     <button
                         onClick={exportToPDF}
-                        disabled={isExporting}
+                        disabled={exportingFormat !== null}
                         className="btn btn-secondary flex items-center justify-center gap-2"
                     >
-                        {isExporting ? (
+                        {exportingFormat === 'pdf' ? (
                             <Loader2 size={18} className="animate-spin" />
                         ) : (
                             <FileText size={18} />
@@ -702,10 +703,10 @@ export function FinanceExport() {
                     </button>
                     <button
                         onClick={exportToExcel}
-                        disabled={isExporting}
+                        disabled={exportingFormat !== null}
                         className="btn btn-primary flex items-center justify-center gap-2"
                     >
-                        {isExporting ? (
+                        {exportingFormat === 'excel' ? (
                             <Loader2 size={18} className="animate-spin" />
                         ) : (
                             <FileSpreadsheet size={18} />

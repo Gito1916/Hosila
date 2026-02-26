@@ -221,19 +221,19 @@ export function RoomCard({ room, onClick }: RoomCardProps) {
                 <div className="px-5 pl-6 pb-3 pt-2 mt-auto flex gap-2">
                     <button
                         onClick={(e) => handleStatusChange(e, 'available')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100"
+                        className="flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-semibold transition-colors bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 active:bg-emerald-200"
                         title="Mark Clean"
                     >
-                        <Sparkles size={13} />
+                        <Sparkles size={16} />
                         Clean
                     </button>
                     <button
                         onClick={(e) => handleStatusChange(e, 'maintenance')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors bg-surface-inset text-muted border border-border hover:bg-surface-raised"
+                        className="flex items-center justify-center gap-1.5 px-4 py-2.5 min-h-[44px] rounded-lg text-xs font-semibold transition-colors bg-surface-inset text-muted border border-border hover:bg-surface-raised active:bg-surface-card"
                         title="Maintenance"
                     >
-                        <Wrench size={13} />
-                        Maintenance
+                        <Wrench size={16} />
+                        Fix
                     </button>
                 </div>
             )}

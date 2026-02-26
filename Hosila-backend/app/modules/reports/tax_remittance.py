@@ -33,65 +33,28 @@ async def generate_tax_remittance_report(
     - Federal: VAT
     - State: TDL
     - Informational: Service Charge collected
+
+    Reads from the `charges` table (source of truth for revenue + tax).
     """
 
     # Build proper datetime range for asyncpg
     start_dt = datetime.combine(start, time.min)
     end_dt = datetime.combine(end, time(23, 59, 59))
 
-    # ── Summary by tax type ───────────────────────
-    summary_result = await db.execute(
-        text("""
-            SELECT
-                tax_type,
-                COUNT(*) as transaction_count,
-                SUM(tax_amount) as total_amount,
-                SUM(CASE WHEN remitted THEN tax_amount ELSE 0 END) as remitted_amount,
-                SUM(CASE WHEN NOT remitted THEN tax_amount ELSE 0 END) as pending_amount
-            FROM tax_transactions
-            WHERE hotel_id = :hotel_id
-              AND transaction_date >= :start_ts
-              AND transaction_date < :end_ts
-            GROUP BY tax_type
-        """),
-        {
-            "hotel_id": hotel_id,
-            "start_ts": start_dt,
-            "end_ts": end_dt,
-        },
-    )
-    summary_rows = {row["tax_type"]: row for row in summary_result.mappings().all()}
-
-    def _make_summary(tax_type: str) -> TaxTypeSummary:
-        row = summary_rows.get(tax_type)
-        if row:
-            return TaxTypeSummary(
-                tax_type=tax_type,
-                total_amount=Decimal(str(row["total_amount"])),
-                remitted_amount=Decimal(str(row["remitted_amount"])),
-                pending_amount=Decimal(str(row["pending_amount"])),
-                transaction_count=int(row["transaction_count"]),
-            )
-        return TaxTypeSummary(
-            tax_type=tax_type,
-            total_amount=Decimal("0"),
-            remitted_amount=Decimal("0"),
-            pending_amount=Decimal("0"),
-            transaction_count=0,
-        )
-
-    # ── Breakdown by department ───────────────────
-    dept_result = await db.execute(
+    # ── Aggregate taxes from charges table ─────────────
+    result = await db.execute(
         text("""
             SELECT
                 department,
-                COALESCE(SUM(CASE WHEN tax_type = 'vat' THEN tax_amount ELSE 0 END), 0) as vat,
-                COALESCE(SUM(CASE WHEN tax_type = 'tdl' THEN tax_amount ELSE 0 END), 0) as tdl,
-                COALESCE(SUM(CASE WHEN tax_type = 'service_charge' THEN tax_amount ELSE 0 END), 0) as sc
-            FROM tax_transactions
+                COUNT(*) as transaction_count,
+                COALESCE(SUM(vat_amount_v2), 0)           as total_vat,
+                COALESCE(SUM(tdl_amount), 0)              as total_tdl,
+                COALESCE(SUM(service_charge_amount), 0)    as total_sc
+            FROM charges
             WHERE hotel_id = :hotel_id
-              AND transaction_date >= :start_ts
-              AND transaction_date < :end_ts
+              AND charge_date >= :start_ts
+              AND charge_date < :end_ts
+              AND status IN ('active', 'partially_refunded')
             GROUP BY department
             ORDER BY department
         """),
@@ -101,22 +64,64 @@ async def generate_tax_remittance_report(
             "end_ts": end_dt,
         },
     )
-    by_department = [
-        DepartmentTaxBreakdown(
-            department=row["department"],
-            vat=Decimal(str(row["vat"])),
-            tdl=Decimal(str(row["tdl"])),
-            service_charge=Decimal(str(row["sc"])),
+    dept_rows = result.mappings().all()
+
+    # Accumulate totals per tax type
+    total_vat = Decimal("0")
+    total_tdl = Decimal("0")
+    total_sc = Decimal("0")
+    total_count = 0
+
+    by_department = []
+    for row in dept_rows:
+        vat = Decimal(str(row["total_vat"]))
+        tdl = Decimal(str(row["total_tdl"]))
+        sc = Decimal(str(row["total_sc"]))
+        total_vat += vat
+        total_tdl += tdl
+        total_sc += sc
+        total_count += int(row["transaction_count"])
+
+        by_department.append(
+            DepartmentTaxBreakdown(
+                department=row["department"],
+                vat=vat,
+                tdl=tdl,
+                service_charge=sc,
+            )
         )
-        for row in dept_result.mappings().all()
-    ]
+
+    # ── Check remittance_batches for already-remitted amounts ──
+    remit_result = await db.execute(
+        text("""
+            SELECT tax_type, COALESCE(SUM(total_amount), 0) as remitted
+            FROM remittance_batches
+            WHERE hotel_id = :hotel_id
+              AND status = 'remitted'
+              AND period_start >= :start
+              AND period_end <= :end
+            GROUP BY tax_type
+        """),
+        {"hotel_id": hotel_id, "start": start, "end": end},
+    )
+    remitted_map = {row["tax_type"]: Decimal(str(row["remitted"])) for row in remit_result.mappings().all()}
+
+    def _make_summary(tax_type: str, total: Decimal) -> TaxTypeSummary:
+        remitted = remitted_map.get(tax_type, Decimal("0"))
+        return TaxTypeSummary(
+            tax_type=tax_type,
+            total_amount=total,
+            remitted_amount=remitted,
+            pending_amount=total - remitted,
+            transaction_count=total_count,
+        )
 
     return TaxRemittanceReport(
         period_start=start,
         period_end=end,
-        federal_vat=_make_summary("vat"),
-        state_tdl=_make_summary("tdl"),
-        service_charge=_make_summary("service_charge"),
+        federal_vat=_make_summary("vat", total_vat),
+        state_tdl=_make_summary("tdl", total_tdl),
+        service_charge=_make_summary("service_charge", total_sc),
         by_department=by_department,
     )
 
