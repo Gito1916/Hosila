@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useRef, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getInventoryStats, getLowStockItems, getAllInventoryItems } from '@/db/inventory';
+import { requireSupabase, getHotelId } from '@/lib/api';
+import { toast } from '@/lib/errorMessages';
 import { InventoryCard } from './InventoryCard';
 import { InventoryDetailsModal } from './InventoryDetailsModal';
 import { InventoryForm } from './InventoryForm';
@@ -36,7 +38,46 @@ export function InventoryList() {
     const [behaviorFilter, setBehaviorFilter] = useState<AmenityBehavior | 'all' | 'amenity'>('all');
     const [showForm, setShowForm] = useState(false);
     const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
-    const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+    const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
+    const [editingCell, setEditingCell] = useState<{ id: string; field: 'unit_cost' | 'selling_price' } | null>(null);
+    const [editValue, setEditValue] = useState('');
+    const editInputRef = useRef<HTMLInputElement>(null);
+    const queryClient = useQueryClient();
+
+    // Focus the edit input when it appears
+    useEffect(() => {
+        if (editingCell && editInputRef.current) {
+            editInputRef.current.focus();
+            editInputRef.current.select();
+        }
+    }, [editingCell]);
+
+    // Save edited price
+    const handlePriceSave = async (itemId: string, field: 'unit_cost' | 'selling_price') => {
+        const numVal = parseFloat(editValue);
+        if (isNaN(numVal) || numVal < 0) {
+            setEditingCell(null);
+            return;
+        }
+        try {
+            const sb = requireSupabase();
+            const hotelId = await getHotelId();
+            await sb.from('inventory_items').update({ [field]: numVal }).eq('id', itemId).eq('hotel_id', hotelId);
+            // Also update services selling_price if this item is sold as a restaurant beverage
+            if (field === 'selling_price') {
+                await sb.from('services').update({ price: numVal }).eq('hotel_id', hotelId).like('id', itemId);
+            }
+            // Invalidate all dependent queries
+            queryClient.invalidateQueries({ queryKey: ['inventory_items'] });
+            queryClient.invalidateQueries({ queryKey: ['getInventoryStats'] });
+            queryClient.invalidateQueries({ queryKey: ['services'] });
+            queryClient.invalidateQueries({ queryKey: ['restaurant'] });
+            toast.success(`Price updated to ₦${numVal.toLocaleString()}`);
+        } catch {
+            toast.error('Failed to update price');
+        }
+        setEditingCell(null);
+    };
 
     // Get all inventory items
     const { data: allItems } = useQuery({ queryKey: ['inventory_items'], queryFn: getAllInventoryItems });
@@ -397,10 +438,11 @@ export function InventoryList() {
                                 <tr className="bg-surface-raised/50">
                                     <th className="text-left p-3 text-sm font-medium text-muted">Item Name</th>
                                     <th className="text-left p-3 text-sm font-medium text-muted">Category</th>
-                                    <th className="text-center p-3 text-sm font-medium text-muted">Current Stock</th>
-                                    <th className="text-center p-3 text-sm font-medium text-muted">Min Level</th>
+                                    <th className="text-center p-3 text-sm font-medium text-muted">Stock</th>
+                                    <th className="text-center p-3 text-sm font-medium text-muted">Min</th>
                                     <th className="text-center p-3 text-sm font-medium text-muted">Type</th>
-                                    <th className="text-right p-3 text-sm font-medium text-muted">Unit Cost</th>
+                                    <th className="text-right p-3 text-sm font-medium text-muted">Cost Price</th>
+                                    <th className="text-right p-3 text-sm font-medium text-muted">Selling Price</th>
                                     <th className="text-center p-3 text-sm font-medium text-muted">Status</th>
                                 </tr>
                             </thead>
@@ -437,8 +479,39 @@ export function InventoryList() {
                                                     {item.behavior === 'consumable' ? 'Consumable' : 'Returnable'}
                                                 </span>
                                             </td>
-                                            <td className="p-3 text-right text-muted">
-                                                {item.unit_cost ? `₦${item.unit_cost.toLocaleString()}` : '-'}
+                                            <td className="p-3 text-right" onClick={(e) => { e.stopPropagation(); setEditingCell({ id: item.id, field: 'unit_cost' }); setEditValue(String(item.unit_cost ?? 0)); }}>
+                                                {editingCell?.id === item.id && editingCell?.field === 'unit_cost' ? (
+                                                    <input
+                                                        ref={editInputRef}
+                                                        type="number"
+                                                        value={editValue}
+                                                        onChange={(e) => setEditValue(e.target.value)}
+                                                        onBlur={() => handlePriceSave(item.id, 'unit_cost')}
+                                                        onKeyDown={(e) => { if (e.key === 'Enter') handlePriceSave(item.id, 'unit_cost'); if (e.key === 'Escape') setEditingCell(null); }}
+                                                        className="w-20 text-right text-sm px-2 py-0.5 rounded border border-primary-400 bg-surface-base outline-none text-heading"
+                                                    />
+                                                ) : (
+                                                    <span className="text-muted hover:text-primary-400 cursor-pointer" title="Click to edit">
+                                                        {item.unit_cost ? `₦${item.unit_cost.toLocaleString()}` : '-'}
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="p-3 text-right" onClick={(e) => { e.stopPropagation(); setEditingCell({ id: item.id, field: 'selling_price' }); setEditValue(String(item.selling_price ?? 0)); }}>
+                                                {editingCell?.id === item.id && editingCell?.field === 'selling_price' ? (
+                                                    <input
+                                                        ref={editInputRef}
+                                                        type="number"
+                                                        value={editValue}
+                                                        onChange={(e) => setEditValue(e.target.value)}
+                                                        onBlur={() => handlePriceSave(item.id, 'selling_price')}
+                                                        onKeyDown={(e) => { if (e.key === 'Enter') handlePriceSave(item.id, 'selling_price'); if (e.key === 'Escape') setEditingCell(null); }}
+                                                        className="w-20 text-right text-sm px-2 py-0.5 rounded border border-primary-400 bg-surface-base outline-none text-heading"
+                                                    />
+                                                ) : (
+                                                    <span className="text-muted hover:text-primary-400 cursor-pointer" title="Click to edit">
+                                                        {item.selling_price ? `₦${item.selling_price.toLocaleString()}` : '-'}
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="p-3 text-center">
                                                 {isLow ? (
