@@ -306,9 +306,13 @@ export const reportsApi = {
             }),
         }),
 
-    /** Download report as Excel or PDF */
+    /** Download report as Excel or PDF (legacy) */
     downloadReport: (type: string, start: string, end: string, format: string = 'excel') =>
         apiDownload(`/api/v1/reports/${type}/export?start=${start}&end=${end}&format=${format}`),
+
+    /** Download V2 period-aware report (accommodation/restaurant only) */
+    downloadReportV2: (type: 'accommodation' | 'restaurant', start: string, end: string, mode: string = 'auto') =>
+        apiDownload(`/api/v1/reports/${type}/export-v2?start=${start}&end=${end}&mode=${mode}`),
 };
 
 // Analytics

@@ -142,3 +142,61 @@ class RemittanceBatchResponse(BaseModel):
     total_amount: Decimal
     transactions_marked: int
     status: str
+
+
+# ── V2 Export Schemas ─────────────────────────────────────────
+
+# Accommodation
+
+class AccommodationDailySummaryRow(BaseModel):
+    date: date
+    rooms_sold: int
+    occupancy_rate: Decimal
+    daily_revenue: Decimal
+
+
+class AccommodationMonthlySummaryRow(BaseModel):
+    month: str = Field(..., description="YYYY-MM")
+    rooms_sold: int
+    occupancy_rate: Decimal
+    monthly_revenue: Decimal
+
+
+class AccommodationTransactionRow(BaseModel):
+    time: datetime
+    booking_id: str
+    guest_name: str
+    room_number: str
+    description: str
+    amount: Decimal
+    status: str
+
+
+# Restaurant
+
+class RestaurantDailySalesRow(BaseModel):
+    date: date
+    orders: int
+    food_revenue: Decimal
+    drinks_revenue: Decimal
+    total_revenue: Decimal
+
+
+class RestaurantMonthlySalesRow(BaseModel):
+    month: str = Field(..., description="YYYY-MM")
+    orders: int
+    food_revenue: Decimal
+    drinks_revenue: Decimal
+    total_revenue: Decimal
+
+
+class RestaurantTransactionRow(BaseModel):
+    time: datetime
+    order_number: str
+    guest_room: str
+    item_name: str
+    category: str
+    quantity: int
+    unit_price: Decimal
+    line_total: Decimal
+    status: str

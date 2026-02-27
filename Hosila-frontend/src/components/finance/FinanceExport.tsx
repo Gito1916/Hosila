@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { format, startOfMonth, startOfWeek, endOfWeek } from 'date-fns';
+import { format, startOfMonth, startOfWeek, endOfWeek, startOfYear } from 'date-fns';
 import { useReportDownload } from '@/hooks/useHosilaApi';
 import { toast } from '@/lib/errorMessages';
 
@@ -13,13 +13,13 @@ import {
     Package,
 } from 'lucide-react';
 
-type DateRange = 'today' | 'week' | 'month' | 'custom';
+type DateRange = 'today' | 'week' | 'month' | 'year' | 'custom';
 type ReportType = 'accommodation' | 'restaurant' | 'inventory' | 'tax-remittance';
 type ExportingFormat = 'pdf' | 'excel' | null;
 
 const reportTypes: { value: ReportType; label: string; description: string; icon: typeof Building2; formats: ('pdf' | 'excel')[] }[] = [
-    { value: 'accommodation', label: 'Accommodation Report', description: 'RevPAR, ADR, occupancy & revenue by room type', icon: Building2, formats: ['excel'] },
-    { value: 'restaurant', label: 'Restaurant Report', description: 'Item sales, margins, top sellers & daily breakdown', icon: Utensils, formats: ['excel'] },
+    { value: 'accommodation', label: 'Accommodation Report', description: 'Daily revenue breakdown, or transaction detail for single day', icon: Building2, formats: ['excel'] },
+    { value: 'restaurant', label: 'Restaurant Report', description: 'Daily food/drinks sales split, or transaction detail for single day', icon: Utensils, formats: ['excel'] },
     { value: 'inventory', label: 'Inventory Report', description: 'Stock movements: opening, purchases, usage, closing', icon: Package, formats: ['excel'] },
     { value: 'tax-remittance', label: 'Tax Report', description: 'SC, VAT & TDL breakdown for compliance', icon: Calculator, formats: ['pdf', 'excel'] },
 ];
@@ -45,6 +45,8 @@ export function FinanceExport() {
             }
             case 'month':
                 return { start: format(startOfMonth(now), 'yyyy-MM-dd'), end: format(now, 'yyyy-MM-dd') };
+            case 'year':
+                return { start: format(startOfYear(now), 'yyyy-MM-dd'), end: format(now, 'yyyy-MM-dd') };
             case 'custom':
                 return { start: customStart, end: customEnd };
         }
@@ -103,11 +105,12 @@ export function FinanceExport() {
             {/* Date Range Selection */}
             <div>
                 <label className="label">Date Range</label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-5 gap-2">
                     {[
                         { value: 'today', label: 'Today' },
                         { value: 'week', label: 'This Week' },
                         { value: 'month', label: 'This Month' },
+                        { value: 'year', label: 'This Year' },
                         { value: 'custom', label: 'Custom' },
                     ].map((opt) => (
                         <button

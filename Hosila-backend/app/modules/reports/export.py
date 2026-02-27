@@ -322,3 +322,270 @@ def generate_tax_remittance_excel(report: TaxRemittanceReport, hotel_name: str) 
     buf = io.BytesIO()
     wb.save(buf)
     return buf.getvalue()
+
+
+# ── V2 Export Builders ────────────────────────────────────────
+
+_total_font = Font(bold=True, size=11)
+_total_fill = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
+
+
+def _add_total_row(ws, row_num: int, col_count: int):
+    """Style a total row with bold font and light background."""
+    for col in range(1, col_count + 1):
+        cell = ws.cell(row=row_num, column=col)
+        cell.font = _total_font
+        cell.fill = _total_fill
+        cell.border = _thin_border
+
+
+# ── Accommodation V2 ─────────────────────────────────────────
+
+def generate_accommodation_daily_summary_excel(
+    rows: list, total_revenue, avg_daily_revenue,
+    hotel_name: str, start: str, end: str,
+) -> bytes:
+    """Daily revenue breakdown: Date | Rooms Sold | Occupancy % | Daily Revenue."""
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Daily Revenue"
+
+    ws.append([f"{hotel_name} — Accommodation Daily Revenue"])
+    ws.append([f"Period: {start} to {end}"])
+    ws.append([])
+
+    ws.append(["Date", "Rooms Sold", "Occupancy %", "Daily Revenue"])
+    _style_header_row(ws, 4, 4)
+
+    total_sold = 0
+    total_rev = 0
+    for row in rows:
+        ws.append([
+            str(row.date),
+            row.rooms_sold,
+            f"{row.occupancy_rate}%",
+            float(row.daily_revenue),
+        ])
+        total_sold += row.rooms_sold
+        total_rev += float(row.daily_revenue)
+
+    # TOTAL row
+    total_row = ws.max_row + 1
+    ws.append(["TOTAL", total_sold, "", total_rev])
+    _add_total_row(ws, total_row, 4)
+
+    # Avg daily revenue
+    ws.append([])
+    ws.append(["Average Daily Revenue", float(avg_daily_revenue)])
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+def generate_accommodation_monthly_summary_excel(
+    rows: list, total_revenue, avg_monthly_revenue,
+    hotel_name: str, start: str, end: str,
+) -> bytes:
+    """Monthly revenue summary: Month | Rooms Sold | Occupancy % | Monthly Revenue."""
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Monthly Revenue"
+
+    ws.append([f"{hotel_name} — Accommodation Monthly Summary"])
+    ws.append([f"Period: {start} to {end}"])
+    ws.append([])
+
+    ws.append(["Month", "Rooms Sold", "Occupancy %", "Monthly Revenue"])
+    _style_header_row(ws, 4, 4)
+
+    total_sold = 0
+    total_rev = 0
+    for row in rows:
+        ws.append([
+            row.month,
+            row.rooms_sold,
+            f"{row.occupancy_rate}%",
+            float(row.monthly_revenue),
+        ])
+        total_sold += row.rooms_sold
+        total_rev += float(row.monthly_revenue)
+
+    total_row = ws.max_row + 1
+    ws.append(["TOTAL", total_sold, "", total_rev])
+    _add_total_row(ws, total_row, 4)
+
+    ws.append([])
+    ws.append(["Average Monthly Revenue", float(avg_monthly_revenue)])
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+def generate_accommodation_transactions_excel(
+    rows: list, hotel_name: str, report_date: str,
+) -> bytes:
+    """Transaction detail: Time | Booking ID | Guest | Room | Description | Amount | Status."""
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Transactions"
+
+    ws.append([f"{hotel_name} — Accommodation Transactions"])
+    ws.append([f"Date: {report_date}"])
+    ws.append([])
+
+    ws.append(["Time", "Booking ID", "Guest", "Room", "Description", "Amount", "Status"])
+    _style_header_row(ws, 4, 7)
+
+    total_amount = 0
+    for row in rows:
+        ws.append([
+            row.time.strftime("%H:%M:%S") if hasattr(row.time, 'strftime') else str(row.time),
+            row.booking_id,
+            row.guest_name,
+            row.room_number,
+            row.description,
+            float(row.amount),
+            row.status,
+        ])
+        total_amount += float(row.amount)
+
+    total_row = ws.max_row + 1
+    ws.append(["", "", "", "", "TOTAL", total_amount, ""])
+    _add_total_row(ws, total_row, 7)
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+# ── Restaurant V2 ────────────────────────────────────────────
+
+def generate_restaurant_daily_sales_excel(
+    rows: list, total_revenue, avg_daily_revenue,
+    hotel_name: str, start: str, end: str,
+) -> bytes:
+    """Daily sales: Date | Orders | Food Revenue | Drinks Revenue | Total Revenue."""
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Daily Sales"
+
+    ws.append([f"{hotel_name} — Restaurant Daily Sales"])
+    ws.append([f"Period: {start} to {end}"])
+    ws.append([])
+
+    ws.append(["Date", "Orders", "Food Revenue", "Drinks Revenue", "Total Revenue"])
+    _style_header_row(ws, 4, 5)
+
+    t_orders = 0
+    t_food = 0
+    t_drinks = 0
+    t_total = 0
+    for row in rows:
+        ws.append([
+            str(row.date),
+            row.orders,
+            float(row.food_revenue),
+            float(row.drinks_revenue),
+            float(row.total_revenue),
+        ])
+        t_orders += row.orders
+        t_food += float(row.food_revenue)
+        t_drinks += float(row.drinks_revenue)
+        t_total += float(row.total_revenue)
+
+    total_row = ws.max_row + 1
+    ws.append(["TOTAL", t_orders, t_food, t_drinks, t_total])
+    _add_total_row(ws, total_row, 5)
+
+    ws.append([])
+    ws.append(["Average Daily Revenue", float(avg_daily_revenue)])
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+def generate_restaurant_monthly_sales_excel(
+    rows: list, total_revenue, avg_monthly_revenue,
+    hotel_name: str, start: str, end: str,
+) -> bytes:
+    """Monthly sales: Month | Orders | Food Revenue | Drinks Revenue | Total Revenue."""
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Monthly Sales"
+
+    ws.append([f"{hotel_name} — Restaurant Monthly Sales"])
+    ws.append([f"Period: {start} to {end}"])
+    ws.append([])
+
+    ws.append(["Month", "Orders", "Food Revenue", "Drinks Revenue", "Total Revenue"])
+    _style_header_row(ws, 4, 5)
+
+    t_orders = 0
+    t_food = 0
+    t_drinks = 0
+    t_total = 0
+    for row in rows:
+        ws.append([
+            row.month,
+            row.orders,
+            float(row.food_revenue),
+            float(row.drinks_revenue),
+            float(row.total_revenue),
+        ])
+        t_orders += row.orders
+        t_food += float(row.food_revenue)
+        t_drinks += float(row.drinks_revenue)
+        t_total += float(row.total_revenue)
+
+    total_row = ws.max_row + 1
+    ws.append(["TOTAL", t_orders, t_food, t_drinks, t_total])
+    _add_total_row(ws, total_row, 5)
+
+    ws.append([])
+    ws.append(["Average Monthly Revenue", float(avg_monthly_revenue)])
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+def generate_restaurant_transactions_excel(
+    rows: list, hotel_name: str, report_date: str,
+) -> bytes:
+    """Transaction detail: Time | Order # | Guest/Room | Item | Category | Qty | Unit Price | Line Total | Status."""
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Transactions"
+
+    ws.append([f"{hotel_name} — Restaurant Transactions"])
+    ws.append([f"Date: {report_date}"])
+    ws.append([])
+
+    ws.append(["Time", "Order #", "Guest/Room", "Item", "Category", "Qty", "Unit Price", "Line Total", "Status"])
+    _style_header_row(ws, 4, 9)
+
+    total_amount = 0
+    for row in rows:
+        ws.append([
+            row.time.strftime("%H:%M:%S") if hasattr(row.time, 'strftime') else str(row.time),
+            row.order_number,
+            row.guest_room,
+            row.item_name,
+            row.category,
+            row.quantity,
+            float(row.unit_price),
+            float(row.line_total),
+            row.status,
+        ])
+        total_amount += float(row.line_total)
+
+    total_row = ws.max_row + 1
+    ws.append(["", "", "", "", "", "", "TOTAL", total_amount, ""])
+    _add_total_row(ws, total_row, 9)
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()

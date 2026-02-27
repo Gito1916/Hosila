@@ -125,11 +125,19 @@ export function useMarkRemitted() {
     });
 }
 
-/** Download report as PDF or Excel */
+/** Download report as PDF or Excel — uses V2 for accommodation/restaurant */
 export function useReportDownload() {
     return useMutation({
         mutationFn: async ({ type, start, end, format }: { type: string; start: string; end: string; format: 'pdf' | 'excel' }) => {
-            const blob = await reportsApi.downloadReport(type, start, end, format);
+            let blob: Blob;
+
+            // Accommodation and restaurant use V2 period-aware exports (Excel only)
+            if ((type === 'accommodation' || type === 'restaurant') && format === 'excel') {
+                blob = await reportsApi.downloadReportV2(type, start, end, 'auto');
+            } else {
+                blob = await reportsApi.downloadReport(type, start, end, format);
+            }
+
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
