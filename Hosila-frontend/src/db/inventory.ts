@@ -152,6 +152,7 @@ export async function recordMovement(data: {
         unit_cost: item.unit_cost,
         reason: data.reason,
         department: data.department,
+        source: data.movementType === 'add' ? 'restock' : 'manual_deduct',
         supplier_name: data.supplierName,
         receipt_url: data.receiptUrl,
         performed_by: data.performedBy,

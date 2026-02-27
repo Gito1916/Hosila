@@ -33,7 +33,6 @@ export function InventoryDetailsModal({ item, onClose, onDeleted }: InventoryDet
     const [movementType, setMovementType] = useState<MovementType>('add');
     const [quantity, setQuantity] = useState(1);
     const [reason, setReason] = useState('');
-    const [department, setDepartment] = useState('');
 
     // Get movement history
     const { data: movements } = useQuery({ queryKey: ['getMovementsForItem', item.id], queryFn: () => getMovementsForItem(item.id), enabled: !!item.id });
@@ -51,14 +50,12 @@ export function InventoryDetailsModal({ item, onClose, onDeleted }: InventoryDet
                 movementType,
                 quantity,
                 reason: reason || undefined,
-                department: department || undefined,
                 performedBy: user.id,
             });
 
             setShowMovement(false);
             setQuantity(1);
             setReason('');
-            setDepartment('');
         } catch (err) {
             toast.error('Failed to record movement', err);
         } finally {
@@ -173,7 +170,7 @@ export function InventoryDetailsModal({ item, onClose, onDeleted }: InventoryDet
                                 onClick={() => { setShowMovement(true); setMovementType('add'); }}
                                 className="btn btn-primary flex-1"
                             >
-                                <Plus size={18} className="mr-1" /> Add Stock
+                                <Plus size={18} className="mr-1" /> Restock
                             </button>
                             <button
                                 onClick={() => { setShowMovement(true); setMovementType('deduct'); }}
@@ -186,7 +183,7 @@ export function InventoryDetailsModal({ item, onClose, onDeleted }: InventoryDet
                         <div className="card p-4 space-y-3">
                             <h3 className="font-medium text-heading flex items-center gap-2">
                                 {movementType === 'add' ? (
-                                    <><TrendingUp size={18} className="text-status-available" /> Add Stock</>
+                                    <><TrendingUp size={18} className="text-status-available" /> Restock</>
                                 ) : (
                                     <><TrendingDown size={18} className="text-red-400" /> Deduct Stock</>
                                 )}
@@ -213,21 +210,7 @@ export function InventoryDetailsModal({ item, onClose, onDeleted }: InventoryDet
                                 />
                             </div>
 
-                            <div>
-                                <label className="label">Department</label>
-                                <select
-                                    value={department}
-                                    onChange={(e) => setDepartment(e.target.value)}
-                                    className="input"
-                                >
-                                    <option value="">Select department...</option>
-                                    <option value="housekeeping">Housekeeping</option>
-                                    <option value="kitchen">Kitchen</option>
-                                    <option value="front_desk">Front Desk</option>
-                                    <option value="maintenance">Maintenance</option>
-                                    <option value="laundry">Laundry</option>
-                                </select>
-                            </div>
+
 
                             <div className="flex gap-2">
                                 <button onClick={() => setShowMovement(false)} className="btn btn-secondary flex-1">
