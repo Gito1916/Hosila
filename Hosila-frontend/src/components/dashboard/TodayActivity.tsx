@@ -14,7 +14,7 @@ export function TodayActivity({ onCheckIn, onCheckOut }: TodayActivityProps) {
     // Combine and format for the table
     const activities = [
         ...(arrivals || []).map(a => {
-            const nights = differenceInDays(new Date(a.reservation.checkout_date), new Date(a.reservation.check_in_date));
+            const nights = differenceInDays(new Date(a.reservation.check_out_date), new Date(a.reservation.check_in_date));
             return {
                 id: a.reservation.id,
                 type: 'arrival',
@@ -41,7 +41,7 @@ export function TodayActivity({ onCheckIn, onCheckOut }: TodayActivityProps) {
                 statusColor: d.isOverdue
                     ? 'bg-red-50 text-red-600 border-red-200'
                     : 'bg-orange-50 text-orange-600 border-orange-200',
-                amount: `₦${d.booking.total_price.toLocaleString()}`,
+                amount: `₦${(d.booking.total_charged ?? d.booking.balance ?? 0).toLocaleString()}`,
                 action: () => onCheckOut?.(d.booking.id)
             };
         })
