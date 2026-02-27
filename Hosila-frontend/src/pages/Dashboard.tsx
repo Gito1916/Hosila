@@ -163,9 +163,9 @@ export function DashboardPage() {
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Revenue Analytics Chart (Takes up 2/3 width on large screens) */}
-                <div className="lg:col-span-2 bg-surface-card rounded-xl shadow-sm border border-border p-5">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                {/* Revenue Analytics Chart (Takes up 2/3 width on xl screens) */}
+                <div className="xl:col-span-2 bg-surface-card rounded-xl shadow-sm border border-border p-5">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-base font-semibold text-heading">Revenue Analytics</h3>
                         <span className="text-xs text-muted">Last 7 Days</span>
@@ -195,7 +195,7 @@ export function DashboardPage() {
                 </div>
 
                 {/* Today's Activity / Recent Activity */}
-                <div className="lg:col-span-1 bg-surface-card rounded-xl shadow-sm border border-border p-0 overflow-hidden flex flex-col">
+                <div className="xl:col-span-1 bg-surface-card rounded-xl shadow-sm border border-border p-0 overflow-hidden flex flex-col">
                     <div className="p-5 border-b border-border flex items-center justify-between">
                         <h3 className="text-base font-semibold text-heading flex items-center gap-2">
                             <Calendar size={18} className="text-primary-400" />
