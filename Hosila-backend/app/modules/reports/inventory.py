@@ -37,7 +37,7 @@ async def generate_inventory_report(
     # Get all inventory items
     items_result = await db.execute(
         text("""
-            SELECT id, name, category, unit_type, unit_cost
+            SELECT id, name, category, unit_type, unit_cost, current_stock
             FROM inventory_items
             WHERE hotel_id = :hotel_id
             ORDER BY category, name
@@ -55,22 +55,27 @@ async def generate_inventory_report(
     for item in items:
         item_id = str(item["id"])
         unit_cost = Decimal(str(item["unit_cost"]))
+        current_stock = int(item["current_stock"])
 
-        # Opening stock: all movements before period start
-        opening_result = await db.execute(
+        # Opening stock: work backwards from current_stock
+        # Opening = current_stock - (adds since period start) + (deducts since period start)
+        # This handles items whose initial stock was set without a movement record
+        net_change_result = await db.execute(
             text("""
                 SELECT
-                    COALESCE(SUM(CASE WHEN movement_type = 'add' THEN quantity ELSE 0 END), 0)
-                    - COALESCE(SUM(CASE WHEN movement_type = 'deduct' THEN quantity ELSE 0 END), 0)
-                    as opening_stock
+                    COALESCE(SUM(CASE WHEN movement_type = 'add' THEN quantity ELSE 0 END), 0) as total_adds,
+                    COALESCE(SUM(CASE WHEN movement_type = 'deduct' THEN quantity ELSE 0 END), 0) as total_deducts
                 FROM inventory_movements
                 WHERE item_id = :item_id
                   AND hotel_id = :hotel_id
-                  AND movement_time < :start_ts
+                  AND movement_time >= :start_ts
             """),
             {"item_id": item_id, "hotel_id": hotel_id, "start_ts": start_dt},
         )
-        opening_stock = int(opening_result.scalar() or 0)
+        net_row = net_change_result.mappings().first()
+        adds_since = int(net_row["total_adds"])
+        deducts_since = int(net_row["total_deducts"])
+        opening_stock = current_stock - adds_since + deducts_since
 
         # Period movements
         period_result = await db.execute(
