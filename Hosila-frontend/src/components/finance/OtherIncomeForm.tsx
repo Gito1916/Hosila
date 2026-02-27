@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useAuthStore } from '@/stores/authStore';
 import { useQuery } from '@tanstack/react-query';
@@ -8,6 +8,7 @@ import type { IncomeCategory, PaymentMethod } from '@/types';
 import { X, Loader2, Building2, Printer } from 'lucide-react';
 import { getHotel } from '@/db/settings';
 import { requireSupabase, getHotelId } from '@/lib/api';
+import { taxApi } from '@/lib/apiClient';
 import { toast } from '@/lib/errorMessages';
 
 interface OtherIncomeFormProps {
@@ -40,9 +41,14 @@ export function OtherIncomeForm({ onClose, onSuccess }: OtherIncomeFormProps) {
     const [error, setError] = useState<string | null>(null);
     const [savedIncomeId, setSavedIncomeId] = useState<string | null>(null);
 
-    // Load hotel tax rate for taxable calculation
+    // Load hotel settings
     const { data: hotel } = useQuery({ queryKey: ['hotel'], queryFn: getHotel });
-    const taxRate = hotel?.settings?.services_tax_rate ?? hotel?.settings?.tax_rate ?? 0;
+
+    // Tax breakdown state from FastAPI
+    const [scAmount, setScAmount] = useState(0);
+    const [vatAmount, setVatAmount] = useState(0);
+    const [tdlAmount, setTdlAmount] = useState(0);
+    const [computedTotal, setComputedTotal] = useState(0);
 
     const {
         register,
@@ -70,8 +76,31 @@ export function OtherIncomeForm({ onClose, onSuccess }: OtherIncomeFormProps) {
     const watchPaymentMethod = useWatch({ control, name: 'paymentMethod' });
 
     const baseAmount = Number(watchAmount) || 0;
-    const taxAmount = watchTaxable && taxRate > 0 ? Math.round(baseAmount * (taxRate / 100) * 100) / 100 : 0;
-    const totalAmount = Math.round((baseAmount + taxAmount) * 100) / 100;
+
+    // Fetch SC/VAT/TDL breakdown from backend when amount or taxable changes
+    const fetchTaxBreakdown = useCallback(async (amount: number, taxable: boolean) => {
+        if (amount <= 0 || !taxable) {
+            setScAmount(0); setVatAmount(0); setTdlAmount(0); setComputedTotal(amount);
+            return;
+        }
+        try {
+            const breakdown = await taxApi.calculate(amount, 'other_services');
+            setScAmount(Number(breakdown.service_charge.amount));
+            setVatAmount(Number(breakdown.vat.amount));
+            setTdlAmount(Number(breakdown.tdl.amount));
+            setComputedTotal(Number(breakdown.total));
+        } catch {
+            // Fallback: no tax if API unreachable
+            setScAmount(0); setVatAmount(0); setTdlAmount(0); setComputedTotal(amount);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchTaxBreakdown(baseAmount, !!watchTaxable);
+    }, [baseAmount, watchTaxable, fetchTaxBreakdown]);
+
+    const taxAmount = scAmount + vatAmount + tdlAmount;
+    const totalAmount = watchTaxable ? computedTotal : baseAmount;
 
     const onSubmit = async (data: FormData) => {
         if (!user) return;
@@ -90,7 +119,7 @@ export function OtherIncomeForm({ onClose, onSuccess }: OtherIncomeFormProps) {
                     id: incomeId,
                     hotel_id: hotelId,
                     category: data.category,
-                    description: data.description + (data.taxable && taxRate > 0 ? ` (incl. ${taxRate}% tax: ₦${taxAmount.toLocaleString()})` : ''),
+                    description: data.description + (data.taxable && taxAmount > 0 ? ` (incl. tax: ₦${taxAmount.toLocaleString()})` : ''),
                     amount: totalAmount,
                     payment_method: data.paymentMethod,
                     customer_name: data.customerName || undefined,
@@ -107,7 +136,7 @@ export function OtherIncomeForm({ onClose, onSuccess }: OtherIncomeFormProps) {
                 department: 'other_income',
                 description: `${categoryLabels[data.category]}: ${data.description}`,
                 gross_amount: totalAmount,
-                tax_rate: data.taxable && taxRate > 0 ? taxRate : 0,
+                tax_rate: data.taxable ? taxAmount : 0,
                 reference_id: incomeId,
                 reference_type: 'other_income',
                 charge_date: now,
@@ -181,7 +210,9 @@ export function OtherIncomeForm({ onClose, onSuccess }: OtherIncomeFormProps) {
         <div class="section-title">Details</div>
         <div class="description">${watchDescription || receiptCategory}</div>
         <div class="row"><span>Amount</span><span>₦${baseAmount.toLocaleString()}</span></div>
-        ${watchTaxable && taxRate > 0 ? `<div class="row"><span>Tax (${taxRate}%)</span><span>₦${taxAmount.toLocaleString()}</span></div>` : ''}
+        ${watchTaxable && scAmount > 0 ? `<div class="row"><span>Service Charge</span><span>₦${scAmount.toLocaleString()}</span></div>` : ''}
+        ${watchTaxable && vatAmount > 0 ? `<div class="row"><span>VAT</span><span>₦${vatAmount.toLocaleString()}</span></div>` : ''}
+        ${watchTaxable && tdlAmount > 0 ? `<div class="row"><span>TDL</span><span>₦${tdlAmount.toLocaleString()}</span></div>` : ''}
         <div class="row total"><span>TOTAL</span><span>₦${totalAmount.toLocaleString()}</span></div>
     </div>
 
@@ -258,32 +289,43 @@ export function OtherIncomeForm({ onClose, onSuccess }: OtherIncomeFormProps) {
                     <div className="flex items-center justify-between bg-surface-raised/50 rounded-lg p-3">
                         <div>
                             <label className="text-sm text-heading font-medium">Taxable</label>
-                            <p className="text-xs text-muted">
-                                {taxRate > 0 ? `Add ${taxRate}% tax to the amount` : 'No tax rate configured'}
-                            </p>
+                            <p className="text-xs text-muted">Add SC + VAT + TDL to the amount</p>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
                                 {...register('taxable')}
-                                disabled={taxRate <= 0}
                                 className="sr-only peer"
                             />
-                            <div className="w-11 h-6 bg-surface-card peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500 peer-disabled:opacity-50"></div>
+                            <div className="w-11 h-6 bg-surface-card peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-500"></div>
                         </label>
                     </div>
 
-                    {/* Tax Preview */}
-                    {watchTaxable && taxRate > 0 && baseAmount > 0 && (
+                    {/* Tax Breakdown Preview */}
+                    {watchTaxable && baseAmount > 0 && (
                         <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 space-y-1">
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted">Base Amount</span>
                                 <span className="text-heading">₦{baseAmount.toLocaleString()}</span>
                             </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-amber-400">Tax ({taxRate}%)</span>
-                                <span className="text-amber-400">₦{taxAmount.toLocaleString()}</span>
-                            </div>
+                            {scAmount > 0 && (
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-amber-400">Service Charge</span>
+                                    <span className="text-amber-400">₦{scAmount.toLocaleString()}</span>
+                                </div>
+                            )}
+                            {vatAmount > 0 && (
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-amber-400">VAT</span>
+                                    <span className="text-amber-400">₦{vatAmount.toLocaleString()}</span>
+                                </div>
+                            )}
+                            {tdlAmount > 0 && (
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-amber-400">TDL</span>
+                                    <span className="text-amber-400">₦{tdlAmount.toLocaleString()}</span>
+                                </div>
+                            )}
                             <div className="flex justify-between text-sm font-bold border-t border-amber-500/30 pt-1">
                                 <span className="text-heading">Total</span>
                                 <span className="text-heading">₦{totalAmount.toLocaleString()}</span>
