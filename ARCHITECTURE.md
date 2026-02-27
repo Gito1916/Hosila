@@ -73,6 +73,7 @@
 - **Movement Report tab**: `InventoryReport` — backend-powered analytics (opening stock, purchases, usage, wastage, closing stock) via `useInventoryReport`
 - Categories: food, housekeeping, maintenance, front office, beverages, laundry, amenities
 - Excel/PDF export via backend
+- **IMPORTANT**: All manual stock movements MUST set `source` field (`'restock'` for adds, `'manual_deduct'` for deductions). The movement report filters by source.
 
 ### Finance
 - **Page**: `Finance.tsx` (tabbed: Overview / Income / Expenses / Transactions / Tax)
@@ -81,8 +82,9 @@
 - **Expenses**: `ExpenseList` + `ExpenseForm` — expense recording with categories, void support
 - **Transactions**: `TransactionsList` — unified ledger of all financial movements
 - **Tax**: `TaxSummary` — SC/VAT/TDL breakdown per department, remittance tracking via `useTaxRemittanceReport`, mark-as-remitted
-- **Export**: `FinanceExport` modal — downloads accommodation, restaurant, inventory, and tax reports as PDF/Excel via backend export endpoints
-- Unified date picker (Daily/Weekly/Monthly/Yearly/Custom) shared across all tabs
+- **Export**: `FinanceExport` modal — downloads accommodation, restaurant, inventory, and tax reports as Excel via backend. Accommodation and restaurant use **V2 period-aware endpoints** that auto-detect layout from date range (daily transactions / daily summary / monthly summary)
+- Date options: Today / This Week / This Month / This Year / Custom
+- Unified date picker shared across all tabs
 
 ### Settings
 - **Page**: `Settings.tsx` (tabbed: Hotel / Rooms / Users / Finance / Cloud / Email / Backup)
@@ -297,7 +299,16 @@ Hosila-backend/
 │   │   ├── tax_engine/        # /api/v1/tax/* (calculation, settings)
 │   │   ├── billing/           # /api/v1/billing/checkout
 │   │   ├── reports/           # /api/v1/reports/* (accomm, restaurant, inventory, export)
+│   │   │   ├── router.py      # All report endpoints (including V2 export)
+│   │   │   ├── accommodation.py # Accommodation report + V2 daily/monthly/transaction functions
+│   │   │   ├── restaurant.py  # Restaurant report + V2 daily/monthly/transaction functions
+│   │   │   ├── inventory.py   # Inventory movement report (opening/closing stock)
+│   │   │   ├── export.py      # Excel/PDF builders (legacy + V2)
+│   │   │   ├── report_period.py # Period auto-detection (resolve_export_mode)
+│   │   │   ├── schemas.py     # Pydantic models for all reports
+│   │   │   └── tax_remittance.py
 │   │   ├── analytics/         # /api/v1/analytics/dashboard
+│   │   ├── email/             # /api/v1/email/* (settings, send, logs)
 │   │   └── organisations/     # Org management (Not mounted in main.py yet)
 │   ├── config.py              # Environment configuration & Pydantic settings
 │   └── database.py            # SQLAlchemy Async setup
@@ -319,8 +330,14 @@ Hosila-backend/
 | `GET` | `/api/v1/reports/inventory` | Stock movement report |
 | `GET` | `/api/v1/reports/tax-remittance` | Tax remittance summary |
 | `POST` | `/api/v1/reports/tax-remittance/mark-remitted` | Mark tax type as remitted for period |
-| `GET` | `/api/v1/reports/{type}/export` | Download report as PDF or Excel |
+| `GET` | `/api/v1/reports/{type}/export` | Download report as PDF or Excel (legacy) |
+| `GET` | `/api/v1/reports/accommodation/export-v2` | **V2** period-aware accommodation export (auto/daily_transactions/daily_summary/monthly_summary) |
+| `GET` | `/api/v1/reports/restaurant/export-v2` | **V2** period-aware restaurant export (auto/daily_transactions/daily_summary/monthly_summary) |
 | `GET` | `/api/v1/analytics/dashboard` | Aggregated financial KPIs |
+| `GET` | `/api/v1/email/settings` | Get hotel email settings |
+| `PUT` | `/api/v1/email/settings` | Update hotel email settings |
+| `GET` | `/api/v1/email/logs` | Paginated email send logs |
+| `POST` | `/api/v1/email/send/{type}/{id}` | Trigger email (reservation/checkin/checkout) |
 
 ### 5.3 Tax Engine
 
@@ -439,7 +456,7 @@ The Finance page (`Finance.tsx`) uses a **unified date picker** shared across al
 | **Tax** | `TaxSummary` | Supabase (charges) + Backend API (`useTaxRemittanceReport`, `useMarkRemitted`) |
 
 ### Export Modal
-`FinanceExport` component uses `useReportDownload` to trigger backend export endpoints (`/reports/{type}/export`). Supports accommodation, restaurant, inventory, and tax-remittance reports in PDF and/or Excel.
+`FinanceExport` component uses `useReportDownload` hook. **Accommodation and restaurant** are routed through **V2 endpoints** (`/export-v2?mode=auto`) which auto-detect the export layout from the date range. Inventory and tax-remittance continue using the legacy export endpoint.
 
 ### Tax Settings (Settings → Finance tab)
 - Per-department cards (Accommodation, Restaurant, Other Services)
@@ -571,6 +588,7 @@ Primary also has static shades: `primary-50` through `primary-700` (mirrors bran
 | `audit_logs` | All state changes | `id`, `hotel_id`, `user_id`, `action`, `entity_type`, `details` |
 | `service_orders` | Restaurant orders | `id`, `hotel_id`, `booking_id`, `total_price`, `status` |
 | `inventory_items` | Stock items | `id`, `hotel_id`, `name`, `current_stock`, `unit_cost` |
+| `inventory_movements` | Stock movements | `id`, `hotel_id`, `item_id`, `movement_type`, `quantity`, `source`, `balance_after` |
 | `reservations` | Future bookings | `id`, `hotel_id`, `guest_id`, `room_id`, `check_in_date`, `check_out_date` |
 | `receipts` | Payment receipts | `id`, `hotel_id`, `booking_id`, `receipt_number`, `payment_id` |
 | `invoices` | Billing invoices | `id`, `hotel_id`, `booking_id`, `invoice_number` |
@@ -595,6 +613,8 @@ Primary also has static shades: `primary-50` through `primary-700` (mirrors bran
 10. **Keep the accounting system balanced**. Every debit must have a corresponding credit. Use `createCharge` + `createPaymentWithAllocation` for revenue flows.
 11. **Immediately settle non-booking charges**. If recording revenue that is paid on the spot (like Other Income), always call `createPaymentWithAllocation` after `createCharge`.
 12. **Use `uuid` for all client-generated IDs**. Import from `uuid` package: `import { v4 as uuidv4 } from 'uuid'`.
+13. **Always set `source` on inventory movements**. `'restock'` for adds, `'manual_deduct'` for manual deductions, `'check_in'` for amenity issues, `'loss'` for lost items. The movement report filters on this field.
+14. **Use V2 export endpoints** for accommodation and restaurant downloads. The `useReportDownload` hook handles this automatically.
 
 ### MUST NOT Do
 
