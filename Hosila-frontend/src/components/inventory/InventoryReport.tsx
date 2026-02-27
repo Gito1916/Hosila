@@ -168,7 +168,7 @@ export function InventoryReport() {
                         <div className="bg-surface-card rounded-xl p-4 border border-border">
                             <div className="flex items-center gap-2 mb-1">
                                 <TrendingDown size={16} className="text-red-400" />
-                                <span className="text-muted text-xs">Usage Value</span>
+                                <span className="text-muted text-xs">Sold/Used Value</span>
                             </div>
                             <p className="text-xl font-bold text-red-400">{f(report.total_usage_value)}</p>
                         </div>
@@ -198,7 +198,7 @@ export function InventoryReport() {
                                             <th className="text-center text-muted font-medium py-2.5 px-3">Unit</th>
                                             <th className="text-center text-blue-400 font-medium py-2.5 px-3">Opening</th>
                                             <th className="text-center text-green-400 font-medium py-2.5 px-3">Purchased</th>
-                                            <th className="text-center text-amber-400 font-medium py-2.5 px-3">Used</th>
+                                            <th className="text-center text-amber-400 font-medium py-2.5 px-3">Sold/Used</th>
                                             <th className="text-center text-red-400 font-medium py-2.5 px-3">Wasted</th>
                                             <th className="text-center text-heading font-medium py-2.5 px-3">Closing</th>
                                             <th className="text-right text-muted font-medium py-2.5 px-4">Value</th>
