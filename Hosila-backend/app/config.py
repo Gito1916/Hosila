@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     allowed_origins: str = "http://localhost:5173,http://localhost:3000,https://hosila.com"
     api_version: str = "v1"
-    debug: bool = True
+    debug: bool = False
 
     @property
     def cors_origins(self) -> list[str]:
