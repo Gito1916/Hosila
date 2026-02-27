@@ -4,7 +4,7 @@ All calculations done server-side via SQL aggregation.
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import date, datetime, time
+from datetime import date
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,6 +14,7 @@ from app.modules.reports.schemas import (
     PaymentMethodSplit,
     DailyRevenue,
 )
+from app.shared.date_utils import date_range_to_timestamps
 
 TWO_PLACES = Decimal("0.01")
 
@@ -26,9 +27,7 @@ async def generate_restaurant_report(
 ) -> RestaurantReport:
     """Generate restaurant sales analysis report."""
 
-    # Build proper datetime range for asyncpg
-    start_dt = datetime.combine(start, time.min)
-    end_dt = datetime.combine(end, time(23, 59, 59))
+    start_ts, end_ts = date_range_to_timestamps(start, end)
 
     # ── Item-level sales ──────────────────────────
     # service_orders.service_id is text and can be either:
@@ -56,15 +55,14 @@ async def generate_restaurant_report(
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start_dt,
-            "end_ts": end_dt,
+            "start_ts": start_ts,
+            "end_ts": end_ts,
         },
     )
     item_rows = items_result.mappings().all()
 
     all_items: list[MenuItemSales] = []
     total_revenue = Decimal("0")
-    total_orders_set = set()
 
     for row in item_rows:
         rev = Decimal(str(row["revenue"]))
@@ -100,8 +98,8 @@ async def generate_restaurant_report(
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start_dt,
-            "end_ts": end_dt,
+            "start_ts": start_ts,
+            "end_ts": end_ts,
         },
     )
     total_orders = order_count_result.scalar() or 0
@@ -127,8 +125,8 @@ async def generate_restaurant_report(
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start_dt,
-            "end_ts": end_dt,
+            "start_ts": start_ts,
+            "end_ts": end_ts,
         },
     )
     payment_split = [
@@ -157,8 +155,8 @@ async def generate_restaurant_report(
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start_dt,
-            "end_ts": end_dt,
+            "start_ts": start_ts,
+            "end_ts": end_ts,
         },
     )
     daily_breakdown = [
@@ -186,8 +184,8 @@ async def generate_restaurant_report(
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start_dt,
-            "end_ts": end_dt,
+            "start_ts": start_ts,
+            "end_ts": end_ts,
         },
     )
     tax_row = tax_result.mappings().first()

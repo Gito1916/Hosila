@@ -2,10 +2,12 @@
 Tax remittance report — VAT/TDL summaries, mark-as-remitted, batch management.
 This is the compliance module that hotels will use to track
 what they owe FIRS (VAT) and state revenue service (TDL).
+
+Source of truth: tax_transactions table (used for both totals and remittance state).
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timezone
 from uuid import uuid4
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,6 +20,10 @@ from app.modules.reports.schemas import (
     RemittanceBatchResponse,
 )
 from app.shared.audit import write_audit_log
+from app.shared.date_utils import date_range_to_timestamps
+from app.shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 TWO_PLACES = Decimal("0.01")
 
@@ -34,34 +40,32 @@ async def generate_tax_remittance_report(
     - State: TDL
     - Informational: Service Charge collected
 
-    Reads from the `charges` table (source of truth for revenue + tax).
+    Reads from tax_transactions (single source of truth for both
+    collected amounts and remittance state).
     """
 
-    # Build proper datetime range for asyncpg
-    start_dt = datetime.combine(start, time.min)
-    end_dt = datetime.combine(end, time(23, 59, 59))
+    start_ts, end_ts = date_range_to_timestamps(start, end)
 
-    # ── Aggregate taxes from charges table ─────────────
+    # ── Aggregate taxes from tax_transactions (single source of truth) ──
     result = await db.execute(
         text("""
             SELECT
                 department,
                 COUNT(*) as transaction_count,
-                COALESCE(SUM(vat_amount_v2), 0)           as total_vat,
-                COALESCE(SUM(tdl_amount), 0)              as total_tdl,
-                COALESCE(SUM(service_charge_amount), 0)    as total_sc
-            FROM charges
+                COALESCE(SUM(CASE WHEN tax_type = 'vat' THEN tax_amount ELSE 0 END), 0) as total_vat,
+                COALESCE(SUM(CASE WHEN tax_type = 'tdl' THEN tax_amount ELSE 0 END), 0) as total_tdl,
+                COALESCE(SUM(CASE WHEN tax_type = 'service_charge' THEN tax_amount ELSE 0 END), 0) as total_sc
+            FROM tax_transactions
             WHERE hotel_id = :hotel_id
-              AND charge_date >= :start_ts
-              AND charge_date < :end_ts
-              AND status IN ('active', 'partially_refunded')
+              AND transaction_date >= :start_ts
+              AND transaction_date < :end_ts
             GROUP BY department
             ORDER BY department
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start_dt,
-            "end_ts": end_dt,
+            "start_ts": start_ts,
+            "end_ts": end_ts,
         },
     )
     dept_rows = result.mappings().all()
@@ -91,18 +95,24 @@ async def generate_tax_remittance_report(
             )
         )
 
-    # ── Check remittance_batches for already-remitted amounts ──
+    # ── Remittance totals from tax_transactions (same source) ──
     remit_result = await db.execute(
         text("""
-            SELECT tax_type, COALESCE(SUM(total_amount), 0) as remitted
-            FROM remittance_batches
+            SELECT
+                tax_type,
+                COALESCE(SUM(tax_amount), 0) as remitted
+            FROM tax_transactions
             WHERE hotel_id = :hotel_id
-              AND status = 'remitted'
-              AND period_start >= :start
-              AND period_end <= :end
+              AND remitted = TRUE
+              AND transaction_date >= :start_ts
+              AND transaction_date < :end_ts
             GROUP BY tax_type
         """),
-        {"hotel_id": hotel_id, "start": start, "end": end},
+        {
+            "hotel_id": hotel_id,
+            "start_ts": start_ts,
+            "end_ts": end_ts,
+        },
     )
     remitted_map = {row["tax_type"]: Decimal(str(row["remitted"])) for row in remit_result.mappings().all()}
 
@@ -137,11 +147,9 @@ async def mark_as_remitted(
     Creates a remittance_batch record for auditing.
     """
     batch_id = str(uuid4())
-    now = datetime.now()
+    now = datetime.now(timezone.utc)  # timezone-aware UTC
 
-    # Build proper datetime range for asyncpg
-    req_start_dt = datetime.combine(request.period_start, time.min)
-    req_end_dt = datetime.combine(request.period_end, time(23, 59, 59))
+    start_ts, end_ts = date_range_to_timestamps(request.period_start, request.period_end)
 
     # Count and sum pending transactions
     result = await db.execute(
@@ -157,8 +165,8 @@ async def mark_as_remitted(
         {
             "hotel_id": hotel_id,
             "tax_type": request.tax_type,
-            "start_ts": req_start_dt,
-            "end_ts": req_end_dt,
+            "start_ts": start_ts,
+            "end_ts": end_ts,
         },
     )
     row = result.mappings().first()
@@ -214,28 +222,31 @@ async def mark_as_remitted(
             "batch_id": batch_id,
             "hotel_id": hotel_id,
             "tax_type": request.tax_type,
-            "start_ts": req_start_dt,
-            "end_ts": req_end_dt,
+            "start_ts": start_ts,
+            "end_ts": end_ts,
             "remitted_at": now,
         },
     )
 
     await db.commit()
 
-    # Audit log
-    await write_audit_log(
-        db, hotel_id, user_id,
-        action="tax_remitted",
-        entity_type="remittance_batch",
-        entity_id=batch_id,
-        details={
-            "tax_type": request.tax_type,
-            "total_amount": str(total),
-            "transactions_marked": count,
-            "period": f"{request.period_start} to {request.period_end}",
-        },
-    )
-    await db.commit()
+    # Audit log (non-critical)
+    try:
+        await write_audit_log(
+            db, hotel_id, user_id,
+            action="tax_remitted",
+            entity_type="remittance_batch",
+            entity_id=batch_id,
+            details={
+                "tax_type": request.tax_type,
+                "total_amount": str(total),
+                "transactions_marked": count,
+                "period": f"{request.period_start} to {request.period_end}",
+            },
+        )
+        await db.commit()
+    except Exception as e:
+        logger.error("Non-critical audit log failed for remittance: %s", e, exc_info=True)
 
     return RemittanceBatchResponse(
         batch_id=batch_id,

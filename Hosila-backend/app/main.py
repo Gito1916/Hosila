@@ -11,6 +11,9 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.config import settings
+from app.shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 # ── Module routers ────────────────────────────────────────────
 from app.modules.health.router import router as health_router
@@ -25,12 +28,12 @@ from app.modules.email.router import router as email_router
 async def lifespan(app: FastAPI):
     """Application lifespan — startup and shutdown hooks."""
     # Startup: connection pool is created lazily by SQLAlchemy
-    print(f"🚀 Hosila API starting in {settings.environment} mode")
+    logger.info("Hosila API starting in %s mode", settings.environment)
     yield
     # Shutdown: dispose engine
     from app.database import engine
     await engine.dispose()
-    print("🛑 Hosila API shutting down")
+    logger.info("Hosila API shutting down")
 
 
 app = FastAPI(
@@ -56,15 +59,20 @@ app.add_middleware(
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """
-    Catch-all for unhandled exceptions. Returns a JSON response
+    Catch-all for unhandled exceptions. Returns a generic JSON response
     with CORS headers so the browser doesn't mask the real error
-    as a CORS failure.
+    as a CORS failure. Internal details are logged server-side only.
     """
-    print(f"❌ Unhandled error on {request.method} {request.url.path}: {type(exc).__name__}: {exc}")
+    # Log full details server-side — never expose to client
+    logger.error(
+        "Unhandled error on %s %s: %s: %s",
+        request.method, request.url.path, type(exc).__name__, exc,
+        exc_info=True,
+    )
     origin = request.headers.get("origin", "")
     response = JSONResponse(
         status_code=500,
-        content={"detail": f"Internal server error: {type(exc).__name__}: {exc}"},
+        content={"detail": "An unexpected error occurred. Please try again later."},
     )
     # Add CORS headers manually so the browser can read the error
     if origin in settings.cors_origins:

@@ -1,14 +1,18 @@
 """
 Accommodation report — RevPAR, ADR, occupancy, revenue by room type.
 All calculations done server-side via SQL aggregation.
+
+Charges are pre-aggregated per booking via CTE to prevent overcount
+when a booking has multiple accommodation charges.
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import date, datetime, time
+from datetime import date
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.reports.schemas import AccommodationReport, RoomTypeRevenue
+from app.shared.date_utils import date_range_to_timestamps
 
 TWO_PLACES = Decimal("0.01")
 
@@ -21,9 +25,7 @@ async def generate_accommodation_report(
 ) -> AccommodationReport:
     """Generate accommodation revenue and performance report."""
 
-    # Build proper datetime range for asyncpg
-    start_dt = datetime.combine(start, time.min)
-    end_dt = datetime.combine(end, time(23, 59, 59))
+    start_ts, end_ts = date_range_to_timestamps(start, end)
 
     # Total rooms available
     rooms_result = await db.execute(
@@ -35,8 +37,17 @@ async def generate_accommodation_report(
     total_room_nights = total_rooms * days_in_period
 
     # Booking revenue + room nights sold
+    # CTE pre-aggregates charges per booking to prevent 1:N overcount
     booking_result = await db.execute(
         text("""
+            WITH booking_charges AS (
+                SELECT booking_id, SUM(gross_amount) as total_revenue
+                FROM charges
+                WHERE hotel_id = :hotel_id
+                  AND department = 'accommodation'
+                  AND status = 'active'
+                GROUP BY booking_id
+            )
             SELECT
                 r.room_type,
                 COUNT(DISTINCT b.id) as bookings,
@@ -50,13 +61,10 @@ async def generate_accommodation_report(
                     )
                     ELSE 1 END
                 ), 0) as nights_sold,
-                COALESCE(SUM(c.gross_amount), 0) as revenue
+                COALESCE(SUM(bc.total_revenue), 0) as revenue
             FROM bookings b
             JOIN rooms r ON b.room_id = r.id
-            LEFT JOIN charges c ON c.booking_id = b.id
-                AND c.department = 'accommodation'
-                AND c.status = 'active'
-                AND c.hotel_id = :hotel_id
+            LEFT JOIN booking_charges bc ON bc.booking_id = b.id
             WHERE b.hotel_id = :hotel_id
               AND b.check_in_time < :end_ts
               AND b.check_out_time > :start_ts
@@ -65,8 +73,8 @@ async def generate_accommodation_report(
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start_dt,
-            "end_ts": end_dt,
+            "start_ts": start_ts,
+            "end_ts": end_ts,
         },
     )
     rows = booking_result.mappings().all()
@@ -116,8 +124,8 @@ async def generate_accommodation_report(
         """),
         {
             "hotel_id": hotel_id,
-            "start_ts": start_dt,
-            "end_ts": end_dt,
+            "start_ts": start_ts,
+            "end_ts": end_ts,
         },
     )
     tax_row = tax_result.mappings().first()

@@ -1,14 +1,17 @@
 """
 Inventory movement report — opening/closing stock, purchases, usage, wastage.
 Proper stock accounting: Opening + Purchases - Usage - Wastage = Closing.
+
+Uses batch SQL queries instead of per-item queries to avoid N+1 performance issues.
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import date, datetime, time
+from datetime import date
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.reports.schemas import InventoryReport, InventoryItemReport
+from app.shared.date_utils import date_range_to_timestamps
 
 TWO_PLACES = Decimal("0.01")
 
@@ -23,18 +26,18 @@ async def generate_inventory_report(
     Generate inventory movement report.
 
     For each item:
-      Opening Stock = total adds before period - total deductions before period
+      Opening Stock = current_stock - adds_since_start + deducts_since_start
       Purchases     = adds within period (source = 'restock')
       Usage         = deductions within period (source != 'loss')
       Wastage       = deductions within period (source = 'loss')
       Closing Stock = Opening + Purchases - Usage - Wastage
+
+    Uses grouped SQL queries (not per-item) to avoid N+1 performance issues.
     """
 
-    # Build proper datetime range for asyncpg
-    start_dt = datetime.combine(start, time.min)
-    end_dt = datetime.combine(end, time(23, 59, 59))
+    start_ts, end_ts = date_range_to_timestamps(start, end)
 
-    # Get all inventory items
+    # ── 1. Get all inventory items ────────────────
     items_result = await db.execute(
         text("""
             SELECT id, name, category, unit_type, unit_cost, current_stock
@@ -46,6 +49,80 @@ async def generate_inventory_report(
     )
     items = items_result.mappings().all()
 
+    if not items:
+        return InventoryReport(
+            period_start=start,
+            period_end=end,
+            items=[],
+            total_opening_value=Decimal("0"),
+            total_closing_value=Decimal("0"),
+            total_purchases_value=Decimal("0"),
+            total_usage_value=Decimal("0"),
+        )
+
+    item_ids = [str(item["id"]) for item in items]
+
+    # ── 2. Batch: net changes since period start (for opening stock) ──
+    net_result = await db.execute(
+        text("""
+            SELECT
+                item_id,
+                COALESCE(SUM(CASE WHEN movement_type = 'add' THEN quantity ELSE 0 END), 0) as total_adds,
+                COALESCE(SUM(CASE WHEN movement_type = 'deduct' THEN quantity ELSE 0 END), 0) as total_deducts
+            FROM inventory_movements
+            WHERE item_id = ANY(:item_ids)
+              AND hotel_id = :hotel_id
+              AND movement_time >= :start_ts
+            GROUP BY item_id
+        """),
+        {"item_ids": item_ids, "hotel_id": hotel_id, "start_ts": start_ts},
+    )
+    net_changes = {
+        str(row["item_id"]): {
+            "adds": int(row["total_adds"]),
+            "deducts": int(row["total_deducts"]),
+        }
+        for row in net_result.mappings().all()
+    }
+
+    # ── 3. Batch: period movements (purchases, usage, wastage) ──
+    period_result = await db.execute(
+        text("""
+            SELECT
+                item_id,
+                COALESCE(SUM(CASE
+                    WHEN movement_type = 'add' AND source = 'restock' THEN quantity
+                    ELSE 0 END), 0) as purchases,
+                COALESCE(SUM(CASE
+                    WHEN movement_type = 'deduct' AND source != 'loss' THEN quantity
+                    ELSE 0 END), 0) as usage,
+                COALESCE(SUM(CASE
+                    WHEN movement_type = 'deduct' AND source = 'loss' THEN quantity
+                    ELSE 0 END), 0) as wastage
+            FROM inventory_movements
+            WHERE item_id = ANY(:item_ids)
+              AND hotel_id = :hotel_id
+              AND movement_time >= :start_ts
+              AND movement_time < :end_ts
+            GROUP BY item_id
+        """),
+        {
+            "item_ids": item_ids,
+            "hotel_id": hotel_id,
+            "start_ts": start_ts,
+            "end_ts": end_ts,
+        },
+    )
+    period_movements = {
+        str(row["item_id"]): {
+            "purchases": int(row["purchases"]),
+            "usage": int(row["usage"]),
+            "wastage": int(row["wastage"]),
+        }
+        for row in period_result.mappings().all()
+    }
+
+    # ── 4. Merge results in Python ────────────────
     report_items: list[InventoryItemReport] = []
     total_opening = Decimal("0")
     total_closing = Decimal("0")
@@ -57,56 +134,13 @@ async def generate_inventory_report(
         unit_cost = Decimal(str(item["unit_cost"]))
         current_stock = int(item["current_stock"])
 
-        # Opening stock: work backwards from current_stock
-        # Opening = current_stock - (adds since period start) + (deducts since period start)
-        # This handles items whose initial stock was set without a movement record
-        net_change_result = await db.execute(
-            text("""
-                SELECT
-                    COALESCE(SUM(CASE WHEN movement_type = 'add' THEN quantity ELSE 0 END), 0) as total_adds,
-                    COALESCE(SUM(CASE WHEN movement_type = 'deduct' THEN quantity ELSE 0 END), 0) as total_deducts
-                FROM inventory_movements
-                WHERE item_id = :item_id
-                  AND hotel_id = :hotel_id
-                  AND movement_time >= :start_ts
-            """),
-            {"item_id": item_id, "hotel_id": hotel_id, "start_ts": start_dt},
-        )
-        net_row = net_change_result.mappings().first()
-        adds_since = int(net_row["total_adds"])
-        deducts_since = int(net_row["total_deducts"])
-        opening_stock = current_stock - adds_since + deducts_since
+        net = net_changes.get(item_id, {"adds": 0, "deducts": 0})
+        opening_stock = current_stock - net["adds"] + net["deducts"]
 
-        # Period movements
-        period_result = await db.execute(
-            text("""
-                SELECT
-                    COALESCE(SUM(CASE
-                        WHEN movement_type = 'add' AND source = 'restock' THEN quantity
-                        ELSE 0 END), 0) as purchases,
-                    COALESCE(SUM(CASE
-                        WHEN movement_type = 'deduct' AND source != 'loss' THEN quantity
-                        ELSE 0 END), 0) as usage,
-                    COALESCE(SUM(CASE
-                        WHEN movement_type = 'deduct' AND source = 'loss' THEN quantity
-                        ELSE 0 END), 0) as wastage
-                FROM inventory_movements
-                WHERE item_id = :item_id
-                  AND hotel_id = :hotel_id
-                  AND movement_time >= :start_ts
-                  AND movement_time < :end_ts
-            """),
-            {
-                "item_id": item_id,
-                "hotel_id": hotel_id,
-                "start_ts": start_dt,
-                "end_ts": end_dt,
-            },
-        )
-        period = period_result.mappings().first()
-        purchases = int(period["purchases"])
-        usage = int(period["usage"])
-        wastage = int(period["wastage"])
+        period = period_movements.get(item_id, {"purchases": 0, "usage": 0, "wastage": 0})
+        purchases = period["purchases"]
+        usage = period["usage"]
+        wastage = period["wastage"]
         closing_stock = opening_stock + purchases - usage - wastage
 
         item_report = InventoryItemReport(

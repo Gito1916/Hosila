@@ -8,7 +8,6 @@ Supports dual sending mode:
 """
 
 import os
-import traceback
 from datetime import datetime
 from typing import Optional
 
@@ -17,6 +16,9 @@ from sqlalchemy import text
 
 from app.config import settings
 from app.database import async_session_factory
+from app.shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 # ── Template Engine ───────────────────────────────────────────
 _template_dir = os.path.join(os.path.dirname(__file__), "templates")
@@ -133,7 +135,7 @@ class EmailService:
     async def _send_via_resend(self, to: str, subject: str, html: str, sender: dict) -> dict:
         """Send email using Resend API. Returns provider response."""
         if not settings.resend_api_key:
-            print("⚠️  RESEND_API_KEY not set — email not sent (dev mode)")
+            logger.warning("RESEND_API_KEY not set — email not sent (dev mode)")
             return {"status": "skipped", "reason": "no_api_key"}
 
         try:
@@ -153,7 +155,7 @@ class EmailService:
             return {"status": "sent", "id": getattr(response, "id", str(response))}
 
         except Exception as e:
-            print(f"❌ Resend send error: {e}")
+            logger.error("Resend send error: %s", e, exc_info=True)
             return {"status": "failed", "error": str(e)}
 
     async def _log_email(
@@ -215,7 +217,7 @@ class EmailService:
                            rm.room_number, rm.room_type
                     FROM reservations r
                     JOIN guests g ON g.id = r.guest_id
-                    JOIN rooms rm ON rm.id = r.room_id
+                    LEFT JOIN rooms rm ON rm.id = r.room_id
                     WHERE r.id = :rid AND r.hotel_id = :hid
                 """),
                 {"rid": reservation_id, "hid": hotel_id},
@@ -244,7 +246,7 @@ class EmailService:
             "guest_name": row["guest_name"],
             "checkin_date": checkin_date.strftime("%B %d, %Y") if checkin_date else "TBD",
             "checkout_date": checkout_date.strftime("%B %d, %Y") if checkout_date else "TBD",
-            "room_type": row.get("room_type", "Standard"),
+            "room_type": row.get("room_type") or "TBD",
             "nights": int(row.get("nights") or 1),
             "total_amount": total_amount,
             "deposit_paid": deposit_paid,

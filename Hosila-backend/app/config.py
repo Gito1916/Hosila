@@ -1,6 +1,8 @@
 """
 Application configuration — loaded from environment variables.
 Uses pydantic-settings for validation and type coercion.
+
+In production, fail-fast validation ensures no dev defaults leak through.
 """
 
 from pydantic_settings import BaseSettings
@@ -34,4 +36,33 @@ class Settings(BaseSettings):
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 
+def _validate_production(s: Settings) -> None:
+    """
+    Fail-fast validation for production deployments.
+    Prevents the app from booting with insecure dev defaults.
+    """
+    if s.environment != "production":
+        return
+
+    errors: list[str] = []
+
+    if s.supabase_jwt_secret in ("dev-jwt-secret", ""):
+        errors.append("SUPABASE_JWT_SECRET must be set (not default) in production")
+
+    if s.supabase_service_role_key in ("dev-service-role-key", ""):
+        errors.append("SUPABASE_SERVICE_ROLE_KEY must be set (not default) in production")
+
+    if "localhost" in s.database_url:
+        errors.append("DATABASE_URL must not point to localhost in production")
+
+    if s.debug:
+        errors.append("DEBUG must be False in production")
+
+    if errors:
+        raise RuntimeError(
+            "Production configuration validation failed:\n  - " + "\n  - ".join(errors)
+        )
+
+
 settings = Settings()
+_validate_production(settings)

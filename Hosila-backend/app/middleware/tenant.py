@@ -128,6 +128,9 @@ async def get_tenant(
             active_hotel_name = h.name
             break
 
+    # Set hotel_id on request state so rate limiter can use it
+    request.state.hotel_id = active_hotel_id
+
     return TenantContext(
         hotel_id=active_hotel_id,
         user_id=uid,

@@ -2,11 +2,15 @@
 Billing service — invoice generation and tax transaction recording.
 
 This is called during guest checkout. It:
-1. Fetches all charges for the booking
-2. Calculates tax breakdown per charge using the tax engine
-3. Generates a formal invoice document
-4. Records tax_transactions for remittance tracking
-5. Creates journal entries for proper accounting
+1. Reserves idempotency key atomically (prevents race conditions)
+2. Fetches all charges for the booking
+3. Calculates tax breakdown per charge using the tax engine
+4. Generates a formal invoice document
+5. Records tax_transactions for remittance tracking
+6. Creates journal entries for proper accounting
+7. Commits all business writes in a single transaction
+8. Records audit log (non-critical — failure here won't rollback business data)
+9. Stores idempotency response
 """
 
 from decimal import Decimal, ROUND_HALF_UP
@@ -23,10 +27,14 @@ from app.modules.billing.schemas import (
     InvoiceResponse,
 )
 from app.shared.audit import write_audit_log
-from app.shared.idempotency import check_idempotency, store_idempotency
+from app.shared.idempotency import reserve_idempotency_key, store_idempotency
 from app.shared.exceptions import NotFoundError, ConflictError
+from app.shared.logger import get_logger
+
+logger = get_logger(__name__)
 
 TWO_PLACES = Decimal("0.01")
+_MAX_INVOICE_RETRIES = 3
 
 
 def _round(amount: Decimal) -> Decimal:
@@ -42,22 +50,23 @@ async def generate_invoice(
     """
     Generate a tax-compliant invoice for a booking checkout.
 
-    Steps:
-      1. Check idempotency key (return cached response if duplicate)
-      2. Fetch booking + guest details
-      3. Fetch all charges for the booking
-      4. Calculate tax breakdown per charge via tax engine
-      5. Insert/update invoice with full tax breakdown
-      6. Insert tax_transactions per tax component
-      7. Insert journal entries for accounting
-      8. Write audit log
-      9. Store idempotency key with response
+    Uses reserve-first idempotency to prevent duplicate charges under
+    concurrent retries. All business writes (invoice, tax_transactions,
+    journal entries) are committed in a single transaction.
     """
 
-    # ── 1. Idempotency check ──────────────────────
-    cached = await check_idempotency(db, hotel_id, request.idempotency_key)
-    if cached:
+    # ── 1. Reserve idempotency key atomically ─────
+    status, cached = await reserve_idempotency_key(db, hotel_id, request.idempotency_key)
+
+    if status == "already_processed" and cached:
         return InvoiceResponse(**cached)
+
+    if status == "in_progress":
+        raise ConflictError(
+            "This checkout is already being processed. Please wait and retry."
+        )
+
+    # status == "reserved" — proceed with business logic
 
     # ── 2. Fetch booking + guest ──────────────────
     result = await db.execute(
@@ -140,7 +149,7 @@ async def generate_invoice(
             },
         )
 
-        # ── 6. Insert tax_transactions ────────────
+        # Insert tax_transactions per tax component
         now = datetime.now(timezone.utc)
         for tax_type, component in [
             ("service_charge", tax_result.service_charge),
@@ -171,16 +180,10 @@ async def generate_invoice(
 
     grand_total = total_base + total_sc + total_vat + total_tdl
 
-    # ── 5. Generate invoice number + insert ───────
-    count_result = await db.execute(
-        text("SELECT COUNT(*) FROM invoices WHERE hotel_id = :hotel_id"),
-        {"hotel_id": hotel_id},
-    )
-    count = count_result.scalar() or 0
-    invoice_number = f"INV-{datetime.now(timezone.utc).year}-{count + 1:05d}"
+    # ── 5. Generate invoice number with retry on collision ────
     invoice_id = str(uuid4())
+    invoice_number = await _generate_invoice_number(db, hotel_id)
 
-    # Update existing invoice or create new one
     await db.execute(
         text("""
             INSERT INTO invoices (id, hotel_id, booking_id, invoice_number,
@@ -189,12 +192,6 @@ async def generate_invoice(
             VALUES (:id, :hotel_id, :booking_id, :invoice_number,
                     :guest_name, :guest_phone, :items::jsonb,
                     :subtotal, :tax, :total, :status)
-            ON CONFLICT (id) DO UPDATE SET
-                items = :items::jsonb,
-                subtotal = :subtotal,
-                tax = :tax,
-                total = :total,
-                status = :status
         """),
         {
             "id": invoice_id,
@@ -211,39 +208,21 @@ async def generate_invoice(
         },
     )
 
-    # ── 7. Journal entries ────────────────────────
-    # CR: VAT Payable
+    # ── 6. Journal entries ────────────────────────
     if total_vat > 0:
         await _insert_journal(db, hotel_id, invoice_id, "2010", "credit", total_vat,
                               "VAT Payable", "charge")
-    # CR: TDL Payable
     if total_tdl > 0:
         await _insert_journal(db, hotel_id, invoice_id, "2020", "credit", total_tdl,
                               "TDL Payable", "charge")
-    # CR: Service Charge Payable
     if total_sc > 0:
         await _insert_journal(db, hotel_id, invoice_id, "2030", "credit", total_sc,
                               "Service Charge Payable", "charge")
 
+    # ── 7. SINGLE COMMIT for all business writes ──
     await db.commit()
 
-    # ── 8. Audit log ──────────────────────────────
-    await write_audit_log(
-        db, hotel_id, user_id,
-        action="invoice_generated",
-        entity_type="invoice",
-        entity_id=invoice_id,
-        details={
-            "invoice_number": invoice_number,
-            "grand_total": str(grand_total),
-            "vat": str(total_vat),
-            "tdl": str(total_tdl),
-            "booking_id": request.booking_id,
-        },
-    )
-    await db.commit()
-
-    # ── 9. Build response + store idempotency ─────
+    # ── 8. Build response ─────────────────────────
     response = InvoiceResponse(
         invoice_id=invoice_id,
         invoice_number=invoice_number,
@@ -262,13 +241,69 @@ async def generate_invoice(
         created_at=datetime.now(timezone.utc),
     )
 
-    await store_idempotency(db, hotel_id, request.idempotency_key, response.model_dump(mode="json"))
-    await db.commit()
+    # ── 9. Non-critical post-commit: audit + idempotency ──
+    # These run after the main commit. If they fail, business data
+    # is already persisted. We log errors but don't rollback.
+    try:
+        await write_audit_log(
+            db, hotel_id, user_id,
+            action="invoice_generated",
+            entity_type="invoice",
+            entity_id=invoice_id,
+            details={
+                "invoice_number": invoice_number,
+                "grand_total": str(grand_total),
+                "vat": str(total_vat),
+                "tdl": str(total_tdl),
+                "booking_id": request.booking_id,
+            },
+        )
+        await store_idempotency(db, hotel_id, request.idempotency_key, response.model_dump(mode="json"))
+        await db.commit()
+    except Exception as e:
+        logger.error(
+            "Non-critical post-commit failed (audit/idempotency): %s",
+            e, exc_info=True,
+        )
+        # Don't re-raise — business data is already committed
 
     return response
 
 
 # ── Helpers ───────────────────────────────────────────────────
+
+async def _generate_invoice_number(db: AsyncSession, hotel_id: str) -> str:
+    """
+    Generate a unique invoice number using COUNT + retry on collision.
+    Format: INV-{year}-{sequence:05d}
+    """
+    year = datetime.now(timezone.utc).year
+
+    for attempt in range(_MAX_INVOICE_RETRIES):
+        count_result = await db.execute(
+            text("SELECT COUNT(*) FROM invoices WHERE hotel_id = :hotel_id"),
+            {"hotel_id": hotel_id},
+        )
+        count = (count_result.scalar() or 0) + 1 + attempt
+        candidate = f"INV-{year}-{count:05d}"
+
+        # Check uniqueness
+        exists = await db.execute(
+            text("""
+                SELECT 1 FROM invoices
+                WHERE hotel_id = :hotel_id AND invoice_number = :inv_num
+                LIMIT 1
+            """),
+            {"hotel_id": hotel_id, "inv_num": candidate},
+        )
+        if not exists.first():
+            return candidate
+
+    # Fallback: append UUID fragment for guaranteed uniqueness
+    fallback = f"INV-{year}-{str(uuid4())[:8].upper()}"
+    logger.warning("Invoice number collision after %d retries, using fallback: %s", _MAX_INVOICE_RETRIES, fallback)
+    return fallback
+
 
 def _serialize_items(items: list[InvoiceLineItem]) -> str:
     """Serialize invoice items to JSON string for JSONB storage."""

@@ -16,13 +16,17 @@ def _build_async_url(url: str) -> str:
     return url
 
 
+# Only echo SQL in development when debug is explicitly enabled.
+# Never echo in production, even if debug is somehow True (belt + suspenders).
+_echo_sql = settings.debug and settings.environment != "production"
+
 engine = create_async_engine(
     _build_async_url(settings.database_url),
     pool_size=5,
     max_overflow=5,
     pool_pre_ping=True,
     pool_recycle=300,
-    echo=settings.debug,
+    echo=_echo_sql,
     # PgBouncer compatibility (Supabase uses PgBouncer in transaction mode)
     # Disable asyncpg's prepared statement cache to avoid
     # "prepared statement already exists" errors

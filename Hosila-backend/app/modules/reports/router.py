@@ -45,12 +45,22 @@ async def export_accommodation_report(
     db: AsyncSession = Depends(get_db),
 ):
     report = await accommodation.generate_accommodation_report(db, tenant.hotel_id, start, end)
-    content = export.generate_accommodation_excel(report, tenant.hotel_name or "Hotel")
-    return StreamingResponse(
-        io.BytesIO(content),
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f"attachment; filename=accommodation_report_{start}_{end}.xlsx"},
-    )
+    hotel_name = tenant.hotel_name or "Hotel"
+
+    if format == "pdf":
+        content = export.generate_accommodation_pdf(report, hotel_name)
+        return StreamingResponse(
+            io.BytesIO(content),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=accommodation_report_{start}_{end}.pdf"},
+        )
+    else:
+        content = export.generate_accommodation_excel(report, hotel_name)
+        return StreamingResponse(
+            io.BytesIO(content),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename=accommodation_report_{start}_{end}.xlsx"},
+        )
 
 
 # ── Restaurant ────────────────────────────────────────────────
