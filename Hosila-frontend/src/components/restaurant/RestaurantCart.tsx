@@ -244,11 +244,26 @@ export function RestaurantCart({
                         const inventoryId = item.service.id.replace('inv_', '');
                         const inventoryItem = await (async () => { const sb = requireSupabase(); const { data } = await sb.from('inventory_items').select('*').eq('id', inventoryId).single(); return data; })();
                         if (inventoryItem) {
+                            const newStock = Math.max(0, inventoryItem.current_stock - item.quantity);
                             await (async () => {
-                                const sb = requireSupabase(); await sb.from('inventory_items').update({
-                                    current_stock: Math.max(0, inventoryItem.current_stock - item.quantity),
+                                const sb = requireSupabase();
+                                await sb.from('inventory_items').update({
+                                    current_stock: newStock,
                                     updated_at: now,
                                 }).eq('id', inventoryId);
+                                // Record movement for reporting
+                                await sb.from('inventory_movements').insert({
+                                    id: uuidv4(),
+                                    hotel_id: hotelId,
+                                    item_id: inventoryId,
+                                    movement_type: 'deduct',
+                                    quantity: item.quantity,
+                                    source: 'restaurant',
+                                    reason: `Restaurant order ${orderNumber}`,
+                                    balance_after: newStock,
+                                    performed_by: user.id,
+                                    movement_time: now,
+                                });
                             })();
                         }
                     }
@@ -316,11 +331,26 @@ export function RestaurantCart({
                         const inventoryId = item.service.id.replace('inv_', '');
                         const inventoryItem = await (async () => { const sb = requireSupabase(); const { data } = await sb.from('inventory_items').select('*').eq('id', inventoryId).single(); return data; })();
                         if (inventoryItem) {
+                            const newStock = Math.max(0, inventoryItem.current_stock - item.quantity);
                             await (async () => {
-                                const sb = requireSupabase(); await sb.from('inventory_items').update({
-                                    current_stock: Math.max(0, inventoryItem.current_stock - item.quantity),
+                                const sb = requireSupabase();
+                                await sb.from('inventory_items').update({
+                                    current_stock: newStock,
                                     updated_at: now,
                                 }).eq('id', inventoryId);
+                                // Record movement for reporting
+                                await sb.from('inventory_movements').insert({
+                                    id: uuidv4(),
+                                    hotel_id: hotelId,
+                                    item_id: inventoryId,
+                                    movement_type: 'deduct',
+                                    quantity: item.quantity,
+                                    source: 'restaurant',
+                                    reason: `Restaurant order ${orderNumber}`,
+                                    balance_after: newStock,
+                                    performed_by: user.id,
+                                    movement_time: now,
+                                });
                             })();
                         }
                     }
