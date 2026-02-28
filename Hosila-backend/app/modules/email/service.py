@@ -237,10 +237,27 @@ class EmailService:
             return {"status": "skipped", "reason": "no_guest_email"}
 
         # Render content
-        total_amount = float(row.get("total_amount") or 0)
+        base_amount = float(row.get("total_amount") or 0)
         deposit_paid = float(row.get("deposit_paid") or 0)
         checkin_date = row.get("check_in_date")
         checkout_date = row.get("check_out_date")
+
+        # Compute tax-inclusive total using the tax engine so the email
+        # shows the actual amount the guest will be charged at check-in
+        total_amount = base_amount
+        try:
+            from app.modules.tax_engine.service import calculate_tax_breakdown
+            from app.modules.tax_engine.schemas import TaxCalculationRequest
+            from decimal import Decimal
+            async with async_session_factory() as tax_session:
+                tax_request = TaxCalculationRequest(
+                    base_amount=Decimal(str(base_amount)),
+                    department="accommodation",
+                )
+                breakdown = await calculate_tax_breakdown(tax_session, hotel_id, tax_request)
+                total_amount = float(breakdown.total)
+        except Exception as e:
+            logger.warning("Tax calc failed for reservation email, using base amount: %s", e)
 
         content_context = {
             "guest_name": row["guest_name"],
