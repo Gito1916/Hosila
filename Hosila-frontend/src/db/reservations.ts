@@ -197,8 +197,16 @@ export async function createReservation(data: {
         timestamp: nowIso,
     });
 
-    // Auto-send reservation confirmation email (non-blocking)
-    emailApi.sendReservationEmail(reservation.id).catch(() => { });
+    // Auto-send reservation confirmation email (non-blocking, only if guest emails feature is enabled)
+    (async () => {
+        try {
+            const sb2 = requireSupabase();
+            const { data: h } = await sb2.from('hotels').select('settings').eq('id', hotelId).single();
+            if (h?.settings?.guest_emails_enabled) {
+                emailApi.sendReservationEmail(reservation.id).catch(() => { });
+            }
+        } catch { /* skip silently */ }
+    })();
 
     return reservation as unknown as Reservation;
 }

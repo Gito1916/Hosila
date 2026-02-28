@@ -302,8 +302,16 @@ export async function checkIn(data: {
         timestamp: nowIso,
     });
 
-    // Auto-send check-in welcome email (non-blocking)
-    emailApi.sendCheckinEmail(booking.id).catch(() => { });
+    // Auto-send check-in welcome email (non-blocking, only if guest emails feature is enabled)
+    (async () => {
+        try {
+            const sb2 = requireSupabase();
+            const { data: h } = await sb2.from('hotels').select('settings').eq('id', hotelId).single();
+            if (h?.settings?.guest_emails_enabled) {
+                emailApi.sendCheckinEmail(booking.id).catch(() => { });
+            }
+        } catch { /* skip silently */ }
+    })();
 
     return booking as unknown as Booking;
 }
@@ -524,8 +532,16 @@ export async function checkOut(
         timestamp: nowIso,
     });
 
-    // Auto-send checkout receipt email (non-blocking)
-    emailApi.sendCheckoutEmail(bookingId).catch(() => { });
+    // Auto-send checkout receipt email (non-blocking, only if guest emails feature is enabled)
+    (async () => {
+        try {
+            const sb2 = requireSupabase();
+            const { data: h } = await sb2.from('hotels').select('settings').eq('id', hotelId).single();
+            if (h?.settings?.guest_emails_enabled) {
+                emailApi.sendCheckoutEmail(bookingId).catch(() => { });
+            }
+        } catch { /* skip silently */ }
+    })();
 }
 
 // Record payment for booking — uses FIFO allocation to correctly attribute to departments

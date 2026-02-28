@@ -1,10 +1,12 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { exportData, downloadBackup } from '@/db/settings';
 import { requireSupabase, getHotelId } from '@/lib/api';
 import { toast } from '@/lib/errorMessages';
 import { EmailImportPanel } from './EmailImportPanel';
 import { ApiKeyPanel } from './ApiKeyPanel';
 import { EmailSettingsPanel } from './EmailSettingsPanel';
+import { getHotel } from '@/db/settings';
+import type { HotelSettings } from '@/types';
 import {
     Download,
     Upload,
@@ -17,12 +19,46 @@ import {
     Mail,
     Globe,
     Send,
+    Power,
 } from 'lucide-react';
 
 type Section = 'backup' | 'email_import' | 'website_api' | 'guest_emails';
 
+/** Reusable toggle switch with visible OFF state (not white-on-white) */
+function FeatureToggle({
+    enabled,
+    onChange,
+    loading,
+}: {
+    enabled: boolean;
+    onChange: (val: boolean) => void;
+    loading?: boolean;
+}) {
+    return (
+        <button
+            type="button"
+            onClick={(e) => {
+                e.stopPropagation();
+                if (!loading) onChange(!enabled);
+            }}
+            className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${enabled ? 'bg-primary-500' : 'bg-border-strong'
+                } ${loading ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
+            title={enabled ? 'Disable feature' : 'Enable feature'}
+        >
+            <div
+                className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-[22px]' : 'translate-x-0.5'
+                    }`}
+            />
+        </button>
+    );
+}
+
 export function AdvancedPanel() {
     const [expandedSection, setExpandedSection] = useState<Section | null>('backup');
+
+    // Feature toggle state
+    const [settings, setSettings] = useState<HotelSettings | null>(null);
+    const [toggleLoading, setToggleLoading] = useState<string | null>(null);
 
     // Backup state
     const [isExporting, setIsExporting] = useState(false);
@@ -33,8 +69,44 @@ export function AdvancedPanel() {
     const [restoreError, setRestoreError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Load settings on mount
+    useEffect(() => {
+        (async () => {
+            try {
+                const hotel = await getHotel();
+                if (hotel?.settings) setSettings(hotel.settings);
+            } catch {
+                // Settings will stay null — toggles default to off
+            }
+        })();
+    }, []);
+
     const toggleSection = (section: Section) => {
         setExpandedSection(prev => prev === section ? null : section);
+    };
+
+    /** Persist a feature toggle to the hotels.settings JSONB column */
+    const handleToggle = async (key: keyof HotelSettings, newValue: boolean) => {
+        setToggleLoading(key);
+        try {
+            const sb = requireSupabase();
+            const hotelId = await getHotelId();
+
+            // Merge into existing settings
+            const updatedSettings = { ...settings, [key]: newValue };
+            const { error } = await sb
+                .from('hotels')
+                .update({ settings: updatedSettings })
+                .eq('id', hotelId);
+
+            if (error) throw error;
+            setSettings(updatedSettings as HotelSettings);
+            toast.success(newValue ? 'Feature enabled' : 'Feature disabled');
+        } catch (err) {
+            toast.error('Failed to update setting', err);
+        } finally {
+            setToggleLoading(null);
+        }
     };
 
     const handleExport = async () => {
@@ -133,7 +205,7 @@ export function AdvancedPanel() {
                 <p className="text-sm text-muted">Backup, email import, guest emails, and API settings</p>
             </div>
 
-            {/* Backup & Restore Section */}
+            {/* Backup & Restore Section — NO toggle, always available */}
             <div className="card overflow-hidden">
                 <button
                     onClick={() => toggleSection('backup')}
@@ -187,7 +259,7 @@ export function AdvancedPanel() {
                 )}
             </div>
 
-            {/* Email Import Section */}
+            {/* Email Import Section — with toggle */}
             <div className="card overflow-hidden">
                 <button
                     onClick={() => toggleSection('email_import')}
@@ -197,9 +269,19 @@ export function AdvancedPanel() {
                         <Mail className="text-purple-400" size={18} />
                     </div>
                     <div className="flex-1">
-                        <h4 className="text-heading font-medium text-sm">Email Import</h4>
+                        <h4 className="text-heading font-medium text-sm flex items-center gap-2">
+                            Email Import
+                            {settings?.email_import_enabled && (
+                                <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded-full font-medium uppercase">On</span>
+                            )}
+                        </h4>
                         <p className="text-xs text-muted">Auto-import OTA reservations from Gmail</p>
                     </div>
+                    <FeatureToggle
+                        enabled={!!settings?.email_import_enabled}
+                        onChange={(val) => handleToggle('email_import_enabled', val)}
+                        loading={toggleLoading === 'email_import_enabled'}
+                    />
                     {expandedSection === 'email_import'
                         ? <ChevronDown size={18} className="text-muted" />
                         : <ChevronRight size={18} className="text-muted" />
@@ -207,12 +289,21 @@ export function AdvancedPanel() {
                 </button>
                 {expandedSection === 'email_import' && (
                     <div className="px-4 pb-4 border-t border-border/50 pt-4">
-                        <EmailImportPanel />
+                        {settings?.email_import_enabled ? (
+                            <EmailImportPanel />
+                        ) : (
+                            <div className="flex items-center gap-3 p-4 bg-surface-raised/30 rounded-lg">
+                                <Power size={18} className="text-muted" />
+                                <p className="text-sm text-muted">
+                                    This feature is turned off. Enable the toggle above to configure email import.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
 
-            {/* Website API Section */}
+            {/* Website API Section — with toggle */}
             <div className="card overflow-hidden">
                 <button
                     onClick={() => toggleSection('website_api')}
@@ -222,9 +313,19 @@ export function AdvancedPanel() {
                         <Globe className="text-cyan-400" size={18} />
                     </div>
                     <div className="flex-1">
-                        <h4 className="text-heading font-medium text-sm">Website API</h4>
+                        <h4 className="text-heading font-medium text-sm flex items-center gap-2">
+                            Website API
+                            {settings?.website_api_enabled && (
+                                <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded-full font-medium uppercase">On</span>
+                            )}
+                        </h4>
                         <p className="text-xs text-muted">API keys & endpoints for your hotel website</p>
                     </div>
+                    <FeatureToggle
+                        enabled={!!settings?.website_api_enabled}
+                        onChange={(val) => handleToggle('website_api_enabled', val)}
+                        loading={toggleLoading === 'website_api_enabled'}
+                    />
                     {expandedSection === 'website_api'
                         ? <ChevronDown size={18} className="text-muted" />
                         : <ChevronRight size={18} className="text-muted" />
@@ -232,12 +333,21 @@ export function AdvancedPanel() {
                 </button>
                 {expandedSection === 'website_api' && (
                     <div className="px-4 pb-4 border-t border-border/50 pt-4">
-                        <ApiKeyPanel />
+                        {settings?.website_api_enabled ? (
+                            <ApiKeyPanel />
+                        ) : (
+                            <div className="flex items-center gap-3 p-4 bg-surface-raised/30 rounded-lg">
+                                <Power size={18} className="text-muted" />
+                                <p className="text-sm text-muted">
+                                    This feature is turned off. Enable the toggle above to manage API keys.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
 
-            {/* Guest Email Automation Section */}
+            {/* Guest Email Automation Section — with toggle */}
             <div className="card overflow-hidden">
                 <button
                     onClick={() => toggleSection('guest_emails')}
@@ -247,9 +357,19 @@ export function AdvancedPanel() {
                         <Send className="text-blue-400" size={18} />
                     </div>
                     <div className="flex-1">
-                        <h4 className="text-heading font-medium text-sm">Guest Email Automation</h4>
+                        <h4 className="text-heading font-medium text-sm flex items-center gap-2">
+                            Guest Email Automation
+                            {settings?.guest_emails_enabled && (
+                                <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded-full font-medium uppercase">On</span>
+                            )}
+                        </h4>
                         <p className="text-xs text-muted">Auto-send confirmation, welcome & receipt emails</p>
                     </div>
+                    <FeatureToggle
+                        enabled={!!settings?.guest_emails_enabled}
+                        onChange={(val) => handleToggle('guest_emails_enabled', val)}
+                        loading={toggleLoading === 'guest_emails_enabled'}
+                    />
                     {expandedSection === 'guest_emails'
                         ? <ChevronDown size={18} className="text-muted" />
                         : <ChevronRight size={18} className="text-muted" />
@@ -257,7 +377,16 @@ export function AdvancedPanel() {
                 </button>
                 {expandedSection === 'guest_emails' && (
                     <div className="px-4 pb-4 border-t border-border/50 pt-4">
-                        <EmailSettingsPanel />
+                        {settings?.guest_emails_enabled ? (
+                            <EmailSettingsPanel />
+                        ) : (
+                            <div className="flex items-center gap-3 p-4 bg-surface-raised/30 rounded-lg">
+                                <Power size={18} className="text-muted" />
+                                <p className="text-sm text-muted">
+                                    This feature is turned off. Enable the toggle above to configure guest email automation.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

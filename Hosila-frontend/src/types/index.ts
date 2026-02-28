@@ -161,6 +161,10 @@ export interface ServiceChargeConfig {
 }
 
 export interface HotelSettings {
+    // Feature toggles for advanced settings (default: false/undefined for new hotels)
+    email_import_enabled?: boolean;
+    website_api_enabled?: boolean;
+    guest_emails_enabled?: boolean;
     checkout_time: string; // e.g., "12:00"
     short_rest_enabled: boolean;
     short_rest_min_hours: number;
