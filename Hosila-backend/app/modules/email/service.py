@@ -402,6 +402,9 @@ class EmailService:
         hotel_name = hotel_info.get("name", "Hotel")
         subject = f"Welcome to {hotel_name}! 🛎️"
         base_context = self._build_base_context(hotel_info, email_settings)
+        # Don't show custom_footer in the base email footer — it's already
+        # rendered as checkin_info_items inside the check-in content body
+        base_context["custom_footer"] = None
         base_context.update({
             "subject": subject,
             "email_title": f"Welcome, {row['guest_name']}!",
