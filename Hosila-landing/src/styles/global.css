@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+@config "../../tailwind.config.mjs";
+
+@layer base {
+  body {
+    @apply text-textColor-body bg-surface-base antialiased text-base leading-relaxed;
+  }
+
+  h1,
+  .h1 {
+    @apply text-textColor-heading font-medium tracking-tight text-2xl lg:text-3xl xl:text-4xl leading-[1.1] mb-8;
+  }
+
+  h2,
+  .h2 {
+    @apply text-textColor-heading font-medium tracking-tight text-2xl lg:text-3xl leading-tight mb-6;
+  }
+
+  h3,
+  .h3 {
+    @apply text-textColor-heading font-medium tracking-tight text-2xl lg:text-2xl leading-snug mb-4;
+  }
+
+  p {
+    @apply text-lg text-textColor-body mb-6 leading-relaxed;
+  }
+}
+
+@layer components {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full;
+  }
+}

@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     hosila_logo_url: str = "https://ywxsopiokkdytgsvyacg.supabase.co/storage/v1/object/public/hotel-assets/Hosila-icon-logo.png"
     email_from_address: str = "notifications@mail.hosila.com"
     email_from_name: str = "Hosila"
+    contact_inbox_email: str = "hosilateam@gmail.com"
+    contact_reply_to_email: str = "contact@hosila.com"
+    contact_sender_email: str = "contact@mail.hosila.com"
 
     # ── App ───────────────────────────────────────────────────
     environment: str = "development"

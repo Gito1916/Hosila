@@ -20,7 +20,7 @@
 - Role-based access control (admin, manager, frontdesk, restaurant)
 - Settings & multi-tenant hotel configuration (Support for Tax-inclusive pricing and custom TDL names)
 
-**Deployment**: Frontend on **Vercel** (`https://hosila.vercel.app`), Backend API on **Render** (`https://hosila.onrender.com`), Database on **Supabase** (Postgres + Auth + Realtime).
+**Deployment**: Frontend on **Vercel** (`https://hosila.vercel.app`), Backend API on **Render** (`https://api.hosila.com`), Database on **Supabase** (Postgres + Auth + Realtime).
 
 ---
 
@@ -172,7 +172,7 @@ c:\Hosila\
 ```env
 VITE_SUPABASE_URL=https://ywxsopiokkdytgsvyacg.supabase.co
 VITE_SUPABASE_ANON_KEY=<anon_key>
-VITE_API_BASE_URL=https://hosila.onrender.com
+VITE_API_BASE_URL=https://api.hosila.com
 VITE_GOOGLE_CLIENT_ID=<for Gmail OAuth, email import>
 ```
 
@@ -652,7 +652,7 @@ uvicorn app.main:app --reload    # Start FastAPI dev server (localhost:8000)
 | Component | Platform | URL | Trigger |
 |-----------|----------|-----|---------|
 | Frontend | **Vercel** | `https://hosila.vercel.app` | Push to `master` (root dir: `Hosila-frontend/`) |
-| Backend | **Render** | `https://hosila.onrender.com` | Push to `master` (root dir: `Hosila-backend/`) |
+| Backend | **Render** | `https://api.hosila.com` | Push to `master` (root dir: `Hosila-backend/`) |
 | Database | **Supabase** | `ywxsopiokkdytgsvyacg` | Migrations via CLI or MCP |
 
 ---
@@ -679,4 +679,3 @@ Located in `supabase/migrations/` (if utilized separately). Applied via `supabas
 
 - **Subscription Tier Pricing**: Architecture for free/pro/enterprise tiers with feature gating
 - **Offline Backup System**: Local data persistence so business operations continue without internet
-- **UI/Branding Overhaul**: Major visual redesign and rebrand

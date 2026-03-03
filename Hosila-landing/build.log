@@ -1,0 +1,51 @@
+
+> hosila-website@1.0.0 build
+> astro check && astro build
+
+[2m13:20:45[22m [34m[content][39m Syncing content
+[2m13:20:45[22m [34m[content][39m Synced content
+[2m13:20:45[22m [34m[types][39m Generated [2m565ms[22m
+[2m13:20:45[22m [34m[check][39m Getting diagnostics for Astro files in C:\Hosila\website...
+[96msrc/components/Footer.astro[0m:[93m2[0m:[93m1[0m - [93mwarning[0m[90m ts(6133): [0m'Button' is declared but its value is never read.
+
+[7m2[0m import Button from './Button.astro';
+[7m [0m [93m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/react/FAQ.tsx[0m:[93m1[0m:[93m8[0m - [93mwarning[0m[90m ts(6133): [0m'React' is declared but its value is never read.
+
+[7m1[0m import React, { useState } from 'react';
+[7m [0m [93m       ~~~~~[0m
+
+[96msrc/pages/contact.astro[0m:[93m79[0m:[93m45[0m - [93mwarning[0m[90m ts(6385): [0m'event' is deprecated.
+
+[7m79[0m           <form class="space-y-6" onsubmit="event.preventDefault();">
+[7m  [0m [93m                                            ~~~~~[0m
+
+[96msrc/pages/index.astro[0m:[93m369[0m:[93m82[0m - [93mwarning[0m[90m ts(6385): [0m'event' is deprecated.
+
+[7m369[0m         <form class="flex flex-col sm:flex-row max-w-xl mx-auto gap-4" onsubmit="event.preventDefault();">
+[7m   [0m [93m                                                                                 ~~~~~[0m
+
+Result (18 files): 
+- 0 errors
+- 0 warnings
+- 4 hints
+
+[2m13:20:54[22m [34m[content][39m Syncing content
+[2m13:20:54[22m [34m[content][39m Synced content
+[2m13:20:54[22m [34m[types][39m Generated [2m618ms[22m
+[2m13:20:54[22m [34m[build][39m output: [34m"static"[39m
+[2m13:20:54[22m [34m[build][39m mode: [34m"static"[39m
+[2m13:20:54[22m [34m[build][39m directory: [34mC:\Hosila\website\dist\[39m
+[2m13:20:54[22m [34m[build][39m Collecting build info...
+[2m13:20:54[22m [34m[build][39m [32m✓ Completed in 654ms.[39m
+[2m13:20:54[22m [34m[build][39m Building static entrypoints...
+[31m[1m13:20:55[22m [ERROR] [vite][39m [31m✗[39m Build failed in 996ms
+[@tailwindcss/vite:generate:build] Cannot apply unknown utility class `text-textColor-body`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive
+file: C:/Hosila/website/src/styles/global.css
+  [1mStack trace:[22m
+[2m    at onInvalidCandidate (file:///C:/Hosila/website/node_modules/tailwindcss/dist/chunk-L5IEUH3R.mjs:21:1314)
+    at file:///C:/Hosila/website/node_modules/tailwindcss/dist/chunk-L5IEUH3R.mjs:21:355
+    at I (file:///C:/Hosila/website/node_modules/tailwindcss/dist/chunk-L5IEUH3R.mjs:3:1377)
+    at Gi (file:///C:/Hosila/website/node_modules/tailwindcss/dist/chunk-L5IEUH3R.mjs:38:294)
+    at async vf (file:///C:/Hosila/website/node_modules/tailwindcss/dist/chunk-L5IEUH3R.mjs:38:1406)[22m

@@ -8,6 +8,7 @@ Supports dual sending mode:
 """
 
 import os
+import html
 from datetime import datetime
 from typing import Optional
 
@@ -157,6 +158,51 @@ class EmailService:
         except Exception as e:
             logger.error("Resend send error: %s", e, exc_info=True)
             return {"status": "failed", "error": str(e)}
+
+    async def send_contact_email(self, payload: dict) -> dict:
+        """
+        Send contact-form submissions to Hosila team inbox.
+        Uses explicit contact sender identity on mail.hosila.com with reply-to
+        set to the email entered by the submitter.
+        """
+        subject = f"[Website Contact] {payload['name']}"
+        body_lines = [
+            ("Name", payload["name"]),
+        ]
+        if payload.get("hotel_name"):
+            body_lines.append(("Hotel", payload["hotel_name"]))
+        body_lines.append(("Email", payload["email"]))
+        body_lines.append(("Phone", payload["phone"]))
+        if payload.get("rooms_count"):
+            body_lines.append(("Rooms", payload["rooms_count"]))
+        body_lines.append(("Submitted At", datetime.utcnow().isoformat() + "Z"))
+        body_html = "".join(
+            f"<p><strong>{html.escape(key)}:</strong> {html.escape(value)}</p>"
+            for key, value in body_lines
+        )
+        message_html = f"""
+            <div style="font-family:Arial,sans-serif;line-height:1.55;color:#111827;">
+              <h2 style="margin:0 0 12px;">New Website Contact Submission</h2>
+              {body_html}
+              <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb;" />
+              <p style="margin:0 0 6px;"><strong>Message</strong></p>
+              <pre style="white-space:pre-wrap;font-family:inherit;background:#f9fafb;padding:12px;border-radius:8px;border:1px solid #e5e7eb;">{html.escape(payload["message"])}</pre>
+            </div>
+        """
+
+        sender = {
+            "from_email": f"Hosila Contact <{settings.contact_sender_email}>",
+            "reply_to": payload["email"],
+        }
+        result = await self._send_via_resend(
+            settings.contact_inbox_email, subject, message_html, sender
+        )
+        logger.info(
+            "Contact email dispatch status=%s inbox=%s",
+            result.get("status"),
+            settings.contact_inbox_email,
+        )
+        return result
 
     async def _log_email(
         self,
@@ -533,6 +579,51 @@ class EmailService:
             result.get("error"),
         )
 
+        return result
+
+    async def send_welcome_email(self, user_email: str, user_name: str = "") -> dict:
+        """
+        Send onboarding welcome email to a newly registered user.
+        Uses Hosila platform branding (not hotel-specific branding).
+        """
+        display_name = user_name or "there"
+        subject = "Welcome to Hosila! 🚀"
+
+        primary_color = "#21C29C"
+        content_context = {"primary_color": primary_color}
+        dynamic_content = _render_template("welcome_content.html", content_context)
+
+        base_context = {
+            "hotel_name": "Hosila",
+            "hotel_logo_url": settings.hosila_logo_url,
+            "hotel_address": None,
+            "hotel_phone": None,
+            "hotel_email": None,
+            "primary_color": primary_color,
+            "promo_enabled": False,
+            "promo_title": None,
+            "promo_body": None,
+            "custom_footer": None,
+            "hosila_logo_url": settings.hosila_logo_url,
+            "subject": subject,
+            "email_title": f"Welcome to Hosila, {display_name}!",
+            "email_subtitle": "Run your property smarter, faster, and without the paperwork chaos.",
+            "dynamic_content": dynamic_content,
+            "cta_link": "https://hosila.vercel.app",
+            "cta_text": "Open Hosila →",
+        }
+        html_body = _render_template("base_email.html", base_context)
+
+        sender = {
+            "from_email": f"Hosila <{settings.email_from_address}>",
+            "reply_to": settings.email_from_address,
+        }
+        result = await self._send_via_resend(user_email, subject, html_body, sender)
+        logger.info(
+            "Welcome email dispatch status=%s to=%s",
+            result.get("status"),
+            user_email,
+        )
         return result
 
 

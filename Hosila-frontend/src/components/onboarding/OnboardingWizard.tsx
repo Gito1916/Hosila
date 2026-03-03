@@ -238,6 +238,13 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                 });
             }
 
+            // Fire-and-forget welcome email — do not block onboarding
+            import('@/lib/apiClient').then(({ emailApi }) => {
+                emailApi.sendWelcomeEmail().catch(() => {
+                    // Silently ignore — email is best-effort
+                });
+            });
+
             onComplete();
         } catch (err) {
             console.error(err);

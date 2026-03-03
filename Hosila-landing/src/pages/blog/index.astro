@@ -1,0 +1,107 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import Button from '../../components/Button.astro';
+import FAQ from '../../components/react/FAQ.tsx';
+
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('blog');
+const sortedPosts = posts.sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf());
+const featuredPost = sortedPosts.find(post => post.data.featured) || sortedPosts[0];
+const otherPosts = sortedPosts.filter(post => post.id !== featuredPost?.id);
+---
+
+<Layout title="Blog | Hotel Management Insights">
+  <Navbar />
+  
+  <main class="flex-grow w-full">
+    <!-- Header Section -->
+    <section class="py-20 lg:py-24 bg-surface-base border-b border-border-subtle">
+      <div class="container-custom text-center max-w-3xl mx-auto">
+        <h1>
+          Hosila Insights
+        </h1>
+        <p>
+          The latest thoughts, best practices, and guides on hotel management, integrated inventory, and modern restaurant POS systems.
+        </p>
+        <form id="blog-subscribe-form" class="flex justify-center gap-2">
+          <input type="email" required placeholder="Enter your email" class="px-4 py-2 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-500 max-w-xs w-full" />
+          <Button variant="primary">Subscribe</Button>
+        </form>
+      </div>
+    </section>
+
+    {featuredPost && (
+    <!-- Featured Blog -->
+    <section class="py-16 bg-surface-base">
+      <div class="container-custom">
+        <h2 class="uppercase text-brand-500">Featured Post</h2>
+        <a href={`/blog/${featuredPost.slug}`} class="group block">
+          <div class="grid lg:grid-cols-2 gap-12 items-center bg-surface-card rounded-3xl overflow-hidden border border-border-subtle hover:border-brand-300 transition-colors shadow-sm">
+            <div class="h-[400px] lg:h-full w-full relative overflow-hidden">
+               <img src={featuredPost.data.image || "/images/hero_main.webp"} alt={featuredPost.data.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            </div>
+            <div class="p-8 lg:p-12">
+              <span class="text-sm text-textColor-muted block mb-4">{new Date(featuredPost.data.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+              <h3 class="group-hover:text-brand-500 transition-colors">{featuredPost.data.title}</h3>
+              <p class="line-clamp-3">{featuredPost.data.summary}</p>
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center font-bold text-sm">
+                   {featuredPost.data.author.charAt(0)}
+                </div>
+                <span class="font-medium text-textColor-heading">{featuredPost.data.author}</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </section>
+    )}
+
+    <!-- Blog List -->
+    {otherPosts.length > 0 && (
+    <section class="py-16 bg-surface-inset">
+      <div class="container-custom">
+        <h2>Latest Articles</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {otherPosts.map(post => (
+            <a href={`/blog/${post.slug}`} class="group block h-full">
+              <div class="bg-surface-card rounded-2xl overflow-hidden border border-border-strong hover:border-brand-300 transition-colors shadow-sm h-full flex flex-col">
+                <div class="h-48 overflow-hidden relative">
+                   <img src={post.data.image || "/images/feature_rooms.webp"} alt={post.data.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                </div>
+                <div class="p-6 flex flex-col flex-grow">
+                  <span class="text-sm text-textColor-muted block mb-3">{new Date(post.data.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                  <h3 class="group-hover:text-brand-500 transition-colors line-clamp-2">{post.data.title}</h3>
+                  <p class="line-clamp-3 flex-grow">{post.data.summary}</p>
+                  <div class="flex items-center gap-3 mt-auto">
+                    <span class="font-medium text-sm text-textColor-heading">{post.data.author}</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+    )}
+
+    <!-- FAQ -->
+    <section class="py-24 bg-surface-base">
+      <div class="container-custom max-w-4xl mx-auto">
+        <h2 class="text-center">Frequently Asked Questions</h2>
+        <FAQ client:load />
+      </div>
+    </section>
+  </main>
+  
+  <Footer />
+</Layout>
+<script>
+  document.getElementById('blog-subscribe-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    alert('Subscribed successfully! (Demo feature)');
+  });
+</script>

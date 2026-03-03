@@ -1,0 +1,198 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import Button from '../components/Button.astro';
+import FAQ from '../components/react/FAQ.tsx';
+---
+
+<Layout title="Pricing | Hotel Management Software">
+  <Navbar />
+  
+  <main class="flex-grow w-full">
+    <!-- Header Section -->
+    <section class="py-20 lg:py-24 bg-brand-50">
+      <div class="container-custom text-center max-w-3xl mx-auto">
+        <h1>
+          Simple pricing for hotels of all sizes
+        </h1>
+        <p>
+          No hidden fees, no complicated setup costs. Just clear, predictable pricing that scales as your hotel grows.
+        </p>
+
+        <!-- Toggle -->
+        <div class="flex justify-center mb-12">
+          <div class="bg-surface-inset p-1 rounded-xl inline-flex items-center border border-border-strong">
+            <button id="toggle-monthly" class="px-6 py-2 rounded-lg bg-white shadow text-textColor-heading font-medium transition-colors">Monthly</button>
+            <button id="toggle-yearly" class="px-6 py-2 rounded-lg text-textColor-muted hover:text-textColor-heading font-medium transition-colors flex items-center gap-2">
+              Yearly <span class="bg-brand-100 text-brand-600 text-xs px-2 py-0.5 rounded-full font-bold">Save 16%</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Pricing Tiers Section -->
+    <section class="py-12 bg-surface-base">
+      <div class="container-custom grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        
+        <!-- Starter Plan -->
+        <div class="p-8 rounded-3xl border border-border-strong bg-surface-card flex flex-col hover:border-brand-300 transition-colors">
+          <h3>Starter</h3>
+          <p>For small guesthouses starting out.</p>
+          <div class="mb-8">
+            <span class="text-4xl font-bold text-textColor-heading pricing-amount" data-monthly="₦20,000" data-yearly="₦201,600">₦20,000</span>
+            <span class="text-textColor-muted pricing-period">/month</span>
+          </div>
+          <Button variant="ghost" class="w-full mb-8 pricing-cta">Start Basic</Button>
+          <ul class="space-y-4 text-textColor-body flex-grow">
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Up to 15 rooms</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Basic front desk</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Email support</li>
+          </ul>
+        </div>
+
+        <!-- Pro Plan -->
+        <div class="p-8 rounded-3xl border-2 border-brand-500 bg-surface-card flex flex-col relative shadow-xl">
+          <div class="absolute top-0 right-8 -translate-y-1/2">
+            <span class="bg-brand-500 text-white text-xs font-bold px-3 py-1 rounded-full tracking-wider uppercase">Most Popular</span>
+          </div>
+          <h3>Pro</h3>
+          <p>For established hotels and lodges.</p>
+          <div class="mb-8">
+            <span class="text-4xl font-bold text-textColor-heading pricing-amount" data-monthly="₦50,000" data-yearly="₦504,000">₦50,000</span>
+            <span class="text-textColor-muted pricing-period">/month</span>
+          </div>
+          <Button variant="primary" class="w-full mb-8 pricing-cta">Start Pro Free Trial</Button>
+          <ul class="space-y-4 text-textColor-body flex-grow">
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Up to 60 rooms</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Integrated Restaurant POS</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Full Inventory Tracking</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Priority 24/7 support</li>
+          </ul>
+        </div>
+
+        <!-- Enterprise Plan -->
+        <div class="p-8 rounded-3xl border border-border-strong bg-surface-card flex flex-col hover:border-brand-300 transition-colors">
+          <h3>Enterprise</h3>
+          <p>For multi-property groups.</p>
+          <div class="mb-8">
+            <span class="text-4xl font-bold text-textColor-heading pricing-amount" data-monthly="₦100,000" data-yearly="₦1,008,000">₦100,000</span>
+            <span class="text-textColor-muted pricing-period">/month</span>
+          </div>
+          <Button variant="ghost" class="w-full mb-8 pricing-cta">Contact Sales</Button>
+          <ul class="space-y-4 text-textColor-body flex-grow">
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Unlimited rooms</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Multi-property management</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Custom integrations</li>
+            <li class="flex items-center gap-2"><svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>Dedicated account manager</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- FAQ & CTA Sections -->
+    <section class="py-24 bg-surface-inset border-t border-border-subtle">
+      <div class="container-custom mb-32 max-w-4xl mx-auto">
+        <h2 class="text-center">Frequently asked questions</h2>
+        <FAQ client:load />
+      </div>
+
+      <div class="container-custom">
+        <div class="rounded-3xl bg-brand-500 text-white p-12 text-center shadow-xl max-w-4xl mx-auto">
+          <h2>Stop managing chaos. Start managing a hotel.</h2>
+          <p class="text-brand-50 max-w-2xl mx-auto">Sign up for a free 14-day trial today. No credit card required. Full access to all Pro features.</p>
+          <div class="flex flex-wrap justify-center gap-4">
+            <Button variant="ghost" class="bg-white text-brand-600 hover:bg-brand-50 border-none pricing-cta">Start Free Trial</Button>
+            <Button variant="ghost" class="text-white border-white/30 hover:bg-white/10 hover:border-white pricing-cta">Book a demo</Button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  
+  <Footer />
+
+  <!-- Coming Soon Modal -->
+  <div id="coming-soon-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="modal-backdrop"></div>
+    <div class="relative bg-surface-card rounded-3xl border border-border-strong shadow-2xl p-8 md:p-10 max-w-md w-[90%] mx-auto text-center animate-[scaleIn_0.2s_ease-out]">
+      <div class="text-5xl mb-4">🚀</div>
+      <h3 class="text-xl font-bold text-textColor-heading mb-2">Coming Soon!</h3>
+      <p class="text-textColor-body text-base mb-6">
+        We're putting the finishing touches on our plans. Contact our sales team for early access and special launch pricing.
+      </p>
+      <a href="/contact" class="inline-flex items-center justify-center w-full bg-brand-500 text-white font-medium px-6 py-3 rounded-xl hover:bg-brand-600 transition-colors">
+        Contact Sales for Early Access
+      </a>
+      <button id="modal-close" class="mt-4 text-sm text-textColor-muted hover:text-textColor-heading transition-colors">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <style>
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+
+  <script>
+    const monthlyBtn = document.getElementById('toggle-monthly');
+    const yearlyBtn = document.getElementById('toggle-yearly');
+    const amounts = document.querySelectorAll('.pricing-amount');
+    const periods = document.querySelectorAll('.pricing-period');
+
+    monthlyBtn?.addEventListener('click', () => {
+      monthlyBtn.classList.add('bg-white', 'shadow', 'text-textColor-heading');
+      monthlyBtn.classList.remove('text-textColor-muted');
+      yearlyBtn.classList.remove('bg-white', 'shadow', 'text-textColor-heading');
+      yearlyBtn.classList.add('text-textColor-muted');
+
+      amounts.forEach(el => el.textContent = el.getAttribute('data-monthly'));
+      periods.forEach(el => el.textContent = '/month');
+    });
+
+    yearlyBtn?.addEventListener('click', () => {
+      yearlyBtn.classList.add('bg-white', 'shadow', 'text-textColor-heading');
+      yearlyBtn.classList.remove('text-textColor-muted');
+      monthlyBtn.classList.remove('bg-white', 'shadow', 'text-textColor-heading');
+      monthlyBtn.classList.add('text-textColor-muted');
+
+      amounts.forEach(el => el.textContent = el.getAttribute('data-yearly'));
+      periods.forEach(el => el.textContent = '/year');
+    });
+
+    // Coming Soon modal
+    const modal = document.getElementById('coming-soon-modal');
+    const backdrop = document.getElementById('modal-backdrop');
+    const closeBtn = document.getElementById('modal-close');
+
+    function openModal() {
+      modal?.classList.remove('hidden');
+      modal?.classList.add('flex');
+    }
+    function closeModal() {
+      modal?.classList.add('hidden');
+      modal?.classList.remove('flex');
+    }
+
+    // Attach to all pricing card buttons and CTA buttons
+    document.querySelectorAll('.pricing-cta').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal();
+      });
+    });
+
+    backdrop?.addEventListener('click', closeModal);
+    closeBtn?.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</Layout>

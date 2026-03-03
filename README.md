@@ -9,6 +9,7 @@ Hosila/
 ├── Hosila-frontend/   → React + Vite (deployed on Vercel)
 ├── Hosila-backend/    → FastAPI (deployed on Render)
 │   └── supabase/      → Database migrations
+├── Hosila-landing/    → Astro marketing website (hosila.com)
 ```
 
 ## Stack

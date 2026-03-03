@@ -1,0 +1,14 @@
+﻿[2m18:27:08[22m [34m[content][39m Syncing content
+[2m18:27:08[22m [34m[content][39m Synced content
+[2m18:27:08[22m [34m[types][39m Generated [2m1.08s[22m
+[2m18:27:08[22m [34m[check][39m Getting diagnostics for Astro files in C:\Hosila\website...
+[96msrc/components/react/FAQ.tsx[0m:[93m1[0m:[93m8[0m - [93mwarning[0m[90m ts(6133): [0m'React' is declared but its value is never read.
+
+[7m1[0m import React, { useState } from 'react';
+[7m [0m [93m       ~~~~~[0m
+
+Result (19 files): 
+- 0 errors
+- 0 warnings
+- 1 hint
+

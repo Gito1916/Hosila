@@ -399,4 +399,10 @@ export const emailApi = {
         apiRequest<{ message: string; status: string }>(`/api/v1/email/send/checkout/${bookingId}`, {
             method: 'POST',
         }),
+
+    /** Trigger onboarding welcome email */
+    sendWelcomeEmail: () =>
+        apiRequest<{ message: string; status: string }>('/api/v1/email/send/welcome', {
+            method: 'POST',
+        }),
 };
