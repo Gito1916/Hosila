@@ -268,7 +268,7 @@ export interface Reservation {
     id: string;
     hotel_id: string;
     guest_id: string;
-    room_id: string;
+    room_id: string | null; // null when imported without available room
     check_in_date: Date;
     check_out_date: Date;
     nights: number;
@@ -277,6 +277,11 @@ export interface Reservation {
     status: ReservationStatus;
     source: ReservationSource;
     notes?: string;
+    // Needs-attention tracking (email imports)
+    needs_attention?: boolean;
+    attention_reason?: string; // 'NO_AVAILABILITY' | 'ROOM_TYPE_FULL' | 'PARSE_PARTIAL'
+    source_email_id?: string; // Gmail message ID
+    requested_room_type?: string;
     // Refund tracking
     refund_status?: 'none' | 'full' | 'partial';
     refund_amount?: number;

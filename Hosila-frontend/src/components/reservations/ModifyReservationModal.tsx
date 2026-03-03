@@ -18,7 +18,7 @@ export function ModifyReservationModal({ reservation, onClose, onSuccess }: Modi
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [checkInDate, setCheckInDate] = useState(format(new Date(reservation.check_in_date), 'yyyy-MM-dd'));
     const [checkOutDate, setCheckOutDate] = useState(format(new Date(reservation.check_out_date), 'yyyy-MM-dd'));
-    const [selectedRoomId, setSelectedRoomId] = useState(reservation.room_id);
+    const [selectedRoomId, setSelectedRoomId] = useState(reservation.room_id || '');
     const [error, setError] = useState<string | null>(null);
     const [conflicts, setConflicts] = useState<string[]>([]);
     const [isChecking, setIsChecking] = useState(false);
@@ -41,6 +41,11 @@ export function ModifyReservationModal({ reservation, onClose, onSuccess }: Modi
 
             setIsChecking(true);
             try {
+                if (!selectedRoomId) {
+                    setConflicts([]);
+                    setIsChecking(false);
+                    return;
+                }
                 const conflictingReservations = await checkConflicts(
                     selectedRoomId,
                     new Date(checkInDate),
@@ -67,7 +72,7 @@ export function ModifyReservationModal({ reservation, onClose, onSuccess }: Modi
     const hasChanges =
         checkInDate !== format(new Date(reservation.check_in_date), 'yyyy-MM-dd') ||
         checkOutDate !== format(new Date(reservation.check_out_date), 'yyyy-MM-dd') ||
-        selectedRoomId !== reservation.room_id;
+        selectedRoomId !== (reservation.room_id || '');
 
     const handleSave = async () => {
         if (!isValidDates) {
@@ -92,7 +97,7 @@ export function ModifyReservationModal({ reservation, onClose, onSuccess }: Modi
             await updateReservation(
                 reservation.id,
                 {
-                    roomId: selectedRoomId !== reservation.room_id ? selectedRoomId : undefined,
+                    roomId: selectedRoomId !== (reservation.room_id || '') ? selectedRoomId : undefined,
                     checkInDate: checkInDate !== format(new Date(reservation.check_in_date), 'yyyy-MM-dd')
                         ? new Date(checkInDate) : undefined,
                     checkOutDate: checkOutDate !== format(new Date(reservation.check_out_date), 'yyyy-MM-dd')
@@ -139,7 +144,14 @@ export function ModifyReservationModal({ reservation, onClose, onSuccess }: Modi
                 <div className="p-4 space-y-4">
                     {/* Current Info */}
                     <div className="bg-surface-raised/50 rounded-lg p-3 text-sm">
-                        <p className="text-muted">Current: {currentRoom?.room_number} • {format(new Date(reservation.check_in_date), 'MMM d')} - {format(new Date(reservation.check_out_date), 'MMM d, yyyy')}</p>
+                        <p className="text-muted">
+                            Current: {currentRoom ? `${currentRoom.room_number}` : <span className="text-amber-400 font-medium">No room assigned</span>} • {format(new Date(reservation.check_in_date), 'MMM d')} - {format(new Date(reservation.check_out_date), 'MMM d, yyyy')}
+                        </p>
+                        {reservation.needs_attention && (
+                            <p className="text-amber-400 text-xs mt-1 flex items-center gap-1">
+                                <AlertCircle size={12} /> This reservation needs a room assignment
+                            </p>
+                        )}
                     </div>
 
                     {error && (
@@ -192,8 +204,11 @@ export function ModifyReservationModal({ reservation, onClose, onSuccess }: Modi
                         <select
                             value={selectedRoomId}
                             onChange={(e) => setSelectedRoomId(e.target.value)}
-                            className="input"
+                            className={`input ${!reservation.room_id ? 'border-amber-500 ring-1 ring-amber-500/30' : ''}`}
                         >
+                            {!reservation.room_id && (
+                                <option value="" disabled>— Select a room —</option>
+                            )}
                             {availableRooms.map((room) => (
                                 <option key={room.id} value={room.id}>
                                     Room {room.room_number} - {room.room_type}

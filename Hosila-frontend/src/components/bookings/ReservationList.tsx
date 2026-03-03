@@ -40,7 +40,7 @@ export function ReservationList({ onCheckIn: _onCheckIn }: ReservationListProps)
                 .map(res => ({
                     ...res,
                     guestName: guests.find(g => g.id === res.guest_id)?.name ?? 'Unknown',
-                    roomNumber: rooms.find(r => r.id === res.room_id)?.room_number ?? '?',
+                    roomNumber: res.room_id ? (rooms.find(r => r.id === res.room_id)?.room_number ?? '?') : 'Unassigned',
                 }))
                 .sort((a, b) => new Date(a.check_in_date).getTime() - new Date(b.check_in_date).getTime());
         }
@@ -82,6 +82,12 @@ export function ReservationList({ onCheckIn: _onCheckIn }: ReservationListProps)
         try {
             // Get the guest and room
             const guest = await (async () => { const sb = requireSupabase(); const { data } = await sb.from('guests').select('*').eq('id', reservation.guest_id).single(); return data; })();
+
+            if (!reservation.room_id) {
+                toast.warn('Cannot check in', 'This reservation has no room assigned. Please assign a room first using the edit button.');
+                return;
+            }
+
             const room = await (async () => { const sb = requireSupabase(); const { data } = await sb.from('rooms').select('*').eq('id', reservation.room_id).single(); return data; })();
 
             if (!room) {
@@ -181,6 +187,8 @@ export function ReservationList({ onCheckIn: _onCheckIn }: ReservationListProps)
                 {filteredReservations.map(reservation => {
                     const arrivalStatus = getArrivalStatus(new Date(reservation.check_in_date));
                     const canCheckIn = reservation.status === 'confirmed' &&
+                        !reservation.needs_attention &&
+                        !!reservation.room_id &&
                         (isToday(new Date(reservation.check_in_date)) ||
                             isPast(new Date(reservation.check_in_date)));
 

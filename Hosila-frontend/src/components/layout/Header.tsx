@@ -3,6 +3,7 @@ import { useThemeStore } from '@/stores/themeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { NotificationPanel } from './NotificationPanel';
+import { EmailInboxPanel } from './EmailInboxPanel';
 import { format } from 'date-fns';
 import { Menu, Sun, Moon, RefreshCw } from 'lucide-react';
 
@@ -65,6 +66,9 @@ export function Header({ onMenuClick }: HeaderProps) {
                 >
                     {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
+
+                {/* Email Inbox */}
+                <EmailInboxPanel />
 
                 {/* Notifications */}
                 <NotificationPanel />

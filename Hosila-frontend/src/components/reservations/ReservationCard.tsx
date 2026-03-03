@@ -10,6 +10,7 @@ import {
     CheckCircle,
     XCircle,
     AlertCircle,
+    AlertTriangle,
     ChevronRight,
     LogIn,
     Edit3,
@@ -102,10 +103,24 @@ export function ReservationCard({ reservation, onClick, onCheckIn, onEdit, isPro
                 {/* Room */}
                 <div className="flex items-center gap-2 text-muted">
                     <MapPin size={14} className="text-muted" />
-                    <span>Room {room?.room_number ?? '...'}</span>
-                    <span className="text-muted">•</span>
-                    <span className="text-muted">{room?.room_type ?? '...'}</span>
+                    {reservation.room_id ? (
+                        <>
+                            <span>Room {room?.room_number ?? '...'}</span>
+                            <span className="text-muted">•</span>
+                            <span className="text-muted">{room?.room_type ?? '...'}</span>
+                        </>
+                    ) : (
+                        <span className="text-amber-400 font-medium">Unassigned — needs room</span>
+                    )}
                 </div>
+
+                {/* Needs Attention badge */}
+                {reservation.needs_attention && (
+                    <div className="flex items-center gap-1.5 text-amber-400">
+                        <AlertTriangle size={14} />
+                        <span className="text-xs font-medium">Needs attention — imported without available room</span>
+                    </div>
+                )}
 
                 {/* Dates */}
                 <div className="flex items-center gap-2 text-muted">
@@ -151,7 +166,7 @@ export function ReservationCard({ reservation, onClick, onCheckIn, onEdit, isPro
                         </button>
                     )}
 
-                    {reservation.status === 'confirmed' && (isToday(checkInDate) || isPast(checkInDate)) && (
+                    {reservation.status === 'confirmed' && !reservation.needs_attention && (isToday(checkInDate) || isPast(checkInDate)) && (
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();

@@ -107,7 +107,7 @@ export async function createReservation(data: {
     guestIdNumber?: string;
     vehicleNumber?: string;
     vehicleModel?: string;
-    roomId: string;
+    roomId?: string | null; // null for unassigned imports
     checkInDate: Date;
     checkOutDate: Date;
     source: ReservationSource;
@@ -115,16 +115,24 @@ export async function createReservation(data: {
     notes?: string;
     createdBy: string;
     existingGuestId?: string;
+    // Needs-attention fields (email imports)
+    needsAttention?: boolean;
+    attentionReason?: string;
+    sourceEmailId?: string;
+    requestedRoomType?: string;
+    totalAmountOverride?: number; // Use when no room (from parsed email data)
 }): Promise<Reservation> {
     const sb = requireSupabase();
     const hotelId = await getHotelId();
     const now = new Date();
     const nowIso = now.toISOString();
 
-    // Check for conflicts
-    const conflicts = await checkConflicts(data.roomId, data.checkInDate, data.checkOutDate);
-    if (conflicts.length > 0) {
-        throw new Error('Room is not available for the selected dates');
+    // Check for conflicts (only if a room is assigned)
+    if (data.roomId) {
+        const conflicts = await checkConflicts(data.roomId, data.checkInDate, data.checkOutDate);
+        if (conflicts.length > 0) {
+            throw new Error('Room is not available for the selected dates');
+        }
     }
 
     // Get or create guest
@@ -153,26 +161,38 @@ export async function createReservation(data: {
         guestId = guest.id;
     }
 
-    // Get room to calculate rate
-    const { data: room, error: roomErr } = await sb.from('rooms').select('*').eq('id', data.roomId).single();
-    if (roomErr || !room) throw new Error('Room not found');
-
     const nights = differenceInDays(data.checkOutDate, data.checkInDate);
-    const totalAmount = room.night_rate * nights;
+
+    // Calculate total amount: use room rate if assigned, override if provided, else 0
+    let totalAmount = 0;
+    if (data.roomId) {
+        const { data: room, error: roomErr } = await sb.from('rooms').select('*').eq('id', data.roomId).single();
+        if (roomErr || !room) throw new Error('Room not found');
+        totalAmount = room.night_rate * nights;
+    } else if (data.totalAmountOverride !== undefined) {
+        totalAmount = data.totalAmountOverride;
+    }
+
+    // Determine status: unassigned imports are pending, others are confirmed
+    const status = (data.needsAttention && !data.roomId) ? 'pending' : 'confirmed';
 
     const reservation = {
         id: uuidv4(),
         hotel_id: hotelId,
         guest_id: guestId,
-        room_id: data.roomId,
+        room_id: data.roomId || null,
         check_in_date: data.checkInDate.toISOString(),
         check_out_date: data.checkOutDate.toISOString(),
         nights,
         total_amount: totalAmount,
         deposit_paid: data.depositPaid,
-        status: 'confirmed',
+        status,
         source: data.source,
         notes: data.notes,
+        needs_attention: data.needsAttention || false,
+        attention_reason: data.attentionReason || null,
+        source_email_id: data.sourceEmailId || null,
+        requested_room_type: data.requestedRoomType || null,
         created_at: nowIso,
         updated_at: nowIso,
     };
@@ -190,23 +210,27 @@ export async function createReservation(data: {
         entity_id: reservation.id,
         details: {
             guest_name: data.guestName,
-            room_id: data.roomId,
+            room_id: data.roomId || null,
             check_in: data.checkInDate.toISOString(),
             check_out: data.checkOutDate.toISOString(),
+            needs_attention: data.needsAttention || false,
         },
         timestamp: nowIso,
     });
 
-    // Auto-send reservation confirmation email (non-blocking, only if guest emails feature is enabled)
-    (async () => {
-        try {
-            const sb2 = requireSupabase();
-            const { data: h } = await sb2.from('hotels').select('settings').eq('id', hotelId).single();
-            if (h?.settings?.guest_emails_enabled) {
-                emailApi.sendReservationEmail(reservation.id).catch(() => { });
-            }
-        } catch { /* skip silently */ }
-    })();
+    // Auto-send reservation confirmation email ONLY if room is assigned
+    // (no point emailing guest about an unassigned reservation)
+    if (data.roomId && !data.needsAttention) {
+        (async () => {
+            try {
+                const sb2 = requireSupabase();
+                const { data: h } = await sb2.from('hotels').select('settings').eq('id', hotelId).single();
+                if (h?.settings?.guest_emails_enabled) {
+                    emailApi.sendReservationEmail(reservation.id).catch(() => { });
+                }
+            } catch { /* skip silently */ }
+        })();
+    }
 
     return reservation as unknown as Reservation;
 }
@@ -228,15 +252,17 @@ export async function updateReservation(
     const reservation = await getReservationById(id);
     if (!reservation) throw new Error('Reservation not found');
 
-    // If changing room or dates, check for conflicts
+    // If changing room or dates, check for conflicts (only if room is assigned)
     if (data.roomId || data.checkInDate || data.checkOutDate) {
         const roomId = data.roomId ?? reservation.room_id;
-        const checkIn = data.checkInDate ?? new Date(reservation.check_in_date);
-        const checkOut = data.checkOutDate ?? new Date(reservation.check_out_date);
+        if (roomId) {
+            const checkIn = data.checkInDate ?? new Date(reservation.check_in_date);
+            const checkOut = data.checkOutDate ?? new Date(reservation.check_out_date);
 
-        const conflicts = await checkConflicts(roomId, checkIn, checkOut, id);
-        if (conflicts.length > 0) {
-            throw new Error('Room is not available for the selected dates');
+            const conflicts = await checkConflicts(roomId, checkIn, checkOut, id);
+            if (conflicts.length > 0) {
+                throw new Error('Room is not available for the selected dates');
+            }
         }
     }
 
@@ -245,7 +271,18 @@ export async function updateReservation(
         updated_at: new Date().toISOString(),
     };
 
-    if (data.roomId) updates.room_id = data.roomId;
+    if (data.roomId) {
+        updates.room_id = data.roomId;
+        // If this reservation previously had no room (needs_attention), clear the flag
+        // and promote to confirmed
+        if (reservation.needs_attention && !reservation.room_id) {
+            updates.needs_attention = false;
+            updates.attention_reason = null;
+            if (reservation.status === 'pending') {
+                updates.status = 'confirmed';
+            }
+        }
+    }
     if (data.checkInDate) {
         updates.check_in_date = data.checkInDate.toISOString();
         const checkOut = data.checkOutDate ?? new Date(reservation.check_out_date);

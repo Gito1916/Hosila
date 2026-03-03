@@ -80,6 +80,12 @@ export function ReservationsList() {
         try {
             // Fetch guest and room
             const guest = await (async () => { const sb = requireSupabase(); const { data } = await sb.from('guests').select('*').eq('id', reservation.guest_id).single(); return data; })();
+
+            if (!reservation.room_id) {
+                toast.warn('Cannot check in', 'This reservation has no room assigned. Please assign a room first.');
+                return;
+            }
+
             const room = await (async () => { const sb = requireSupabase(); const { data } = await sb.from('rooms').select('*').eq('id', reservation.room_id).single(); return data; })();
 
             if (!room) throw new Error('Room not found');
