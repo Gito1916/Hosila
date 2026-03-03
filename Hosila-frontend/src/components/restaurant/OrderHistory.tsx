@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { RestaurantReceiptView } from './RestaurantReceipt';
-import { useHotel } from '@/hooks/useSupabaseData';
 import { requireSupabase, getHotelId } from '@/lib/api';
 
 interface OrderItem {
@@ -34,25 +33,24 @@ interface GroupedOrder {
     guestName: string | null;
     isWalkIn: boolean;
     paymentStatus?: 'paid' | 'partial' | 'unpaid';
+    scAmount: number;
+    vatAmount: number;
+    tdlAmount: number;
 }
 
 export function OrderHistory() {
     const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
     const [selectedReceipt, setSelectedReceipt] = useState<{
         items: OrderItem[];
-        totalInfo: { subtotal: number; tax: number; total: number };
+        totalInfo: { subtotal: number; scAmount: number; vatAmount: number; tdlAmount: number; total: number };
         paymentInfo?: { method: string; amount: number; date: Date };
         customerInfo?: string;
         receiptNumber?: string;
     } | null>(null);
 
-    // Get hotel for tax rate
-    const { data: hotel } = useHotel();
-    const taxRate = hotel?.settings?.services_tax_rate ?? hotel?.settings?.tax_rate ?? 0;
-
     // Get all orders grouped by order_number — show ALL statuses
     const { data: groupedOrders } = useQuery({
-        queryKey: ['groupedOrders', taxRate], queryFn: async () => {
+        queryKey: ['groupedOrders'], queryFn: async () => {
             const sevenDaysAgo = new Date();
             sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -151,18 +149,29 @@ export function OrderHistory() {
                 else if (statuses.every(s => s === 'delivered' || s === 'cancelled')) overallStatus = 'delivered';
 
                 const rawSubtotal = orders.reduce((sum, o) => sum + o.total_price, 0);
-                const orderTax = Math.round(rawSubtotal * (taxRate / 100));
+
+                // Read actual tax breakdown from charges table
+                const orderCharge = allCharges.find(
+                    c => c.reference_id === orderNumber && c.status !== 'cancelled'
+                );
+                const orderSC = orderCharge?.service_charge_amount ?? 0;
+                const orderVAT = orderCharge?.vat_amount_v2 ?? 0;
+                const orderTDL = orderCharge?.tdl_amount ?? 0;
+                const orderTotalTax = orderSC + orderVAT + orderTDL;
 
                 enrichedGroups.push({
                     orderNumber,
                     orderedAt: firstOrder.ordered_at,
                     items,
-                    totalAmount: rawSubtotal + orderTax,
+                    totalAmount: rawSubtotal + orderTotalTax,
                     status: overallStatus,
                     roomNumber,
                     guestName,
                     isWalkIn,
                     paymentStatus,
+                    scAmount: orderSC,
+                    vatAmount: orderVAT,
+                    tdlAmount: orderTDL,
                 });
             }
 
@@ -183,17 +192,21 @@ export function OrderHistory() {
     };
 
     const handlePrintReceipt = (order: GroupedOrder) => {
-        // totalAmount already includes tax, derive subtotal back for receipt breakdown
-        const total = order.totalAmount;
-        const subtotal = Math.round(total / (1 + taxRate / 100));
-        const tax = total - subtotal;
+        // Use actual tax amounts from the charge record
+        const rawSubtotal = order.items.reduce((sum, item) => sum + item.total, 0);
 
         setSelectedReceipt({
             items: order.items,
-            totalInfo: { subtotal, tax, total },
+            totalInfo: {
+                subtotal: rawSubtotal,
+                scAmount: order.scAmount,
+                vatAmount: order.vatAmount,
+                tdlAmount: order.tdlAmount,
+                total: order.totalAmount,
+            },
             paymentInfo: {
                 method: order.isWalkIn ? 'Cash/POS' : 'Room Tab',
-                amount: total,
+                amount: order.totalAmount,
                 date: order.orderedAt,
             },
             customerInfo: order.isWalkIn

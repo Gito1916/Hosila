@@ -128,9 +128,10 @@ const THERMAL_PRINT_CSS = `
 
 interface RestaurantInvoiceProps {
     cart: CartItem[];
-    taxRate: number;
     subtotal: number;
-    taxAmount: number;
+    scAmount: number;
+    vatAmount: number;
+    tdlAmount: number;
     total: number;
     mode: 'room_tab' | 'walk_in';
     customerName?: string;
@@ -141,9 +142,10 @@ interface RestaurantInvoiceProps {
 
 export function RestaurantInvoiceView({
     cart,
-    taxRate,
     subtotal,
-    taxAmount,
+    scAmount,
+    vatAmount,
+    tdlAmount,
     total,
     mode,
     customerName,
@@ -290,10 +292,24 @@ export function RestaurantInvoiceView({
                                 <span>Subtotal</span>
                                 <span>{subtotal.toLocaleString()}</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span>VAT ({taxRate}%)</span>
-                                <span>{taxAmount.toLocaleString()}</span>
-                            </div>
+                            {scAmount > 0 && (
+                                <div className="flex justify-between">
+                                    <span>Service Charge</span>
+                                    <span>{scAmount.toLocaleString()}</span>
+                                </div>
+                            )}
+                            {vatAmount > 0 && (
+                                <div className="flex justify-between">
+                                    <span>VAT</span>
+                                    <span>{vatAmount.toLocaleString()}</span>
+                                </div>
+                            )}
+                            {tdlAmount > 0 && (
+                                <div className="flex justify-between">
+                                    <span>TDL</span>
+                                    <span>{tdlAmount.toLocaleString()}</span>
+                                </div>
+                            )}
                         </div>
 
                         {/* Divider */}
@@ -336,7 +352,9 @@ interface RestaurantReceiptProps {
     }[];
     totalInfo: {
         subtotal: number;
-        tax: number;
+        scAmount: number;
+        vatAmount: number;
+        tdlAmount: number;
         total: number;
     };
     paymentInfo?: {
@@ -495,10 +513,22 @@ export function RestaurantReceiptView({
                                 <span>Subtotal</span>
                                 <span>{totalInfo.subtotal.toLocaleString()}</span>
                             </div>
-                            {totalInfo.tax > 0 && (
+                            {totalInfo.scAmount > 0 && (
                                 <div className="flex justify-between">
-                                    <span>VAT (7.5%)</span>
-                                    <span>{totalInfo.tax.toLocaleString()}</span>
+                                    <span>Service Charge</span>
+                                    <span>{totalInfo.scAmount.toLocaleString()}</span>
+                                </div>
+                            )}
+                            {totalInfo.vatAmount > 0 && (
+                                <div className="flex justify-between">
+                                    <span>VAT</span>
+                                    <span>{totalInfo.vatAmount.toLocaleString()}</span>
+                                </div>
+                            )}
+                            {totalInfo.tdlAmount > 0 && (
+                                <div className="flex justify-between">
+                                    <span>TDL</span>
+                                    <span>{totalInfo.tdlAmount.toLocaleString()}</span>
                                 </div>
                             )}
                         </div>

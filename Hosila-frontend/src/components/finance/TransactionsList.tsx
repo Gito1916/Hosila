@@ -117,7 +117,7 @@ export function TransactionsList({ dateFilter = 'daily' }: TransactionsListProps
             netRevenue: charge.net_revenue,
             taxAmount: charge.tax_amount,
             scAmount: charge.service_charge_amount ?? 0,
-            vatAmount: charge.tax_amount ?? 0,
+            vatAmount: charge.vat_amount_v2 ?? 0,
             tdlAmount: charge.tdl_amount ?? 0,
         });
     }

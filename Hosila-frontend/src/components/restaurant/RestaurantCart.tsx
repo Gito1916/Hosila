@@ -67,7 +67,7 @@ export function RestaurantCart({
     const [showInvoice, setShowInvoice] = useState(false);
     const [receiptData, setReceiptData] = useState<{
         items: { name: string; quantity: number; price: number; total: number }[];
-        totalInfo: { subtotal: number; tax: number; total: number };
+        totalInfo: { subtotal: number; scAmount: number; vatAmount: number; tdlAmount: number; total: number };
         paymentInfo?: { method: string; amount: number; date: Date };
         customerInfo?: string;
         receiptNumber?: string;
@@ -147,7 +147,7 @@ export function RestaurantCart({
         fetchTaxBreakdown(subtotal);
     }, [subtotal, fetchTaxBreakdown]);
 
-    const taxAmount = scAmount + vatAmount + tdlAmount;
+
 
     const handleCheckout = async () => {
         if (!user) return;
@@ -392,7 +392,9 @@ export function RestaurantCart({
                     })),
                     totalInfo: {
                         subtotal,
-                        tax: taxAmount,
+                        scAmount,
+                        vatAmount,
+                        tdlAmount,
                         total: cartTotal
                     },
                     paymentInfo: {
@@ -444,9 +446,10 @@ export function RestaurantCart({
         return (
             <RestaurantInvoiceView
                 cart={cart}
-                taxRate={fallbackTaxRate}
                 subtotal={subtotal}
-                taxAmount={taxAmount}
+                scAmount={scAmount}
+                vatAmount={vatAmount}
+                tdlAmount={tdlAmount}
                 total={cartTotal}
                 mode={mode}
                 customerName={customerName}
