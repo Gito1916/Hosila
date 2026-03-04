@@ -48,7 +48,7 @@ export function ReservationDetailsModal({ reservation, onClose }: ReservationDet
     const canMarkNoShow = reservation.status === 'confirmed' && isPast(checkInDate) && !isToday(checkInDate);
 
     const handleCheckIn = async () => {
-        if (!user || !room) return;
+        if (!user || !room || !reservation.room_id) return;
 
         setIsLoading(true);
         try {

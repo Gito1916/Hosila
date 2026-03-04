@@ -128,6 +128,7 @@ export function BookingsPage() {
                     activeTab === 'reservations' && (
                         <ReservationList
                             onCheckIn={(reservation: Reservation) => {
+                                if (!reservation.room_id) return;
                                 // Get the room and open check-in modal
                                 fetchById<Room>('rooms', reservation.room_id).then(room => {
                                     if (room) {

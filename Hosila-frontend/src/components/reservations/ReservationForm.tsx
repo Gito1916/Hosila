@@ -84,7 +84,7 @@ export function ReservationForm({ reservation, onClose, onSuccess, prefilledGues
             setValue('guestName', existingGuest.name);
             setValue('guestPhone', existingGuest.phone ?? '');
             setValue('guestEmail', existingGuest.email ?? '');
-            setValue('roomId', reservation.room_id);
+            setValue('roomId', reservation.room_id ?? '');
             setValue('checkInDate', format(new Date(reservation.check_in_date), 'yyyy-MM-dd'));
             setValue('checkOutDate', format(new Date(reservation.check_out_date), 'yyyy-MM-dd'));
             setValue('source', reservation.source);

@@ -8,7 +8,7 @@ import {
     isGISLoaded, type GmailTokenInfo
 } from '@/lib/gmail';
 import {
-    scanForNewReservations, getLastScanDate, getImportLog,
+    scanForNewReservations, getLastScanDate, getImportLogs,
     type ImportSummary
 } from '@/services/emailImportService';
 
@@ -19,10 +19,15 @@ export function EmailImportPanel() {
     const [isScanning, setIsScanning] = useState(false);
     const [error, setError] = useState('');
     const [lastScan, setLastScan] = useState(getLastScanDate());
-    const [importLog, setImportLog] = useState<ImportSummary[]>(getImportLog());
+    const [importLog, setImportLog] = useState<ImportSummary[]>([]);
     const [lastResult, setLastResult] = useState<ImportSummary | null>(null);
     const [gisLoaded, setGisLoaded] = useState(isGISLoaded());
     const autoScanRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Load import logs on mount
+    useEffect(() => {
+        getImportLogs().then(logs => setImportLog(logs as any));
+    }, []);
     const [autoScanEnabled, setAutoScanEnabled] = useState(
         localStorage.getItem('hotelflow_auto_scan') === 'true'
     );
@@ -89,7 +94,7 @@ export function EmailImportPanel() {
             const result = await scanForNewReservations();
             setLastResult(result);
             setLastScan(new Date());
-            setImportLog(getImportLog());
+            setImportLog(await getImportLogs() as any);
         } catch (err: any) {
             setError(err.message || 'Scan failed');
             if (err.message?.includes('expired') || err.message?.includes('Not connected')) {
