@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { NotificationPanel } from './NotificationPanel';
 import { EmailInboxPanel } from './EmailInboxPanel';
+import { useAvailabilityNotifier } from '@/hooks/useAvailabilityNotifier';
 import { format } from 'date-fns';
 import { Menu, Sun, Moon, RefreshCw } from 'lucide-react';
 
@@ -15,6 +16,9 @@ interface HeaderProps {
 export function Header({ onMenuClick }: HeaderProps) {
     const { theme, toggleTheme } = useThemeStore();
     const hotelName = useAuthStore((state) => state.activeHotelName);
+
+    // Subscribe to availability check notifications via Supabase Realtime
+    useAvailabilityNotifier();
 
     const queryClient = useQueryClient();
     const [isRefreshing, setIsRefreshing] = useState(false);

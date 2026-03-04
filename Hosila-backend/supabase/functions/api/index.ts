@@ -165,7 +165,9 @@ async function handleAvailability(
     supabase: ReturnType<typeof createClient>,
     hotelId: string,
     checkIn: string,
-    checkOut: string
+    checkOut: string,
+    roomType?: string,
+    ipAddress?: string
 ) {
     if (!checkIn || !checkOut) {
         return error("check_in and check_out are required");
@@ -248,13 +250,60 @@ async function handleAvailability(
         (coDate.getTime() - ciDate.getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    return json({
+    // --- Room type filter handling ---
+    let requestedTypeAvailable = true;
+    let alternatives: { room_type: string; available: number; rate_from: number }[] | undefined;
+
+    if (roomType) {
+        // Check if the requested type has availability
+        const requestedTypeLower = roomType.toLowerCase();
+        const matchedType = Object.keys(byType).find(
+            (t) => t.toLowerCase() === requestedTypeLower || t.toLowerCase().includes(requestedTypeLower) || requestedTypeLower.includes(t.toLowerCase())
+        );
+
+        if (!matchedType || byType[matchedType].available === 0) {
+            requestedTypeAvailable = false;
+            // Build alternatives — other available room types
+            alternatives = Object.values(byType)
+                .filter((t) => t.available > 0)
+                .map((t) => ({
+                    room_type: t.room_type,
+                    available: t.available,
+                    rate_from: t.rate_from,
+                }));
+        }
+    }
+
+    // --- Log the availability check to DB (fire-and-forget) ---
+    supabase.from("availability_checks").insert({
+        hotel_id: hotelId,
+        check_in: checkIn,
+        check_out: checkOut,
+        room_type_requested: roomType || null,
+        rooms_found: available.length,
+        requested_type_available: requestedTypeAvailable,
+        alternatives_shown: alternatives !== undefined && alternatives.length > 0,
+        ip_address: ipAddress || null,
+    }).then(() => { }).catch((err) => console.warn("Failed to log availability check:", err));
+
+    // Build response
+    const response: Record<string, unknown> = {
         check_in: checkIn,
         check_out: checkOut,
         nights,
         total_available: available.length,
         availability: Object.values(byType),
-    });
+    };
+
+    if (roomType) {
+        response.requested_room_type = roomType;
+        response.requested_type_available = requestedTypeAvailable;
+        if (alternatives) {
+            response.alternatives = alternatives;
+        }
+    }
+
+    return json(response);
 }
 
 async function handleCreateReservation(
@@ -524,7 +573,9 @@ Deno.serve(async (req: Request) => {
                         supabase,
                         hotelId,
                         url.searchParams.get("check_in") || "",
-                        url.searchParams.get("check_out") || ""
+                        url.searchParams.get("check_out") || "",
+                        url.searchParams.get("room_type") || undefined,
+                        ip
                     );
 
                 case "reservation-status": {

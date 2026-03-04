@@ -36,10 +36,35 @@ const ATTENTION_REASONS: Record<string, { label: string; description: string; co
         description: 'All rooms are occupied for the requested dates. Assign a room or contact the guest to adjust dates.',
         color: 'text-amber-400',
     },
+    ROOM_TYPE_MISMATCH: {
+        label: 'Room Type Mismatch',
+        description: 'The requested room type did not match any hotel room types, or was assigned a different type.',
+        color: 'text-amber-400',
+    },
     ROOM_TYPE_FULL: {
         label: 'Room Type Full',
         description: 'The requested room type is fully booked. Another room type may be available.',
         color: 'text-amber-400',
+    },
+    MISSING_GUEST_NAME: {
+        label: 'Missing Guest Name',
+        description: 'The guest name could not be extracted from the email. Please review and update the reservation.',
+        color: 'text-orange-400',
+    },
+    MISSING_PRICING: {
+        label: 'Missing Pricing',
+        description: 'The total amount could not be extracted. The reservation has been created with a ₦0 total — please update.',
+        color: 'text-orange-400',
+    },
+    SUSPICIOUS_DATES: {
+        label: 'Suspicious Dates',
+        description: 'The check-in/check-out dates look incorrect (same day, or unusually long stay). Please verify.',
+        color: 'text-red-400',
+    },
+    MISSING_BOOKING_REF: {
+        label: 'Missing Booking Ref',
+        description: 'The OTA booking reference could not be extracted. This may affect deduplication.',
+        color: 'text-orange-400',
     },
     PARSE_PARTIAL: {
         label: 'Incomplete Data',
@@ -421,7 +446,9 @@ export function EmailInboxPanel() {
                                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white text-xs font-medium rounded-lg transition-colors"
                                                             >
                                                                 <UserPlus size={12} />
-                                                                Assign Room & Confirm
+                                                                {log.attention_reason === 'NO_AVAILABILITY' || log.attention_reason === 'ROOM_TYPE_FULL'
+                                                                    ? 'Assign Room & Confirm'
+                                                                    : 'Review Reservation'}
                                                             </button>
                                                             <button
                                                                 onClick={() => handleDismiss(log)}

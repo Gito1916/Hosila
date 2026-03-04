@@ -364,62 +364,170 @@ async function processEmail(message: GmailMessage): Promise<ImportResult> {
     }
 }
 
+// =========================================================================
+// Data Quality Validation
+// =========================================================================
+
+interface ValidationIssue {
+    code: string;
+    message: string;
+}
+
+/**
+ * Validate parsed reservation data for completeness and sanity.
+ * Returns an array of issues (empty = all good).
+ */
+function validateParsedData(parsed: ParsedReservation): ValidationIssue[] {
+    const issues: ValidationIssue[] = [];
+
+    // Missing or placeholder guest name
+    if (!parsed.guestName || parsed.guestName.trim().length < 2 || parsed.guestName.toLowerCase() === 'guest') {
+        issues.push({ code: 'MISSING_GUEST_NAME', message: 'Guest name could not be identified' });
+    }
+
+    // Missing pricing
+    if (parsed.totalAmount === undefined || parsed.totalAmount === null || parsed.totalAmount <= 0) {
+        issues.push({ code: 'MISSING_PRICING', message: 'Total amount could not be extracted from the email' });
+    }
+
+    // Suspicious dates
+    if (parsed.checkIn && parsed.checkOut) {
+        const nights = Math.round((parsed.checkOut.getTime() - parsed.checkIn.getTime()) / (1000 * 60 * 60 * 24));
+        if (nights <= 0) {
+            issues.push({ code: 'SUSPICIOUS_DATES', message: 'Check-out date is on or before check-in date' });
+        } else if (nights > 90) {
+            issues.push({ code: 'SUSPICIOUS_DATES', message: `Stay of ${nights} nights seems unusually long — please verify` });
+        }
+    }
+
+    // Missing booking reference
+    if (!parsed.bookingRef || parsed.bookingRef.trim().length === 0) {
+        issues.push({ code: 'MISSING_BOOKING_REF', message: 'Booking reference could not be extracted' });
+    }
+
+    return issues;
+}
+
+/**
+ * Check if the parsed room type matches any of the hotel's actual room types.
+ * Returns 'ROOM_TYPE_MISMATCH' issue if parsed type doesn't match, null otherwise.
+ */
+async function checkRoomTypeMismatch(
+    parsed: ParsedReservation,
+    assignedRoomId: string | null
+): Promise<ValidationIssue | null> {
+    if (!parsed.roomType) return null; // No room type parsed — can't compare
+
+    const sb = requireSupabase();
+    const hotelId = await getHotelId();
+
+    // Get all room types for this hotel
+    const { data: rooms } = await sb.from('rooms')
+        .select('room_type')
+        .eq('hotel_id', hotelId);
+
+    if (!rooms || rooms.length === 0) return null;
+
+    const hotelRoomTypes = [...new Set(rooms.map(r => r.room_type.toLowerCase()))];
+    const parsedTypeLower = parsed.roomType.toLowerCase();
+
+    // Check if any hotel room type matches (fuzzy)
+    const matched = hotelRoomTypes.some(t =>
+        t.includes(parsedTypeLower) || parsedTypeLower.includes(t)
+    );
+
+    if (!matched) {
+        return {
+            code: 'ROOM_TYPE_MISMATCH',
+            message: `Requested "${parsed.roomType}" doesn't match any hotel room types — assigned to best available`,
+        };
+    }
+
+    // If we matched a type but got assigned a different one, that's also a mismatch
+    if (assignedRoomId) {
+        const { data: assignedRoom } = await sb.from('rooms')
+            .select('room_type')
+            .eq('id', assignedRoomId)
+            .single();
+
+        if (assignedRoom) {
+            const assignedLower = assignedRoom.room_type.toLowerCase();
+            const typeMatch = assignedLower.includes(parsedTypeLower) || parsedTypeLower.includes(assignedLower);
+            if (!typeMatch) {
+                return {
+                    code: 'ROOM_TYPE_MISMATCH',
+                    message: `Requested "${parsed.roomType}" but assigned to "${assignedRoom.room_type}" — requested type was full`,
+                };
+            }
+        }
+    }
+
+    return null;
+}
+
+// =========================================================================
+// Full Import Pipeline
+// =========================================================================
+
 /**
  * Import a parsed reservation into the database.
  * If no room is available, creates the reservation anyway as "needs attention".
+ * If data quality issues are found, flags the reservation even with a room.
  */
 async function importParsedReservation(
     parsed: ParsedReservation,
     gmailMessageId: string
 ): Promise<{ reservationId: string; status: 'imported' | 'imported_needs_attention'; attentionReason?: string }> {
-    // Find an available room
+    // ── Step 1: Validate parsed data ────────────────────────────────
+    const dataIssues = validateParsedData(parsed);
+
+    // ── Step 2: Find an available room ──────────────────────────────
     const roomId = await findAvailableRoom(parsed);
 
-    if (!roomId) {
-        // No room available — create reservation as "needs attention" instead of throwing
-        const reservation = await createReservation({
-            guestName: parsed.guestName,
-            guestEmail: parsed.guestEmail,
-            guestPhone: parsed.guestPhone,
-            roomId: null,
-            checkInDate: parsed.checkIn,
-            checkOutDate: parsed.checkOut,
-            source: parsed.source,
-            depositPaid: 0,
-            notes: `⚠️ Imported from ${parsed.source} — needs room assignment\nRef: ${parsed.bookingRef}${parsed.roomType ? `\nRequested type: ${parsed.roomType}` : ''}${parsed.totalAmount ? `\nPrice: ${parsed.totalAmount}` : ''}`,
-            createdBy: 'email-import',
-            needsAttention: true,
-            attentionReason: 'NO_AVAILABILITY',
-            sourceEmailId: gmailMessageId,
-            requestedRoomType: parsed.roomType || undefined,
-            totalAmountOverride: parsed.totalAmount || 0,
-        });
+    // ── Step 3: Check room type mismatch ────────────────────────────
+    const typeMismatch = await checkRoomTypeMismatch(parsed, roomId).catch(() => null);
+    if (typeMismatch) dataIssues.push(typeMismatch);
 
-        return {
-            reservationId: reservation.id,
-            status: 'imported_needs_attention',
-            attentionReason: 'NO_AVAILABILITY',
-        };
-    }
+    // ── Step 4: Determine all attention reasons ─────────────────────
+    const allReasons: string[] = [];
+    if (!roomId) allReasons.push('NO_AVAILABILITY');
+    allReasons.push(...dataIssues.map(i => i.code));
 
-    // Room found — create fully assigned reservation
+    const needsAttention = allReasons.length > 0;
+    const primaryReason = allReasons[0] || undefined;
+    const issuesSummary = dataIssues.map(i => `• ${i.message}`).join('\n');
+
+    // ── Step 5: Build notes ─────────────────────────────────────────
+    const noteLines: string[] = [];
+    if (needsAttention) noteLines.push('⚠️ Needs manual review:');
+    if (!roomId) noteLines.push('• No room available — needs room assignment');
+    if (issuesSummary) noteLines.push(issuesSummary);
+    noteLines.push(`Imported from ${parsed.source} — Ref: ${parsed.bookingRef || 'unknown'}`);
+    if (parsed.roomType) noteLines.push(`Requested type: ${parsed.roomType}`);
+    if (parsed.totalAmount) noteLines.push(`Price: ${parsed.totalAmount}`);
+
+    // ── Step 6: Create reservation ──────────────────────────────────
     const reservation = await createReservation({
-        guestName: parsed.guestName,
+        guestName: parsed.guestName || 'Unknown Guest',
         guestEmail: parsed.guestEmail,
         guestPhone: parsed.guestPhone,
-        roomId,
+        roomId: roomId ?? null,
         checkInDate: parsed.checkIn,
         checkOutDate: parsed.checkOut,
         source: parsed.source,
         depositPaid: 0,
-        notes: parsed.notes || `Imported from ${parsed.source} - Ref: ${parsed.bookingRef}`,
+        notes: noteLines.join('\n'),
         createdBy: 'email-import',
+        needsAttention: needsAttention || undefined,
+        attentionReason: primaryReason,
         sourceEmailId: gmailMessageId,
         requestedRoomType: parsed.roomType || undefined,
+        totalAmountOverride: (!roomId && parsed.totalAmount) ? parsed.totalAmount : undefined,
     });
 
     return {
         reservationId: reservation.id,
-        status: 'imported',
+        status: needsAttention ? 'imported_needs_attention' : 'imported',
+        attentionReason: primaryReason,
     };
 }
