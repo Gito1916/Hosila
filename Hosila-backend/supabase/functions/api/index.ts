@@ -469,10 +469,10 @@ async function handleCreateReservation(
             return error(`No rooms found with type "${body.room_type}"`, 404);
         }
 
-        // Get all booked room IDs for these dates (reservations)
+        // Get all booked room IDs for these dates (reservations) — include checkout for next_available
         const { data: reservationConflicts } = await supabase
             .from("reservations")
-            .select("room_id")
+            .select("room_id, check_out_date")
             .eq("hotel_id", hotelId)
             .in("status", ["confirmed", "pending", "checked_in"])
             .lt("check_in_date", body.check_out)
@@ -483,7 +483,7 @@ async function handleCreateReservation(
         // Also check active bookings
         const { data: bookingConflicts } = await supabase
             .from("bookings")
-            .select("room_id")
+            .select("room_id, check_out_time")
             .eq("hotel_id", hotelId)
             .eq("status", "active")
             .lt("check_in_time", body.check_out)
@@ -497,10 +497,46 @@ async function handleCreateReservation(
         const availableRoom = typeRooms.find((r: any) => !bookedIds.has(r.id));
 
         if (!availableRoom) {
-            return error(
-                `All "${body.room_type}" rooms are booked for ${body.check_in} to ${body.check_out}. Try different dates or another room type.`,
-                409
-            );
+            // All rooms of this type are booked — find earliest checkout (+1 day for cleaning)
+            const typeRoomIds = new Set(typeRooms.map((r: any) => r.id));
+
+            // Find earliest checkout from reservations for rooms of this type
+            let earliestCheckout: string | undefined;
+            for (const r of reservationConflicts || []) {
+                const rid = (r as any).room_id;
+                const co = (r as any).check_out_date;
+                if (typeRoomIds.has(rid) && co) {
+                    if (!earliestCheckout || co < earliestCheckout) {
+                        earliestCheckout = co;
+                    }
+                }
+            }
+            // Also check bookings
+            for (const b of bookingConflicts || []) {
+                const co = (b as any).check_out_time?.split("T")[0] || (b as any).check_out_time;
+                if (typeRoomIds.has(b.room_id) && co) {
+                    if (!earliestCheckout || co < earliestCheckout) {
+                        earliestCheckout = co;
+                    }
+                }
+            }
+
+            // next_available = earliest checkout + 1 day (cleaning buffer)
+            let nextAvailableDate: string | undefined;
+            if (earliestCheckout) {
+                const nextDate = new Date(earliestCheckout);
+                nextDate.setDate(nextDate.getDate() + 1);
+                nextAvailableDate = nextDate.toISOString().split("T")[0];
+            }
+
+            return json({
+                error: `All "${body.room_type}" rooms are booked for ${body.check_in} to ${body.check_out}.`,
+                next_available: nextAvailableDate || null,
+                message: nextAvailableDate
+                    ? `A "${body.room_type}" room will be available from ${nextAvailableDate}. Would you like to adjust your dates?`
+                    : `All "${body.room_type}" rooms are fully booked for these dates. Try a different room type.`,
+                total_rooms_of_type: typeRooms.length,
+            }, 409);
         }
 
         room = availableRoom;
