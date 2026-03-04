@@ -269,6 +269,7 @@ async function handleAvailability(
     // --- Room type filter handling ---
     let requestedTypeAvailable = true;
     let alternatives: { room_type: string; available: number; rate_from: number }[] | undefined;
+    let typeNextAvailable: string | undefined;
 
     if (roomType) {
         // Check if the requested type has availability
@@ -279,6 +280,29 @@ async function handleAvailability(
 
         if (!matchedType || byType[matchedType].available === 0) {
             requestedTypeAvailable = false;
+
+            // Find all rooms of this type to calculate next_available
+            const typeRoomIds = (allRooms || [])
+                .filter((r: any) => r.room_type.toLowerCase() === requestedTypeLower ||
+                    r.room_type.toLowerCase().includes(requestedTypeLower) ||
+                    requestedTypeLower.includes(r.room_type.toLowerCase()))
+                .map((r: any) => r.id);
+
+            // Find earliest checkout among booked rooms of this type
+            let earliestCheckout: string | undefined;
+            for (const rid of typeRoomIds) {
+                const co = latestCheckoutByRoom[rid];
+                if (co && (!earliestCheckout || co < earliestCheckout)) {
+                    earliestCheckout = co;
+                }
+            }
+
+            if (earliestCheckout) {
+                const nextDate = new Date(earliestCheckout);
+                nextDate.setDate(nextDate.getDate() + 1); // +1 day for cleaning
+                typeNextAvailable = nextDate.toISOString().split("T")[0];
+            }
+
             // Build alternatives — other available room types
             alternatives = Object.values(byType)
                 .filter((t) => t.available > 0)
@@ -361,7 +385,15 @@ async function handleAvailability(
     if (roomType) {
         response.requested_room_type = roomType;
         response.requested_type_available = requestedTypeAvailable;
-        if (alternatives) {
+        if (!requestedTypeAvailable) {
+            if (typeNextAvailable) {
+                response.next_available = typeNextAvailable;
+                response.message = `All "${roomType}" rooms are booked for these dates. Next available: ${typeNextAvailable}`;
+            } else {
+                response.message = `All "${roomType}" rooms are booked for these dates`;
+            }
+        }
+        if (alternatives && alternatives.length > 0) {
             response.alternatives = alternatives;
         }
     }
