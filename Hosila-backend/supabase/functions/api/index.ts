@@ -4,7 +4,7 @@
 // Endpoints:
 //   GET  /api?action=hotel-info&hotel_id=...
 //   GET  /api?action=room-types&hotel_id=...
-//   GET  /api?action=availability&hotel_id=...&check_in=...&check_out=...
+//   GET  /api?action=availability&hotel_id=...&check_in=...&check_out=...[&room_type=...][&room_number=...]
 //   POST /api?action=create-reservation  (body: { api_key, hotel_id, ... })
 //   GET  /api?action=reservation-status&hotel_id=...&reservation_id=...
 
@@ -167,6 +167,7 @@ async function handleAvailability(
     checkIn: string,
     checkOut: string,
     roomType?: string,
+    roomNumber?: string,
     ipAddress?: string
 ) {
     if (!checkIn || !checkOut) {
@@ -274,17 +275,53 @@ async function handleAvailability(
         }
     }
 
+    // --- Room number filter handling ---
+    let requestedRoomAvailable: boolean | undefined;
+    let requestedRoomInfo: { room_number: string; room_type: string; rate: number } | undefined;
+
+    if (roomNumber) {
+        const roomNumLower = roomNumber.toLowerCase();
+        // Find the room in all rooms (not just available)
+        const matchedRoom = (allRooms || []).find(
+            (r) => r.room_number.toLowerCase() === roomNumLower
+        );
+
+        if (!matchedRoom) {
+            // Room number doesn't exist at this hotel
+            requestedRoomAvailable = undefined; // unknown room
+        } else {
+            requestedRoomInfo = {
+                room_number: matchedRoom.room_number,
+                room_type: matchedRoom.room_type,
+                rate: matchedRoom.night_rate,
+            };
+            // Check if this specific room is in the available list
+            requestedRoomAvailable = available.some((r) => r.id === matchedRoom.id);
+
+            if (!requestedRoomAvailable && !alternatives) {
+                // Build alternatives — other available rooms
+                alternatives = Object.values(byType)
+                    .filter((t) => t.available > 0)
+                    .map((t) => ({
+                        room_type: t.room_type,
+                        available: t.available,
+                        rate_from: t.rate_from,
+                    }));
+            }
+        }
+    }
+
     // --- Log the availability check to DB (fire-and-forget) ---
     supabase.from("availability_checks").insert({
         hotel_id: hotelId,
         check_in: checkIn,
         check_out: checkOut,
-        room_type_requested: roomType || null,
+        room_type_requested: roomType || roomNumber || null,
         rooms_found: available.length,
-        requested_type_available: requestedTypeAvailable,
+        requested_type_available: roomNumber ? (requestedRoomAvailable ?? false) : requestedTypeAvailable,
         alternatives_shown: alternatives !== undefined && alternatives.length > 0,
         ip_address: ipAddress || null,
-    }).then(() => { }).catch((err) => console.warn("Failed to log availability check:", err));
+    }).then(() => { }).catch((err: any) => console.warn("Failed to log availability check:", err));
 
     // Build response
     const response: Record<string, unknown> = {
@@ -300,6 +337,25 @@ async function handleAvailability(
         response.requested_type_available = requestedTypeAvailable;
         if (alternatives) {
             response.alternatives = alternatives;
+        }
+    }
+
+    if (roomNumber) {
+        response.requested_room_number = roomNumber;
+        if (requestedRoomAvailable === undefined) {
+            response.requested_room_found = false;
+            response.requested_room_available = false;
+            response.message = `Room "${roomNumber}" was not found at this hotel`;
+        } else {
+            response.requested_room_found = true;
+            response.requested_room_available = requestedRoomAvailable;
+            response.requested_room = requestedRoomInfo;
+            if (!requestedRoomAvailable) {
+                response.message = `Room "${roomNumber}" (${requestedRoomInfo?.room_type}) is booked for these dates`;
+                if (alternatives && alternatives.length > 0) {
+                    response.alternatives = alternatives;
+                }
+            }
         }
     }
 
@@ -575,6 +631,7 @@ Deno.serve(async (req: Request) => {
                         url.searchParams.get("check_in") || "",
                         url.searchParams.get("check_out") || "",
                         url.searchParams.get("room_type") || undefined,
+                        url.searchParams.get("room_number") || undefined,
                         ip
                     );
 
