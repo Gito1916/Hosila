@@ -193,21 +193,31 @@ async function handleAvailability(
 
     if (roomErr) return error("Failed to fetch rooms", 500);
 
-    // Get reservations that overlap with the requested dates
+    // Get reservations that overlap with the requested dates (include checkout for next_available calc)
     const { data: overlapping } = await supabase
         .from("reservations")
-        .select("room_id")
+        .select("room_id, check_out_date")
         .eq("hotel_id", hotelId)
         .in("status", ["confirmed", "pending", "checked_in"])
         .lt("check_in_date", checkOut)
         .gt("check_out_date", checkIn);
 
-    const bookedRoomIds = new Set((overlapping || []).map((r) => r.room_id));
+    const bookedRoomIds = new Set((overlapping || []).map((r: any) => r.room_id));
+
+    // Build a map of room_id → latest checkout date (for next_available calculation)
+    const latestCheckoutByRoom: Record<string, string> = {};
+    for (const r of overlapping || []) {
+        const rid = (r as any).room_id;
+        const co = (r as any).check_out_date;
+        if (!latestCheckoutByRoom[rid] || co > latestCheckoutByRoom[rid]) {
+            latestCheckoutByRoom[rid] = co;
+        }
+    }
 
     // Get active bookings that overlap
     const { data: activeBookings } = await supabase
         .from("bookings")
-        .select("room_id")
+        .select("room_id, check_out_time")
         .eq("hotel_id", hotelId)
         .eq("status", "active")
         .lt("check_in_time", checkOut)
@@ -215,6 +225,11 @@ async function handleAvailability(
 
     for (const b of activeBookings || []) {
         bookedRoomIds.add(b.room_id);
+        // Also track checkout from bookings (check_out_time is a timestamp, extract date)
+        const co = (b as any).check_out_time?.split("T")[0] || (b as any).check_out_time;
+        if (co && (!latestCheckoutByRoom[b.room_id] || co > latestCheckoutByRoom[b.room_id])) {
+            latestCheckoutByRoom[b.room_id] = co;
+        }
     }
 
     // Filter available rooms
@@ -278,12 +293,13 @@ async function handleAvailability(
     // --- Room number filter handling ---
     let requestedRoomAvailable: boolean | undefined;
     let requestedRoomInfo: { room_number: string; room_type: string; rate: number } | undefined;
+    let nextAvailable: string | undefined;
 
     if (roomNumber) {
         const roomNumLower = roomNumber.toLowerCase();
         // Find the room in all rooms (not just available)
         const matchedRoom = (allRooms || []).find(
-            (r) => r.room_number.toLowerCase() === roomNumLower
+            (r: any) => r.room_number.toLowerCase() === roomNumLower
         );
 
         if (!matchedRoom) {
@@ -296,17 +312,27 @@ async function handleAvailability(
                 rate: matchedRoom.night_rate,
             };
             // Check if this specific room is in the available list
-            requestedRoomAvailable = available.some((r) => r.id === matchedRoom.id);
+            requestedRoomAvailable = available.some((r: any) => r.id === matchedRoom.id);
 
-            if (!requestedRoomAvailable && !alternatives) {
-                // Build alternatives — other available rooms
-                alternatives = Object.values(byType)
-                    .filter((t) => t.available > 0)
-                    .map((t) => ({
-                        room_type: t.room_type,
-                        available: t.available,
-                        rate_from: t.rate_from,
-                    }));
+            if (!requestedRoomAvailable) {
+                // Calculate next_available: day AFTER latest checkout (allows cleaning time)
+                const latestCO = latestCheckoutByRoom[matchedRoom.id];
+                if (latestCO) {
+                    const coDate2 = new Date(latestCO);
+                    coDate2.setDate(coDate2.getDate() + 1); // +1 day for cleaning
+                    nextAvailable = coDate2.toISOString().split("T")[0];
+                }
+
+                if (!alternatives) {
+                    // Build alternatives — other available rooms
+                    alternatives = Object.values(byType)
+                        .filter((t) => t.available > 0)
+                        .map((t) => ({
+                            room_type: t.room_type,
+                            available: t.available,
+                            rate_from: t.rate_from,
+                        }));
+                }
             }
         }
     }
@@ -351,7 +377,12 @@ async function handleAvailability(
             response.requested_room_available = requestedRoomAvailable;
             response.requested_room = requestedRoomInfo;
             if (!requestedRoomAvailable) {
-                response.message = `Room "${roomNumber}" (${requestedRoomInfo?.room_type}) is booked for these dates`;
+                if (nextAvailable) {
+                    response.next_available = nextAvailable;
+                    response.message = `Room "${roomNumber}" (${requestedRoomInfo?.room_type}) is booked for these dates. Next available: ${nextAvailable}`;
+                } else {
+                    response.message = `Room "${roomNumber}" (${requestedRoomInfo?.room_type}) is booked for these dates`;
+                }
                 if (alternatives && alternatives.length > 0) {
                     response.alternatives = alternatives;
                 }
