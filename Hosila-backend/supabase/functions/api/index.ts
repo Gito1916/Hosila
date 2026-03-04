@@ -400,16 +400,22 @@ async function handleCreateReservation(
         guest_name: string;
         guest_email?: string;
         guest_phone?: string;
-        room_id: string;
+        room_id?: string;
+        room_type?: string;
         check_in: string;
         check_out: string;
         notes?: string;
     }
 ) {
     // Validate required fields
-    if (!body.guest_name || !body.room_id || !body.check_in || !body.check_out) {
+    if (!body.guest_name || !body.check_in || !body.check_out) {
         return error(
-            "guest_name, room_id, check_in, and check_out are required"
+            "guest_name, check_in, and check_out are required"
+        );
+    }
+    if (!body.room_id && !body.room_type) {
+        return error(
+            "Either room_id or room_type is required. Use room_type to auto-pick an available room."
         );
     }
 
@@ -422,28 +428,82 @@ async function handleCreateReservation(
         return error("check_out must be after check_in");
     }
 
-    // Verify room exists and belongs to this hotel
-    const { data: room, error: roomErr } = await supabase
-        .from("rooms")
-        .select("id, room_number, room_type, night_rate")
-        .eq("id", body.room_id)
-        .eq("hotel_id", hotelId)
-        .single();
+    let room: { id: string; room_number: string; room_type: string; night_rate: number };
 
-    if (roomErr || !room) return error("Room not found", 404);
+    if (body.room_id) {
+        // --- Direct room_id lookup ---
+        const { data: foundRoom, error: roomErr } = await supabase
+            .from("rooms")
+            .select("id, room_number, room_type, night_rate")
+            .eq("id", body.room_id)
+            .eq("hotel_id", hotelId)
+            .single();
 
-    // Check room is available for dates
-    const { data: conflicts } = await supabase
-        .from("reservations")
-        .select("id")
-        .eq("room_id", body.room_id)
-        .in("status", ["confirmed", "pending", "checked_in"])
-        .lt("check_in_date", body.check_out)
-        .gt("check_out_date", body.check_in)
-        .limit(1);
+        if (roomErr || !foundRoom) return error("Room not found", 404);
+        room = foundRoom;
 
-    if (conflicts && conflicts.length > 0) {
-        return error("Room is not available for the selected dates", 409);
+        // Check room is available for dates
+        const { data: conflicts } = await supabase
+            .from("reservations")
+            .select("id")
+            .eq("room_id", room.id)
+            .in("status", ["confirmed", "pending", "checked_in"])
+            .lt("check_in_date", body.check_out)
+            .gt("check_out_date", body.check_in)
+            .limit(1);
+
+        if (conflicts && conflicts.length > 0) {
+            return error("Room is not available for the selected dates", 409);
+        }
+    } else {
+        // --- Auto-pick by room_type ---
+        // Get all rooms of this type
+        const { data: typeRooms, error: roomErr } = await supabase
+            .from("rooms")
+            .select("id, room_number, room_type, night_rate")
+            .eq("hotel_id", hotelId)
+            .ilike("room_type", body.room_type!)
+            .in("status", ["available", "occupied"]); // exclude maintenance
+
+        if (roomErr || !typeRooms || typeRooms.length === 0) {
+            return error(`No rooms found with type "${body.room_type}"`, 404);
+        }
+
+        // Get all booked room IDs for these dates (reservations)
+        const { data: reservationConflicts } = await supabase
+            .from("reservations")
+            .select("room_id")
+            .eq("hotel_id", hotelId)
+            .in("status", ["confirmed", "pending", "checked_in"])
+            .lt("check_in_date", body.check_out)
+            .gt("check_out_date", body.check_in);
+
+        const bookedIds = new Set((reservationConflicts || []).map((r: any) => r.room_id));
+
+        // Also check active bookings
+        const { data: bookingConflicts } = await supabase
+            .from("bookings")
+            .select("room_id")
+            .eq("hotel_id", hotelId)
+            .eq("status", "active")
+            .lt("check_in_time", body.check_out)
+            .gt("check_out_time", body.check_in);
+
+        for (const b of bookingConflicts || []) {
+            bookedIds.add(b.room_id);
+        }
+
+        // Find first available room of the requested type
+        const availableRoom = typeRooms.find((r: any) => !bookedIds.has(r.id));
+
+        if (!availableRoom) {
+            return error(
+                `All "${body.room_type}" rooms are booked for ${body.check_in} to ${body.check_out}. Try different dates or another room type.`,
+                409
+            );
+        }
+
+        room = availableRoom;
     }
 
     const nights = Math.ceil(
@@ -499,7 +559,7 @@ async function handleCreateReservation(
         .insert({
             hotel_id: hotelId,
             guest_id: guestId,
-            room_id: body.room_id,
+            room_id: room.id,
             check_in_date: body.check_in,
             check_out_date: body.check_out,
             nights,
