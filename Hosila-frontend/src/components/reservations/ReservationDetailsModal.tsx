@@ -17,7 +17,7 @@ import {
     MapPin,
     CreditCard,
     MessageSquare,
-
+    CheckCircle,
     LogIn,
     XCircle,
     AlertTriangle,
@@ -43,6 +43,7 @@ export function ReservationDetailsModal({ reservation, onClose }: ReservationDet
 
     const checkInDate = new Date(reservation.check_in_date);
     const checkOutDate = new Date(reservation.check_out_date);
+    const canConfirm = reservation.status === 'pending';
     const canCheckIn = reservation.status === 'confirmed' && (isToday(checkInDate) || isPast(checkInDate));
     const canCancel = reservation.status === 'confirmed' || reservation.status === 'pending';
     const canMarkNoShow = reservation.status === 'confirmed' && isPast(checkInDate) && !isToday(checkInDate);
@@ -73,6 +74,24 @@ export function ReservationDetailsModal({ reservation, onClose }: ReservationDet
             onClose();
         } catch (err) {
             console.error('Error checking in:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleConfirm = async () => {
+        if (!user) return;
+
+        setIsLoading(true);
+        try {
+            const sb = requireSupabase();
+            await sb.from('reservations').update({
+                status: 'confirmed',
+                updated_at: new Date().toISOString(),
+            }).eq('id', reservation.id);
+            onClose();
+        } catch (err) {
+            console.error('Error confirming reservation:', err);
         } finally {
             setIsLoading(false);
         }
@@ -215,6 +234,12 @@ export function ReservationDetailsModal({ reservation, onClose }: ReservationDet
                     {/* Actions */}
                     {reservation.status !== 'cancelled' && reservation.status !== 'checked_in' && reservation.status !== 'no_show' && (
                         <div className="flex flex-wrap gap-2">
+                            {canConfirm && (
+                                <button onClick={handleConfirm} disabled={isLoading} className="btn bg-emerald-600 hover:bg-emerald-700 text-white flex-1">
+                                    <CheckCircle size={16} className="mr-1" />
+                                    {isLoading ? 'Confirming...' : 'Confirm Reservation'}
+                                </button>
+                            )}
                             {canCancel && (
                                 <>
                                     <button
