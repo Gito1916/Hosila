@@ -430,8 +430,8 @@ async function handleCreateReservation(
     hotelId: string,
     body: {
         guest_name: string;
-        guest_email?: string;
-        guest_phone?: string;
+        guest_email: string;
+        guest_phone: string;
         room_id?: string;
         room_type?: string;
         check_in: string;
@@ -443,6 +443,11 @@ async function handleCreateReservation(
     if (!body.guest_name || !body.check_in || !body.check_out) {
         return error(
             "guest_name, check_in, and check_out are required"
+        );
+    }
+    if (!body.guest_email || !body.guest_phone) {
+        return error(
+            "guest_email and guest_phone are required so the hotel can contact the guest"
         );
     }
     if (!body.room_id && !body.room_type) {
