@@ -61,8 +61,8 @@ async function validateApiKey(
 
     if (err || !data || data.length === 0) return null;
 
-    // Touch last_used_at in background
-    supabase.rpc("touch_api_key", { p_key_hash: keyHash }).catch(() => { });
+    // Touch last_used_at in background (fire-and-forget)
+    supabase.rpc("touch_api_key", { p_key_hash: keyHash }).then(() => { }).catch(() => { });
 
     return data[0].hotel_id;
 }
@@ -810,6 +810,10 @@ Deno.serve(async (req: Request) => {
             const body = await req.json().catch(() => null);
             if (!body) return error("Invalid JSON body");
 
+            // Debug: log incoming body keys
+            console.log("POST body keys:", Object.keys(body));
+            console.log("POST body:", JSON.stringify(body));
+
             // Get API key from header or body
             const apiKey =
                 req.headers.get("X-API-Key") || body.api_key;
@@ -829,8 +833,11 @@ Deno.serve(async (req: Request) => {
         }
 
         return error("Method not allowed", 405);
-    } catch (err) {
-        console.error("API error:", err);
-        return error("Internal server error", 500);
+    } catch (err: any) {
+        console.error("API error:", err?.message || err, err?.stack || "");
+        return json({
+            error: "Internal server error",
+            debug_message: err?.message || String(err),
+        }, 500);
     }
 });
