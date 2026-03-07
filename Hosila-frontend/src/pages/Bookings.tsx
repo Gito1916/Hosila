@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useRooms } from '@/hooks/useSupabaseData';
-import { fetchById } from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
 import { UnifiedCheckInModal, UnifiedReservationModal } from '@/components/booking';
 import { RoomStatusGrid } from '@/components/bookings/RoomStatusGrid';
 import { AvailabilityCalendar } from '@/components/bookings/AvailabilityCalendar';
 import { ReservationList } from '@/components/bookings/ReservationList';
-import type { Room, Reservation } from '@/types';
+import type { Room } from '@/types';
 import {
     Grid3X3,
     Calendar,
@@ -126,18 +125,7 @@ export function BookingsPage() {
 
                 {
                     activeTab === 'reservations' && (
-                        <ReservationList
-                            onCheckIn={(reservation: Reservation) => {
-                                if (!reservation.room_id) return;
-                                // Get the room and open check-in modal
-                                fetchById<Room>('rooms', reservation.room_id).then(room => {
-                                    if (room) {
-                                        setSelectedRoom(room);
-                                        setShowCheckInModal(true);
-                                    }
-                                });
-                            }}
-                        />
+                        <ReservationList />
                     )
                 }
             </div>
