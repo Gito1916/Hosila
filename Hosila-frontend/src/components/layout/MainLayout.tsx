@@ -3,7 +3,6 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { PWAPrompt } from './PWAPrompt';
-import { OfflineIndicator } from './OfflineIndicator';
 
 export function MainLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -18,8 +17,6 @@ export function MainLayout() {
 
     return (
         <div className="min-h-screen">
-            {/* Offline indicator */}
-            <OfflineIndicator />
 
             {/* Sidebar - always visible on desktop, slide-in on mobile */}
             <Sidebar isOpen={isSidebarOpen} onClose={handleSidebarClose} />

@@ -1,9 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-// Password verification is handled server-side via Supabase RPCs (no client-side hashing)
+import { hashSync, compareSync } from 'bcryptjs';
 import { supabase, isCloudAvailable } from '@/lib/supabase';
 import { getHotelId } from '@/lib/api';
 import type { User, UserRole } from '@/types';
+
+/** Max age for offline cached login (7 days) */
+const OFFLINE_SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
 // ============================================================================
 // Types
@@ -30,6 +33,11 @@ interface AuthState {
 
     // Hotel context (single hotel)
     activeHotelName: string | null;
+
+    // Offline auth
+    lastLoginTime: string | null;
+    offlinePasswordHash: string | null;  // bcrypt hash for offline login verification
+    isOfflineSession: boolean;
 
     // Actions
     login: (username: string, password: string) => Promise<boolean>;
@@ -63,6 +71,11 @@ export const useAuthStore = create<AuthState>()(
             error: null,
             activeHotelName: null,
 
+            // Offline auth
+            lastLoginTime: null,
+            offlinePasswordHash: null,
+            isOfflineSession: false,
+
             // Cloud state
             cloudAccount: null,
             isCloudLinked: false,
@@ -73,8 +86,54 @@ export const useAuthStore = create<AuthState>()(
             // Login — authenticates against Supabase `users` table
             // =================================================================
             login: async (username: string, password: string) => {
-                set({ isLoading: true, error: null });
+                set({ isLoading: true, error: null, isOfflineSession: false });
 
+                // ─── OFFLINE LOGIN PATH ───────────────────────────
+                if (!navigator.onLine) {
+                    const { user: cachedUser, lastLoginTime, offlinePasswordHash } = get();
+
+                    // Must have a previous successful login cached
+                    if (!cachedUser || !offlinePasswordHash || !lastLoginTime) {
+                        set({
+                            error: 'You need an internet connection to sign in for the first time on this device',
+                            isLoading: false,
+                        });
+                        return false;
+                    }
+
+                    // Check session age (7 days max)
+                    const age = Date.now() - new Date(lastLoginTime).getTime();
+                    if (age > OFFLINE_SESSION_MAX_AGE) {
+                        set({
+                            error: 'Your offline session has expired. Please connect to the internet to sign in.',
+                            isLoading: false,
+                        });
+                        return false;
+                    }
+
+                    // Verify username matches
+                    if (cachedUser.username?.toLowerCase() !== username.toLowerCase()) {
+                        set({ error: 'Invalid username or password', isLoading: false });
+                        return false;
+                    }
+
+                    // Verify password against cached hash
+                    const isValid = compareSync(password, offlinePasswordHash);
+                    if (!isValid) {
+                        set({ error: 'Invalid username or password', isLoading: false });
+                        return false;
+                    }
+
+                    // Offline login accepted
+                    set({
+                        isAuthenticated: true,
+                        isLoading: false,
+                        isOfflineSession: true,
+                    });
+                    return true;
+                }
+
+                // ─── ONLINE LOGIN PATH (original) ─────────────────
                 try {
                     if (!supabase) {
                         set({ error: 'Cloud not configured', isLoading: false });
@@ -120,7 +179,17 @@ export const useAuthStore = create<AuthState>()(
                         .update({ last_login: new Date().toISOString() })
                         .eq('id', user.id);
 
-                    set({ user: user as User, isAuthenticated: true, isLoading: false });
+                    // Cache password hash locally for offline login
+                    const offlineHash = hashSync(password, 10);
+
+                    set({
+                        user: user as User,
+                        isAuthenticated: true,
+                        isLoading: false,
+                        isOfflineSession: false,
+                        lastLoginTime: new Date().toISOString(),
+                        offlinePasswordHash: offlineHash,
+                    });
 
                     // Fetch hotel name for display
                     try {
@@ -193,15 +262,23 @@ export const useAuthStore = create<AuthState>()(
                 // Attempt to flush pending offline writes before logout
                 try {
                     const { getPendingCount, flushQueue, clearQueue } = await import('@/lib/offlineQueue');
+                    const { flushCommands, clearCommandQueue } = await import('@/lib/commandQueue');
+                    const { clearLocalStore } = await import('@/lib/localStore');
+
                     const pending = await getPendingCount();
                     if (pending > 0 && navigator.onLine) {
-                        // Try to flush while still online
                         await flushQueue();
                     }
-                    // Clear any remaining queue items
+                    // Flush commands too
+                    if (navigator.onLine) {
+                        await flushCommands();
+                    }
+                    // Clear all queues and local cache
                     await clearQueue();
+                    await clearCommandQueue();
+                    await clearLocalStore();
                 } catch (e) {
-                    console.warn('Failed to flush offline queue on logout:', e);
+                    console.warn('Failed to flush queues on logout:', e);
                 }
 
                 if (supabase) {
@@ -211,6 +288,9 @@ export const useAuthStore = create<AuthState>()(
                     user: null,
                     isAuthenticated: false,
                     error: null,
+                    isOfflineSession: false,
+                    offlinePasswordHash: null,
+                    lastLoginTime: null,
                     cloudAccount: null,
                     isCloudLinked: false,
                     cloudError: null,
@@ -568,6 +648,9 @@ export const useAuthStore = create<AuthState>()(
             partialize: (state) => ({
                 user: state.user,
                 isAuthenticated: state.isAuthenticated,
+                lastLoginTime: state.lastLoginTime,
+                offlinePasswordHash: state.offlinePasswordHash,
+                activeHotelName: state.activeHotelName,
                 cloudAccount: state.cloudAccount,
                 isCloudLinked: state.isCloudLinked,
                 pendingConfirmation: state.pendingConfirmation,

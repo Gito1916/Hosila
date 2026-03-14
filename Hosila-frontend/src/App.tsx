@@ -13,7 +13,7 @@ import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { NotificationToast } from '@/components/notifications/NotificationToast';
 import { UpdatePrompt } from '@/components/layout/UpdatePrompt';
 import { warmUpBackend, onBackendStatusChange } from '@/lib/apiClient';
-import { Loader2, WifiOff, Server } from 'lucide-react';
+import { Loader2, WifiOff, Wifi, Server, AlertTriangle } from 'lucide-react';
 
 // Lazy load pages for code splitting (improved performance)
 const LoginPage = lazy(() => import('@/pages/Login').then(m => ({ default: m.LoginPage })));
@@ -36,29 +36,60 @@ function PageLoader() {
     );
 }
 
-// Offline banner
-function OfflineBanner() {
+// Unified Offline Status Banner
+function OfflineStatusBanner() {
     const [isOnline, setIsOnline] = useState(navigator.onLine);
+    const [showReconnected, setShowReconnected] = useState(false);
+    const [wasPreviouslyOffline, setWasPreviouslyOffline] = useState(false);
 
     useEffect(() => {
-        const handleOnline = () => setIsOnline(true);
-        const handleOffline = () => setIsOnline(false);
+        const handleOnline = () => {
+            setIsOnline(true);
+            if (wasPreviouslyOffline) {
+                setShowReconnected(true);
+                setTimeout(() => setShowReconnected(false), 4000);
+            }
+        };
+        const handleOffline = () => {
+            setIsOnline(false);
+            setWasPreviouslyOffline(true);
+            setShowReconnected(false);
+        };
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
         return () => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, []);
+    }, [wasPreviouslyOffline]);
 
-    if (isOnline) return null;
+    // Reconnected banner (auto-dismiss)
+    if (showReconnected) {
+        return (
+            <div className="fixed top-0 left-0 right-0 z-[60] bg-emerald-600 text-white px-4 py-2 text-center text-sm font-medium flex items-center justify-center gap-2 animate-fade-in">
+                <Wifi size={16} />
+                Back online — Syncing pending changes…
+            </div>
+        );
+    }
 
-    return (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-600 text-heading px-4 py-2 text-center text-sm font-medium flex items-center justify-center gap-2">
-            <WifiOff size={16} />
-            You are offline. HotelFlow requires an internet connection to work.
-        </div>
-    );
+    // Offline banner
+    if (!isOnline) {
+        return (
+            <div className="fixed top-0 left-0 right-0 z-[60] bg-amber-600 text-white px-4 py-2.5 text-center text-sm font-medium">
+                <div className="flex items-center justify-center gap-2">
+                    <WifiOff size={16} />
+                    <span>Working offline — Some features are limited</span>
+                </div>
+                <div className="flex items-center justify-center gap-1.5 mt-0.5 text-xs text-amber-100/80">
+                    <AlertTriangle size={11} />
+                    <span>Check-in, payments, housekeeping & restaurant orders available. Reservations, checkout & settings require internet.</span>
+                </div>
+            </div>
+        );
+    }
+
+    return null;
 }
 
 // Protected route wrapper with onboarding check
@@ -127,7 +158,7 @@ function AppInner() {
 
     return (
         <ErrorBoundary>
-            <OfflineBanner />
+            <OfflineStatusBanner />
             {backendStatus === 'waking' && (
                 <div className="bg-blue-600/90 text-heading text-center py-2 px-4 text-sm flex items-center justify-center gap-2 z-50">
                     <Server size={14} className="animate-pulse" />
