@@ -6,7 +6,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { requireSupabase, getHotelId } from '@/lib/api';
 import type { User, UserRole, Hotel, HotelSettings } from '@/types';
-import bcrypt from 'bcryptjs';
+// Password hashing is handled server-side via Supabase RPCs
 
 // =============================================================================
 // Users
@@ -53,8 +53,11 @@ export async function createUser(data: {
     const existing = await getUserByUsername(data.username);
     if (existing) throw new Error('Username already exists');
 
-    // Hash password
-    const password_hash = await bcrypt.hash(data.password, 10);
+    // Hash password server-side
+    const { data: password_hash, error: hashError } = await sb.rpc('hash_password', {
+        p_password: data.password,
+    });
+    if (hashError || !password_hash) throw new Error('Failed to hash password');
 
     const user = {
         id: uuidv4(),
@@ -90,7 +93,11 @@ export async function updateUser(id: string, data: {
 // Update user password (admin only, no verification)
 export async function updateUserPassword(id: string, newPassword: string): Promise<void> {
     const sb = requireSupabase();
-    const password_hash = await bcrypt.hash(newPassword, 10);
+    // Hash password server-side
+    const { data: password_hash, error: hashError } = await sb.rpc('hash_password', {
+        p_password: newPassword,
+    });
+    if (hashError || !password_hash) throw new Error('Failed to hash password');
     const { error } = await sb.from('users').update({
         password_hash,
         updated_at: new Date().toISOString(),
@@ -104,25 +111,20 @@ export async function changePassword(
     currentPassword: string,
     newPassword: string
 ): Promise<{ success: boolean; error?: string }> {
-    const user = await getUserById(userId);
-    if (!user) {
-        return { success: false, error: 'User not found' };
+    const sb = requireSupabase();
+
+    // Verify current password and change — all server-side
+    const { data, error } = await sb.rpc('verify_and_change_password', {
+        p_user_id: userId,
+        p_current_password: currentPassword,
+        p_new_password: newPassword,
+    });
+
+    if (error) {
+        return { success: false, error: 'Failed to change password' };
     }
 
-    // Verify current password
-    const isValid = await bcrypt.compare(currentPassword, user.password_hash);
-    if (!isValid) {
-        return { success: false, error: 'Current password is incorrect' };
-    }
-
-    // Validate new password
-    if (newPassword.length < 6) {
-        return { success: false, error: 'New password must be at least 6 characters' };
-    }
-
-    // Update password
-    await updateUserPassword(userId, newPassword);
-    return { success: true };
+    return data as { success: boolean; error?: string };
 }
 
 // Delete user

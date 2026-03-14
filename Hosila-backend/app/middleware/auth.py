@@ -14,7 +14,6 @@ import httpx
 from fastapi import Request, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError, ExpiredSignatureError, jwk
-from jose.utils import base64url_decode
 from app.config import settings
 from app.shared.logger import get_logger
 

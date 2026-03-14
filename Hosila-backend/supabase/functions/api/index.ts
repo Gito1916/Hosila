@@ -6,7 +6,7 @@
 //   GET  /api?action=room-types&hotel_id=...
 //   GET  /api?action=availability&hotel_id=...&check_in=...&check_out=...[&room_type=...][&room_number=...]
 //   POST /api?action=create-reservation  (body: { api_key, hotel_id, ... })
-//   GET  /api?action=reservation-status&hotel_id=...&reservation_id=...
+//   POST /api?action=reservation-status  (body: { api_key, reservation_id })  — requires API key
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -52,7 +52,7 @@ async function hashApiKey(key: string): Promise<string> {
 async function validateApiKey(
     supabase: ReturnType<typeof createClient>,
     apiKey: string
-): Promise<string | null> {
+): Promise<{ hotelId: string; scopes: string[]; rateLimit: number } | null> {
     const keyHash = await hashApiKey(apiKey);
 
     const { data, error: err } = await supabase.rpc("validate_api_key", {
@@ -64,7 +64,18 @@ async function validateApiKey(
     // Touch last_used_at in background (fire-and-forget)
     supabase.rpc("touch_api_key", { p_key_hash: keyHash }).then(() => { }).catch(() => { });
 
-    return data[0].hotel_id;
+    // Fetch scopes and rate_limit from api_keys table
+    const { data: keyData } = await supabase
+        .from("api_keys")
+        .select("scopes, rate_limit_per_minute")
+        .eq("key_hash", keyHash)
+        .single();
+
+    return {
+        hotelId: data[0].hotel_id,
+        scopes: keyData?.scopes || ["read:availability"],
+        rateLimit: keyData?.rate_limit_per_minute || 60,
+    };
 }
 
 // ------------------------------------------------------------------
@@ -697,7 +708,6 @@ async function handleReservationStatus(
         .from("reservations")
         .select(
             `id, status, check_in_date, check_out_date, nights, total_amount, deposit_paid, source,
-       guests!inner(name, email, phone),
        rooms!inner(room_number, room_type)`
         )
         .eq("id", reservationId)
@@ -716,10 +726,6 @@ async function handleReservationStatus(
             total_amount: data.total_amount,
             deposit_paid: data.deposit_paid,
             balance: data.total_amount - data.deposit_paid,
-            guest: {
-                name: (data.guests as any).name,
-                email: (data.guests as any).email,
-            },
             room: {
                 number: (data.rooms as any).room_number,
                 type: (data.rooms as any).room_type,
@@ -799,11 +805,8 @@ Deno.serve(async (req: Request) => {
                         ip
                     );
 
-                case "reservation-status": {
-                    const resId = url.searchParams.get("reservation_id");
-                    if (!resId) return error("Missing 'reservation_id' query parameter");
-                    return handleReservationStatus(supabase, hotelId, resId);
-                }
+                case "reservation-status":
+                    return error("reservation-status requires API key authentication. Use POST with X-API-Key header.", 401);
 
                 default:
                     return error(`Unknown action: ${action}`, 404);
@@ -815,22 +818,31 @@ Deno.serve(async (req: Request) => {
             const body = await req.json().catch(() => null);
             if (!body) return error("Invalid JSON body");
 
-            // Debug: log incoming body keys
-            console.log("POST body keys:", Object.keys(body));
-            console.log("POST body:", JSON.stringify(body));
-
             // Get API key from header or body
             const apiKey =
                 req.headers.get("X-API-Key") || body.api_key;
             if (!apiKey) return error("API key required (X-API-Key header or api_key in body)", 401);
 
-            // Validate API key and get hotel_id
-            const validatedHotelId = await validateApiKey(supabase, apiKey);
-            if (!validatedHotelId) return error("Invalid or inactive API key", 403);
+            // Validate API key and get hotel_id + scopes
+            const keyResult = await validateApiKey(supabase, apiKey);
+            if (!keyResult) return error("Invalid or inactive API key", 403);
+
+            const { hotelId: validatedHotelId, scopes } = keyResult;
 
             switch (action) {
                 case "create-reservation":
+                    // Check scope
+                    if (!scopes.includes("write:reservation") && !scopes.includes("*")) {
+                        return error("API key does not have 'write:reservation' scope", 403);
+                    }
                     return handleCreateReservation(supabase, validatedHotelId, body);
+
+                case "reservation-status": {
+                    // Reservation status requires API key (moved from public GET)
+                    const resId = body.reservation_id;
+                    if (!resId) return error("Missing 'reservation_id' in request body");
+                    return handleReservationStatus(supabase, validatedHotelId, resId);
+                }
 
                 default:
                     return error(`Unknown action: ${action}`, 404);
@@ -839,10 +851,9 @@ Deno.serve(async (req: Request) => {
 
         return error("Method not allowed", 405);
     } catch (err: any) {
-        console.error("API error:", err?.message || err, err?.stack || "");
+        console.error("API error:", err?.message || err);
         return json({
             error: "Internal server error",
-            debug_message: err?.message || String(err),
         }, 500);
     }
 });

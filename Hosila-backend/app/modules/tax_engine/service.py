@@ -87,14 +87,14 @@ async def get_tax_settings(
     if row:
         return dict(row)
 
-    # Return defaults if nothing configured
+    # Return defaults if nothing configured — all taxes OFF by default for new hotels
     return {
         "vat_rate": DEFAULT_VAT_RATE,
         "tdl_rate": DEFAULT_TDL_RATE,
         "service_charge_rate": DEFAULT_SC_RATE,
-        "service_charge_enabled": True,
-        "vat_enabled": True,
-        "tdl_enabled": False,  # TDL off by default, hotel must opt in
+        "service_charge_enabled": False,
+        "vat_enabled": False,
+        "tdl_enabled": False,
         "vat_calculation_base": "base_only",
         "tdl_calculation_base": "base_only",
     }
@@ -157,14 +157,18 @@ async def calculate_tax_breakdown(
     db: AsyncSession,
     hotel_id: str,
     request: TaxCalculationRequest,
+    cached_settings: dict | None = None,
 ) -> TaxCalculationResponse:
     """
     Calculate full tax breakdown for a given base amount and department.
 
     This is THE function. Every charge, every checkout, every invoice
     must use this to compute taxes. No exceptions.
+
+    Pass `cached_settings` to avoid a DB round-trip when settings have
+    already been fetched (e.g. during batch checkout).
     """
-    settings = await get_tax_settings(db, hotel_id, request.department)
+    settings = cached_settings or await get_tax_settings(db, hotel_id, request.department)
 
     base = Decimal(str(request.base_amount))
 

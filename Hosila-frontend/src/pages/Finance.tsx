@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useIsTaxEnabled } from '@/hooks/useHosilaApi';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, subDays } from 'date-fns';
 import { FinanceDashboard, FinanceExport, ExpenseList, ExpenseForm, TaxSummary } from '@/components/finance';
 import { TransactionsList } from '@/components/finance/TransactionsList';
@@ -59,13 +60,20 @@ export function FinancePage() {
         custom: 'Custom',
     };
 
-    const tabs: { key: FinanceTab; label: string; icon: typeof BarChart3 }[] = [
+    const isTaxEnabled = useIsTaxEnabled();
+
+    const allTabs: { key: FinanceTab; label: string; icon: typeof BarChart3 }[] = [
         { key: 'overview', label: 'Overview', icon: BarChart3 },
         { key: 'income', label: 'Income', icon: TrendingUp },
         { key: 'expenses', label: 'Expenses', icon: Receipt },
         { key: 'transactions', label: 'Transactions', icon: ArrowUpDown },
         { key: 'tax', label: 'Tax', icon: PieChart },
     ];
+
+    // Hide Tax tab when all taxes are disabled
+    const tabs = isTaxEnabled
+        ? allTabs
+        : allTabs.filter(t => t.key !== 'tax');
 
     return (
         <div className="space-y-6">

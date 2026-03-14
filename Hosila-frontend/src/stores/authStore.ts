@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import bcrypt from 'bcryptjs';
+// Password verification is handled server-side via Supabase RPCs (no client-side hashing)
 import { supabase, isCloudAvailable } from '@/lib/supabase';
 import { getHotelId } from '@/lib/api';
 import type { User, UserRole } from '@/types';
@@ -81,26 +81,35 @@ export const useAuthStore = create<AuthState>()(
                         return false;
                     }
 
-                    // Fetch user from Supabase
-                    const { data: user, error } = await supabase
-                        .from('users')
-                        .select('*')
-                        .eq('username', username)
-                        .single();
+                    // Get hotel_id for scoped user lookup
+                    const hotelId = await getHotelId();
+                    if (!hotelId) {
+                        set({ error: 'Hotel not configured', isLoading: false });
+                        return false;
+                    }
 
-                    if (error || !user) {
+                    // Fetch user via server-side RPC (never exposes password_hash)
+                    const { data: users, error } = await supabase
+                        .rpc('authenticate_user', {
+                            p_username: username,
+                            p_hotel_id: hotelId,
+                        });
+
+                    if (error || !users || users.length === 0) {
                         set({ error: 'Invalid username or password', isLoading: false });
                         return false;
                     }
 
-                    if (!user.is_active) {
-                        set({ error: 'Account is deactivated', isLoading: false });
-                        return false;
-                    }
+                    const user = users[0];
 
-                    const isValid = await bcrypt.compare(password, user.password_hash);
+                    // Verify password server-side
+                    const { data: isValid, error: verifyError } = await supabase
+                        .rpc('verify_user_password', {
+                            p_user_id: user.id,
+                            p_password: password,
+                        });
 
-                    if (!isValid) {
+                    if (verifyError || !isValid) {
                         set({ error: 'Invalid username or password', isLoading: false });
                         return false;
                     }

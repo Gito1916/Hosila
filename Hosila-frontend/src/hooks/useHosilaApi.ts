@@ -26,15 +26,25 @@ export function useTaxCalculation(baseAmount: number, department: string) {
     });
 }
 
-/** Get all tax settings for the hotel */
+/** Get all tax settings for the hotel — cached for the entire session */
 export function useTaxSettings() {
     return useQuery({
         queryKey: ['hosila', 'tax', 'settings'],
         queryFn: () => taxApi.getSettings(),
-        staleTime: 1000 * 60 * 10, // 10 min cache
+        staleTime: Infinity,       // Only refetch when explicitly invalidated
+        gcTime: Infinity,          // Never garbage collect
         retry: false,              // Don't retry on auth failures
         throwOnError: false,       // Don't crash the app if backend is down
     });
+}
+
+/** Check if ANY tax is enabled across any department */
+export function useIsTaxEnabled(): boolean {
+    const { data } = useTaxSettings();
+    if (!data?.settings || data.settings.length === 0) return false;
+    return data.settings.some((s: TaxSettings) =>
+        s.service_charge_enabled || s.vat_enabled || s.tdl_enabled
+    );
 }
 
 /** Update tax settings for a department */

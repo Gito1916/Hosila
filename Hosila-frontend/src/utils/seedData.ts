@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import bcrypt from 'bcryptjs';
+// Password hashing is handled server-side via Supabase RPCs
 import { requireSupabase } from '@/lib/api';
 import type {
     Hotel,
@@ -53,7 +53,11 @@ export async function seedDatabase() {
 
 
     // Create admin user
-    const passwordHash = await bcrypt.hash('admin123', 10);
+    // Hash password server-side
+    const { data: passwordHash, error: hashError } = await sb.rpc('hash_password', {
+        p_password: 'admin123',
+    });
+    if (hashError || !passwordHash) throw new Error('Failed to hash password');
     const admin: Partial<User> = {
         id: uuidv4(),
         hotel_id: hotelId,

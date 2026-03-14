@@ -19,7 +19,7 @@ from uuid import uuid4
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.tax_engine.service import calculate_tax_breakdown
+from app.modules.tax_engine.service import calculate_tax_breakdown, get_tax_settings
 from app.modules.tax_engine.schemas import TaxCalculationRequest
 from app.modules.billing.schemas import (
     CheckoutRequest,
@@ -95,7 +95,13 @@ async def generate_invoice(
     )
     charges = result.mappings().all()
 
-    # ── 4. Calculate taxes per charge ─────────────
+    # ── 4. Pre-fetch tax settings & calculate per charge ───
+    # Fetch tax settings once per unique department to avoid N queries
+    dept_set = set(charge["department"] for charge in charges)
+    tax_settings_cache: dict[str, dict] = {}
+    for dept in dept_set:
+        tax_settings_cache[dept] = await get_tax_settings(db, hotel_id, dept)
+
     items: list[InvoiceLineItem] = []
     total_base = Decimal("0")
     total_sc = Decimal("0")
@@ -104,14 +110,16 @@ async def generate_invoice(
 
     for charge in charges:
         base = Decimal(str(charge["gross_amount"]))
+        dept = charge["department"]
 
         tax_result = await calculate_tax_breakdown(
             db,
             hotel_id,
             TaxCalculationRequest(
                 base_amount=base,
-                department=charge["department"],
+                department=dept,
             ),
+            cached_settings=tax_settings_cache.get(dept),
         )
 
         item = InvoiceLineItem(
@@ -274,34 +282,25 @@ async def generate_invoice(
 
 async def _generate_invoice_number(db: AsyncSession, hotel_id: str) -> str:
     """
-    Generate a unique invoice number using COUNT + retry on collision.
+    Generate a unique invoice number using atomic Postgres counter.
     Format: INV-{year}-{sequence:05d}
+    Uses next_invoice_number() RPC with row-level locking for concurrency safety.
     """
     year = datetime.now(timezone.utc).year
 
-    for attempt in range(_MAX_INVOICE_RETRIES):
-        count_result = await db.execute(
-            text("SELECT COUNT(*) FROM invoices WHERE hotel_id = :hotel_id"),
+    try:
+        result = await db.execute(
+            text("SELECT next_invoice_number(:hotel_id)"),
             {"hotel_id": hotel_id},
         )
-        count = (count_result.scalar() or 0) + 1 + attempt
-        candidate = f"INV-{year}-{count:05d}"
-
-        # Check uniqueness
-        exists = await db.execute(
-            text("""
-                SELECT 1 FROM invoices
-                WHERE hotel_id = :hotel_id AND invoice_number = :inv_num
-                LIMIT 1
-            """),
-            {"hotel_id": hotel_id, "inv_num": candidate},
-        )
-        if not exists.first():
-            return candidate
+        seq = result.scalar()
+        if seq:
+            return f"INV-{year}-{seq:05d}"
+    except Exception as e:
+        logger.warning("Atomic invoice number failed, using fallback: %s", e)
 
     # Fallback: append UUID fragment for guaranteed uniqueness
     fallback = f"INV-{year}-{str(uuid4())[:8].upper()}"
-    logger.warning("Invoice number collision after %d retries, using fallback: %s", _MAX_INVOICE_RETRIES, fallback)
     return fallback
 
 

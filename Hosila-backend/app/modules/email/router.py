@@ -213,6 +213,7 @@ async def get_email_logs(
     db: AsyncSession = Depends(get_db),
 ):
     """Get paginated email send logs."""
+    limit = min(limit, 100)  # Cap to prevent unbounded OFFSET queries
     offset = (page - 1) * limit
 
     # Get total count

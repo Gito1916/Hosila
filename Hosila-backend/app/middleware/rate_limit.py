@@ -1,3 +1,6 @@
+# TODO: Replace with Redis-backed rate limiter when scaling horizontally.
+# The current in-memory implementation won't share state across multiple
+# server instances. See: https://redis.io/commands/incr (sliding window pattern)
 """
 Simple in-memory rate limiter for financial endpoints.
 Uses a sliding window counter per hotel_id.
