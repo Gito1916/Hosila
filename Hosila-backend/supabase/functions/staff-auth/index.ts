@@ -33,6 +33,7 @@ let _jwtSecret: Uint8Array | null = null;
 function getJwtSecret(): Uint8Array {
     if (_jwtSecret) return _jwtSecret;
     const raw = Deno.env.get("SUPABASE_AUTH_JWT_SECRET")
+        || Deno.env.get("AUTH_JWT_SECRET")   // Supabase blocks SUPABASE_ prefix for custom secrets
         || Deno.env.get("JWT_SECRET")
         || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"); // always available
     if (!raw) throw new Error("No JWT signing key available");
