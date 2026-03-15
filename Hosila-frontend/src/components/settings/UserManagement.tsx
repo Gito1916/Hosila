@@ -243,6 +243,8 @@ function UserForm({
             } else {
                 // Create new user
                 if (!formData.password) throw new Error('Password is required');
+                if (formData.password.length < 8) throw new Error('Password must be at least 8 characters.');
+                if (!/[0-9]/.test(formData.password)) throw new Error('Password must contain at least one number.');
                 await createUser({
                     username: formData.username,
                     password: formData.password,
@@ -327,6 +329,7 @@ function UserForm({
                                 className="input"
                                 required
                                 autoComplete="new-password"
+                                placeholder="Min 8 characters, at least 1 number"
                             />
                         </div>
                     )}
@@ -375,8 +378,12 @@ function PasswordResetModal({
         e.preventDefault();
         setError(null);
 
-        if (newPassword.length < 4) {
-            setError('Password must be at least 4 characters.');
+        if (newPassword.length < 8) {
+            setError('Password must be at least 8 characters.');
+            return;
+        }
+        if (!/[0-9]/.test(newPassword)) {
+            setError('Password must contain at least one number.');
             return;
         }
         if (newPassword !== confirmPassword) {

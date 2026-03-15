@@ -426,10 +426,10 @@ export interface User {
     id: string;
     hotel_id: string;
     username: string;
-    password_hash: string;
     name: string;
     role: UserRole;
     is_active: boolean;
+    must_change_password?: boolean;
     last_login?: Date;
     created_at: Date;
     updated_at: Date;

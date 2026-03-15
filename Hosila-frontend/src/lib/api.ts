@@ -399,8 +399,15 @@ export async function deleteExpense(id: string): Promise<void> {
 // Users
 // ============================================================================
 
+// Safe column list for users — never expose password_hash to the frontend
+const USER_SAFE_COLUMNS = 'id, hotel_id, username, name, role, is_active, must_change_password, last_login, created_at, updated_at';
+
 export async function fetchUsers(): Promise<User[]> {
-    return fetchAll<User>('users', 'created_at');
+    const sb = requireSupabase();
+    const hotelId = await getHotelId();
+    const { data, error } = await sb.from('users').select(USER_SAFE_COLUMNS).eq('hotel_id', hotelId).order('created_at', { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as User[];
 }
 
 export async function fetchUserByUsername(username: string): Promise<User | null> {
@@ -408,7 +415,7 @@ export async function fetchUserByUsername(username: string): Promise<User | null
     const hotelId = await getHotelId();
     const { data, error } = await sb
         .from('users')
-        .select('*')
+        .select(USER_SAFE_COLUMNS)
         .eq('hotel_id', hotelId)
         .eq('username', username)
         .single();

@@ -651,10 +651,10 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                 <div className="flex items-start gap-3">
                                     <ShieldAlert size={20} className="text-amber-400 shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="text-amber-400 font-medium text-sm">Change Your Default Password</p>
+                                        <p className="text-amber-400 font-medium text-sm">Default Password Active</p>
                                         <p className="text-muted text-xs mt-1">
-                                            You'll be signed in as <strong className="text-heading">Admin</strong> with the default password.
-                                            Go to <strong className="text-heading">Settings → Users</strong> to change it.
+                                            You'll be signed in as <strong className="text-heading">Admin</strong> with the default password <code className="text-amber-300">Change1Me!</code>.
+                                            You will be prompted to change it on first login.
                                         </p>
                                     </div>
                                 </div>

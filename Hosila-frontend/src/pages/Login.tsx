@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
-import { useHotel, useUsers } from '@/hooks/useSupabaseData';
+import { useHotel } from '@/hooks/useSupabaseData';
 import { supabase } from '@/lib/supabase';
-import { Eye, EyeOff, Loader2, ChevronDown, Wifi, WifiOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Wifi, WifiOff, UserCircle } from 'lucide-react';
+import { ChangePasswordModal } from '@/components/settings/ChangePasswordModal';
 
 export function LoginPage() {
     const navigate = useNavigate();
     const { login, isAuthenticated, isLoading, error } = useAuthStore();
 
-    const [selectedUserId, setSelectedUserId] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [sessionChecked, setSessionChecked] = useState(false);
+    const [showChangePassword, setShowChangePassword] = useState(false);
 
     // Check for an active Supabase session.
     useEffect(() => {
@@ -35,10 +37,6 @@ export function LoginPage() {
 
     // Get hotel info for branding (from Supabase)
     const { data: hotel } = useHotel();
-
-    // Get all active users for the role dropdown
-    const { data: allUsers } = useUsers();
-    const users = allUsers?.filter(u => u.is_active);
 
     // Track online status
     useEffect(() => {
@@ -68,19 +66,21 @@ export function LoginPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedUserId) return;
+        if (!username.trim()) return;
 
         setIsSubmitting(true);
 
-        const selectedUser = users?.find(u => u.id === selectedUserId);
-        if (!selectedUser) {
-            setIsSubmitting(false);
-            return;
-        }
-
-        const success = await login(selectedUser.username, password);
+        const success = await login(username.trim(), password);
 
         if (success) {
+            // Check if user needs to change password
+            const user = useAuthStore.getState().user;
+            if (user?.must_change_password) {
+                setIsSubmitting(false);
+                setShowChangePassword(true);
+                return;
+            }
+
             // Invalidate all queries so they refetch with the new auth session.
             // This is critical: without this, useHotel() serves stale pre-auth
             // data (hotel=undefined) which causes ProtectedRoute to show onboarding.
@@ -90,6 +90,14 @@ export function LoginPage() {
         }
 
         setIsSubmitting(false);
+    };
+
+    const handlePasswordChanged = async () => {
+        setShowChangePassword(false);
+        // After password change, proceed to dashboard
+        const { queryClient } = await import('@/lib/queryClient');
+        await queryClient.invalidateQueries();
+        navigate('/');
     };
 
     // Check if hotel branding exists
@@ -143,29 +151,26 @@ export function LoginPage() {
                             </div>
                         )}
 
-                        {/* Role Dropdown */}
+                        {/* Username */}
                         <div>
-                            <label htmlFor="user-select" className="label">
-                                Sign in as
+                            <label htmlFor="username" className="label">
+                                Username
                             </label>
                             <div className="relative">
-                                <select
-                                    id="user-select"
-                                    value={selectedUserId}
-                                    onChange={(e) => setSelectedUserId(e.target.value)}
-                                    className="input appearance-none pr-10 cursor-pointer"
-                                    required
-                                >
-                                    <option value="" disabled>Select your account...</option>
-                                    {users?.map(u => (
-                                        <option key={u.id} value={u.id}>
-                                            {u.name} ({u.role})
-                                        </option>
-                                    ))}
-                                </select>
-                                <ChevronDown
+                                <UserCircle
                                     size={18}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+                                />
+                                <input
+                                    id="username"
+                                    type="text"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    className="input pl-10"
+                                    placeholder="Enter your username"
+                                    required
+                                    autoComplete="username"
+                                    autoFocus
                                 />
                             </div>
                         </div>
@@ -199,7 +204,7 @@ export function LoginPage() {
                         {/* Submit */}
                         <button
                             type="submit"
-                            disabled={isSubmitting || !selectedUserId}
+                            disabled={isSubmitting || !username.trim()}
                             className="btn btn-primary w-full mt-2"
                         >
                             {isSubmitting ? (
@@ -219,6 +224,14 @@ export function LoginPage() {
                     Powered by Supabase • Real-time cloud data
                 </p>
             </div>
+
+            {/* Force password change modal */}
+            {showChangePassword && (
+                <ChangePasswordModal
+                    onClose={handlePasswordChanged}
+                    forced
+                />
+            )}
         </div>
     );
 }

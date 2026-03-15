@@ -233,7 +233,7 @@ export const useAuthStore = create<AuthState>()(
 
                     const { data: admin } = await supabase
                         .from('users')
-                        .select('*')
+                        .select('id, hotel_id, username, name, role, is_active, must_change_password, last_login, created_at, updated_at')
                         .eq('hotel_id', hotelId)
                         .eq('role', 'admin')
                         .eq('is_active', true)
@@ -308,7 +308,7 @@ export const useAuthStore = create<AuthState>()(
                         // Verify user still exists and is active in Supabase
                         const { data: dbUser, error } = await supabase
                             .from('users')
-                            .select('*')
+                            .select('id, hotel_id, username, name, role, is_active, must_change_password, last_login, created_at, updated_at')
                             .eq('id', user.id)
                             .single();
 

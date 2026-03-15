@@ -8,6 +8,9 @@ import { requireSupabase, getHotelId } from '@/lib/api';
 import type { User, UserRole, Hotel, HotelSettings } from '@/types';
 // Password hashing is handled server-side via Supabase RPCs
 
+// Safe column list for users — never expose password_hash to the frontend
+const USER_SAFE_COLUMNS = 'id, hotel_id, username, name, role, is_active, must_change_password, last_login, created_at, updated_at';
+
 // =============================================================================
 // Users
 // =============================================================================
@@ -16,7 +19,7 @@ import type { User, UserRole, Hotel, HotelSettings } from '@/types';
 export async function getAllUsers(): Promise<User[]> {
     const sb = requireSupabase();
     const hotelId = await getHotelId();
-    const { data, error } = await sb.from('users').select('*').eq('hotel_id', hotelId);
+    const { data, error } = await sb.from('users').select(USER_SAFE_COLUMNS).eq('hotel_id', hotelId);
     if (error) throw error;
     return data ?? [];
 }
@@ -24,7 +27,7 @@ export async function getAllUsers(): Promise<User[]> {
 // Get user by ID
 export async function getUserById(id: string): Promise<User | undefined> {
     const sb = requireSupabase();
-    const { data, error } = await sb.from('users').select('*').eq('id', id).single();
+    const { data, error } = await sb.from('users').select(USER_SAFE_COLUMNS).eq('id', id).single();
     if (error) return undefined;
     return data ?? undefined;
 }
@@ -33,7 +36,7 @@ export async function getUserById(id: string): Promise<User | undefined> {
 export async function getUserByUsername(username: string): Promise<User | undefined> {
     const sb = requireSupabase();
     const hotelId = await getHotelId();
-    const { data, error } = await sb.from('users').select('*').eq('hotel_id', hotelId).eq('username', username).single();
+    const { data, error } = await sb.from('users').select(USER_SAFE_COLUMNS).eq('hotel_id', hotelId).eq('username', username).single();
     if (error) return undefined;
     return data ?? undefined;
 }
@@ -188,7 +191,7 @@ export async function exportData(): Promise<string> {
 
     const [hotel, users, rooms, guests, bookings, reservations, payments, services, service_orders, inventory_items, inventory_movements, expenses] = await Promise.all([
         sb.from('hotels').select('*').eq('id', hotelId).single(),
-        sb.from('users').select('*').eq('hotel_id', hotelId),
+        sb.from('users').select(USER_SAFE_COLUMNS).eq('hotel_id', hotelId),
         sb.from('rooms').select('*').eq('hotel_id', hotelId),
         sb.from('guests').select('*').eq('hotel_id', hotelId),
         sb.from('bookings').select('*').eq('hotel_id', hotelId),

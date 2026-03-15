@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { requireSupabase } from '@/lib/api';
 import type {
     Hotel,
-    User,
 } from '@/types';
 
 // Seed data generator - creates only essential data for fresh install
@@ -53,26 +52,33 @@ export async function seedDatabase() {
 
 
     // Create admin user
-    // Hash password server-side
+    // Hash the default admin password server-side
+    // Password meets policy: 8+ chars, at least 1 digit
     const { data: passwordHash, error: hashError } = await sb.rpc('hash_password', {
-        p_password: 'admin123',
+        p_password: 'Change1Me!',
     });
-    if (hashError || !passwordHash) throw new Error('Failed to hash password');
-    const admin: Partial<User> = {
+    if (hashError || !passwordHash) {
+        throw new Error(`Failed to hash password: ${hashError?.message || 'unknown'}`);
+    }
+
+    // The DB record includes password_hash (not on the frontend User type)
+    const admin: Record<string, unknown> = {
         id: uuidv4(),
         hotel_id: hotelId,
         username: 'admin',
         password_hash: passwordHash,
-        name: 'Admin (Org)',
+        name: 'Admin',
         role: 'admin',
         is_active: true,
+        must_change_password: true,
         created_at: now,
         updated_at: now,
     };
+
     const { error: userError } = await sb.from('users').insert(admin);
     if (userError) throw userError;
 
     console.info('✅ Database initialized successfully!');
-    console.info('📋 Default login: admin / admin123');
+    console.info('📋 Default login: admin / Change1Me!');
     console.info('💡 Go to Settings to add rooms, menu items, and configure your hotel.');
 }
