@@ -94,7 +94,7 @@ function OfflineStatusBanner() {
 
 // Protected route wrapper with onboarding check
 function ProtectedRoute() {
-    const { isAuthenticated, isLoading } = useAuthStore();
+    const { isAuthenticated, isLoading, accessToken } = useAuthStore();
 
     // Use React Query to fetch hotel data — replaces useLiveQuery(db.hotel...)
     // IMPORTANT: Must be called before any early returns to satisfy React's rules of hooks.
@@ -115,7 +115,13 @@ function ProtectedRoute() {
         );
     }
 
-    // No hotel at all = fresh install, show onboarding
+    // Staff users (authenticated via Edge Function JWT) always skip onboarding.
+    // Their hotel already exists — they were created inside that hotel.
+    if (accessToken) {
+        return <Outlet />;
+    }
+
+    // Owner/admin path: No hotel at all = fresh install, show onboarding
     // Hotel exists but onboarding not complete = show onboarding
     // Error fetching hotel (e.g., RLS issue) = show onboarding
     const needsOnboarding = hotelError || !hotel || !hotel.settings?.onboarding_complete;
