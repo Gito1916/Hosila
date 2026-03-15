@@ -204,6 +204,50 @@ class EmailService:
         )
         return result
 
+    async def send_new_hotel_notification(
+        self,
+        hotel_name: str,
+        hotel_email: str = "",
+        hotel_phone: str = "",
+        hotel_address: str = "",
+    ) -> dict:
+        """
+        Notify hosilateam@gmail.com when a new hotel completes registration.
+        """
+        subject = f"[New Hotel Registration] {hotel_name}"
+        body_lines = [("Hotel Name", hotel_name)]
+        if hotel_email:
+            body_lines.append(("Email", hotel_email))
+        if hotel_phone:
+            body_lines.append(("Phone", hotel_phone))
+        if hotel_address:
+            body_lines.append(("Address", hotel_address))
+        body_lines.append(("Registered At", datetime.utcnow().isoformat() + "Z"))
+
+        body_html = "".join(
+            f"<p><strong>{html.escape(k)}:</strong> {html.escape(v)}</p>"
+            for k, v in body_lines
+        )
+        message_html = f"""
+            <div style="font-family:Arial,sans-serif;line-height:1.55;color:#111827;">
+              <h2 style="margin:0 0 12px;">🏨 New Hotel Registration</h2>
+              {body_html}
+              <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb;" />
+              <p style="font-size:13px;color:#6b7280;">
+                A new hotel just completed onboarding on Hosila.
+                Reach out to offer assistance and ensure they get started smoothly.
+              </p>
+            </div>
+        """
+        sender = {
+            "from_email": f"Hosila System <{settings.contact_sender_email}>",
+        }
+        result = await self._send_via_resend(
+            "hosilateam@gmail.com", subject, message_html, sender
+        )
+        logger.info("New hotel notification sent for hotel=%s status=%s", hotel_name, result.get("status"))
+        return result
+
     async def _log_email(
         self,
         hotel_id: str,

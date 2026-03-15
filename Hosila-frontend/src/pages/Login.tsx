@@ -258,13 +258,13 @@ export function LoginPage() {
 
                 {/* Footer */}
                 <p className="text-center text-muted text-xs mt-6">
-                    Setting up a new hotel?{' '}
+                    New hotel?{' '}
                     <button
                         type="button"
                         onClick={() => navigate('/onboarding')}
                         className="text-primary-400 hover:text-primary-300 underline"
                     >
-                        Start here
+                        Create an account
                     </button>
                 </p>
             </div>

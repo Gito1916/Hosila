@@ -141,6 +141,7 @@ export interface Hotel {
     id: string;
     tenant_id?: string; // Supabase auth user who owns this hotel
     name: string;
+    hotel_code?: string; // Unique code for staff login
     logo_url?: string;
     address?: string;
     phone?: string;

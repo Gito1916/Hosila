@@ -337,6 +337,7 @@ async def send_welcome_email(
     """
     Send onboarding welcome email to the authenticated user.
     Triggered after onboarding is marked complete.
+    Also notifies hosilateam@gmail.com about the new hotel registration.
     """
     # Resolve user email from the auth context
     user_id = tenant.user_id
@@ -353,6 +354,22 @@ async def send_welcome_email(
         row["email"],
         row.get("name") or "",
     )
+
+    # ── Notify Hosila team about new hotel registration ──
+    hotel_result = await db.execute(
+        text("SELECT name, email, phone, address FROM hotels WHERE id = :hid"),
+        {"hid": tenant.hotel_id},
+    )
+    hotel_row = hotel_result.mappings().first()
+    if hotel_row:
+        background_tasks.add_task(
+            email_service.send_new_hotel_notification,
+            hotel_row.get("name") or "Unknown",
+            hotel_row.get("email") or "",
+            hotel_row.get("phone") or "",
+            hotel_row.get("address") or "",
+        )
+
     return {"message": "Welcome email queued", "status": "queued"}
 
 

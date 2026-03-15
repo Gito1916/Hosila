@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { getHotel, updateHotel } from '@/db/settings';
-import { uploadHotelLogo, deleteHotelLogo, isCloudLinked } from '@/lib/supabase';
+import { uploadHotelLogo, deleteHotelLogo, isCloudLinked, supabase } from '@/lib/supabase';
 import { isCloudAvailable } from '@/lib/supabase';
 import { getHotelId } from '@/lib/api';
 import { toast } from '@/lib/errorMessages';
 import { useAuthStore } from '@/stores/authStore';
+import { useHotel } from '@/hooks/useSupabaseData';
 import type { Hotel } from '@/types';
 import {
     Building,
@@ -24,6 +25,8 @@ import {
     Lock,
     RefreshCw,
     Copy,
+    Monitor,
+    Hash,
 } from 'lucide-react';
 
 export function AccountPanel() {
@@ -55,8 +58,31 @@ export function AccountPanel() {
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
     const [mgmtLoading, setMgmtLoading] = useState(false);
     const [mgmtSuccess, setMgmtSuccess] = useState('');
-    const [copied, setCopied] = useState(false);
+    const [copiedCode, setCopiedCode] = useState(false);
+    const [activeDevices, setActiveDevices] = useState<number>(0);
     const isOnline = navigator.onLine;
+
+    // Get hotel data (includes hotel_code) from Supabase
+    const { data: hotelData } = useHotel();
+
+    // Fetch active staff sessions count
+    useEffect(() => {
+        async function fetchActiveDevices() {
+            if (!supabase || !hotelData?.id) return;
+            try {
+                const { count } = await supabase
+                    .from('staff_sessions')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('hotel_id', hotelData.id)
+                    .is('revoked_at', null)
+                    .gt('expires_at', new Date().toISOString());
+                setActiveDevices(count ?? 0);
+            } catch {
+                // silently fail
+            }
+        }
+        fetchActiveDevices();
+    }, [hotelData?.id]);
 
     useEffect(() => {
         async function load() {
@@ -170,8 +196,6 @@ export function AccountPanel() {
             document.execCommand('copy');
             document.body.removeChild(textArea);
         }
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
     };
 
     if (isLoading) {
@@ -348,19 +372,48 @@ export function AccountPanel() {
                         </div>
                     </div>
 
-                    {/* Cloud email */}
+                    {/* Hotel Code */}
                     <div className="bg-surface-raised/50 rounded-lg p-3 mb-4">
-                        <p className="text-xs text-muted mb-1">Cloud Account Email</p>
+                        <p className="text-xs text-muted mb-1 flex items-center gap-1">
+                            <Hash size={12} />
+                            Hotel Code
+                        </p>
                         <div className="flex items-center gap-2">
-                            <code className="text-primary-400 font-mono text-sm flex-1">{cloudAccount.email}</code>
-                            <button
-                                onClick={() => handleCopyId(cloudAccount.email)}
-                                className="btn btn-secondary text-xs px-2 py-1"
-                            >
-                                <Copy size={14} />
-                                {copied ? 'Copied!' : 'Copy'}
-                            </button>
+                            <code className="text-primary-400 font-mono text-lg font-bold tracking-widest flex-1">
+                                {hotelData?.hotel_code || '—'}
+                            </code>
+                            {hotelData?.hotel_code && (
+                                <button
+                                    onClick={() => {
+                                        handleCopyId(hotelData.hotel_code!);
+                                        setCopiedCode(true);
+                                        setTimeout(() => setCopiedCode(false), 2000);
+                                    }}
+                                    className="btn btn-secondary text-xs px-2 py-1"
+                                >
+                                    <Copy size={14} />
+                                    {copiedCode ? 'Copied!' : 'Copy'}
+                                </button>
+                            )}
                         </div>
+                        <p className="text-xs text-muted mt-1.5">
+                            Share this code with your staff so they can log in on their devices.
+                        </p>
+                    </div>
+
+                    {/* Connected Devices */}
+                    <div className="bg-surface-raised/50 rounded-lg p-3 mb-4">
+                        <p className="text-xs text-muted mb-1 flex items-center gap-1">
+                            <Monitor size={12} />
+                            Connected Devices
+                        </p>
+                        <div className="flex items-center gap-3">
+                            <span className="text-2xl font-bold text-heading">{activeDevices}</span>
+                            <span className="text-sm text-muted">active staff session{activeDevices !== 1 ? 's' : ''}</span>
+                        </div>
+                        <p className="text-xs text-muted mt-1.5">
+                            Staff devices currently logged in via hotel code.
+                        </p>
                     </div>
                 </div>
             )}

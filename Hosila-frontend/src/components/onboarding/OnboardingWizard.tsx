@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, ChevronRight, ChevronLeft, Check, Loader2, Copy, Settings, Mail, Link2, Monitor, ShieldAlert, UserPlus } from 'lucide-react';
+import { Building2, ChevronRight, ChevronLeft, Check, Loader2, Copy, Settings, Mail, ShieldAlert, UserPlus } from 'lucide-react';
 import { updateHotel } from '@/db/settings';
 import { seedDatabase } from '@/utils/seedData';
-import { isCloudAvailable, supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { requireSupabase, getHotelId, clearHotelIdCache } from '@/lib/api';
 
-type Step = 'welcome' | 'account' | 'hotel' | 'complete' | 'connect';
+type Step = 'welcome' | 'account' | 'hotel' | 'complete';
 
 interface OnboardingWizardProps {
     onComplete: () => void;
@@ -30,16 +30,9 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
     const [hotelEmail, setHotelEmail] = useState('');
     const [hotelError, setHotelError] = useState('');
 
-    // Connect existing hotel
-    const [connectEmail, setConnectEmail] = useState('');
-    const [connectPassword, setConnectPassword] = useState('');
-    const [connectError, setConnectError] = useState('');
-    const [connectSuccess, setConnectSuccess] = useState(false);
-    const [syncProgress, setSyncProgress] = useState('');
     const [copied, setCopied] = useState(false);
 
-    const { loginCloud, autoLoginAsAdmin } = useAuthStore();
-    const cloudAvailable = isCloudAvailable();
+    const { autoLoginAsAdmin } = useAuthStore();
 
     // =========================================================================
     // New Hotel: Step 1 — Create cloud account (Supabase auth.signUp)
@@ -124,94 +117,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         }
     };
 
-    // =========================================================================
-    // Connect Existing: Login to Supabase → verify org data exists
-    // =========================================================================
-    const handleConnectExisting = async () => {
-        if (!connectEmail || !connectEmail.includes('@')) {
-            setConnectError('Please enter a valid email address');
-            return;
-        }
-        if (!connectPassword || connectPassword.length < 8) {
-            setConnectError('Password must be at least 8 characters');
-            return;
-        }
 
-        setIsSubmitting(true);
-        setConnectError('');
-        setSyncProgress('Signing in to cloud...');
-
-        try {
-            // Step 1: Login to Supabase cloud account
-            const loggedIn = await loginCloud(connectEmail, connectPassword);
-            if (!loggedIn) {
-                const storeError = useAuthStore.getState().cloudError;
-                setConnectError(storeError || 'Invalid email or password.');
-                setIsSubmitting(false);
-                setSyncProgress('');
-                return;
-            }
-
-            // Step 2: Verify hotel data exists
-            setSyncProgress('Verifying hotel data...');
-            clearHotelIdCache();
-            const hotelId = await getHotelId();
-            const sb = requireSupabase();
-
-            const { data: hotel } = await sb
-                .from('hotels')
-                .select('*')
-                .eq('id', hotelId)
-                .single();
-
-            if (!hotel) {
-                setConnectError('No hotel found for this account. Make sure you are using the correct credentials.');
-                setIsSubmitting(false);
-                setSyncProgress('');
-                return;
-            }
-
-            // Step 3: Verify users exist
-            setSyncProgress('Checking staff accounts...');
-            const { count: users } = await sb
-                .from('users')
-                .select('*', { count: 'exact', head: true })
-                .eq('hotel_id', hotel.id);
-
-            if (users === 0) {
-                setConnectError('Hotel connected but no staff accounts found. Create users on the primary device first.');
-                setIsSubmitting(false);
-                setSyncProgress('');
-                return;
-            }
-
-            // Step 4: Mark onboarding complete
-            setSyncProgress('Finalizing setup...');
-            await updateHotel({
-                settings: {
-                    ...hotel.settings!,
-                    onboarding_complete: true,
-                },
-            });
-
-            setSyncProgress('');
-            setConnectSuccess(true);
-        } catch (err: any) {
-            setConnectError(err?.message || 'Failed to connect to hotel');
-            setSyncProgress('');
-            console.error(err);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    // =========================================================================
-    // Connect Existing: Go to login page
-    // =========================================================================
-    const handleGoToLogin = () => {
-        onComplete();
-        navigate('/login');
-    };
 
     // =========================================================================
     // New Org: Complete → auto-login as admin
@@ -273,14 +179,10 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
     };
 
     // Progress dots
-    const isConnectFlow = currentStep === 'connect';
-    const newFlowSteps: Step[] = ['welcome', 'account', 'hotel', 'complete'];
-    const connectFlowSteps: Step[] = ['welcome', 'connect', 'complete'];
-    const activeSteps = isConnectFlow || connectSuccess ? connectFlowSteps : newFlowSteps;
+    const flowSteps: Step[] = ['welcome', 'account', 'hotel', 'complete'];
 
     const getStepIndex = (step: Step) => {
-        if (step === 'connect') return 1;
-        return newFlowSteps.indexOf(step);
+        return flowSteps.indexOf(step);
     };
 
     return (
@@ -289,12 +191,12 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                 {/* Progress indicator */}
                 {currentStep !== 'welcome' && (
                     <div className="flex items-center justify-center gap-2 mb-8">
-                        {activeSteps.map((_, i) => (
+                        {flowSteps.map((_, i) => (
                             <div key={i} className="flex items-center gap-2">
                                 <div className={`w-3 h-3 rounded-full ${i < getStepIndex(currentStep) ? 'bg-status-available' :
                                     i === getStepIndex(currentStep) ? 'bg-primary-500' : 'bg-surface-raised'
                                     }`} />
-                                {i < activeSteps.length - 1 && (
+                                {i < flowSteps.length - 1 && (
                                     <div className={`w-12 h-0.5 ${i < getStepIndex(currentStep) ? 'bg-status-available' : 'bg-surface-raised'
                                         }`} />
                                 )}
@@ -304,7 +206,6 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                 )}
 
                 <div className="bg-surface-card rounded-2xl border border-border overflow-hidden">
-                    {/* Welcome — Choose new or connect */}
                     {currentStep === 'welcome' && (
                         <div className="p-6">
                             <div className="text-center mb-8">
@@ -312,49 +213,28 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                     <img src="/Hosila-icon-logo.png" alt="Hosila" className="w-16 h-16 rounded-xl" />
                                 </div>
                                 <h2 className="text-2xl font-bold text-heading">Welcome to Hosila</h2>
-                                <p className="text-muted mt-2">How would you like to get started?</p>
+                                <p className="text-muted mt-2">Let's set up your hotel in just a few steps.</p>
                             </div>
 
-                            <div className="space-y-3">
-                                <button
-                                    onClick={() => setCurrentStep('account')}
-                                    className="w-full p-5 rounded-xl border-2 border-border hover:border-primary-500 hover:bg-primary-500/5 text-left transition-all group"
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-primary-500/20 rounded-full flex items-center justify-center shrink-0 group-hover:bg-primary-500/30 transition-colors">
-                                            <Building2 size={24} className="text-primary-400" />
-                                        </div>
-                                        <div>
-                                            <p className="text-heading font-semibold text-lg">Create New Hotel</p>
-                                            <p className="text-sm text-muted">First time using Hosila? Set up your hotel.</p>
-                                        </div>
-                                        <ChevronRight size={20} className="text-muted ml-auto shrink-0" />
-                                    </div>
-                                </button>
+                            <button
+                                onClick={() => setCurrentStep('account')}
+                                className="btn btn-primary w-full text-lg py-3"
+                            >
+                                <Building2 size={20} className="mr-2" />
+                                Get Started
+                                <ChevronRight size={20} className="ml-2" />
+                            </button>
 
+                            <p className="text-center text-muted text-xs mt-4">
+                                Already have a hotel?{' '}
                                 <button
-                                    onClick={() => setCurrentStep('connect')}
-                                    disabled={!cloudAvailable}
-                                    className={`w-full p-5 rounded-xl border-2 border-border hover:border-cyan-500 hover:bg-cyan-500/5 text-left transition-all group ${!cloudAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    type="button"
+                                    onClick={() => navigate('/login')}
+                                    className="text-primary-400 hover:text-primary-300 underline"
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-cyan-500/20 rounded-full flex items-center justify-center shrink-0 group-hover:bg-cyan-500/30 transition-colors">
-                                            <Link2 size={24} className="text-cyan-400" />
-                                        </div>
-                                        <div>
-                                            <p className="text-heading font-semibold text-lg">Connect to Hotel</p>
-                                            <p className="text-sm text-muted">Already set up? Join an existing hotel.</p>
-                                        </div>
-                                        <ChevronRight size={20} className="text-muted ml-auto shrink-0" />
-                                    </div>
+                                    Sign in here
                                 </button>
-
-                                {!cloudAvailable && (
-                                    <p className="text-xs text-muted text-center mt-2">
-                                        Cloud sync not configured. Add Supabase credentials to connect to an existing hotel.
-                                    </p>
-                                )}
-                            </div>
+                            </p>
                         </div>
                     )}
 
@@ -519,119 +399,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                         </div>
                     )}
 
-                    {/* Connect to Existing Org */}
-                    {currentStep === 'connect' && (
-                        <div className="p-6">
-                            <div className="text-center mb-6">
-                                <div className="w-16 h-16 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Monitor size={32} className="text-cyan-400" />
-                                </div>
-                                <h2 className="text-2xl font-bold text-heading">Connect to Hotel</h2>
-                                <p className="text-muted mt-2">Enter the cloud account details from the hotel's account</p>
-                            </div>
 
-                            {!connectSuccess ? (
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="label">Cloud Account Email</label>
-                                        <div className="relative">
-                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
-                                            <input
-                                                type="email"
-                                                value={connectEmail}
-                                                onChange={(e) => setConnectEmail(e.target.value)}
-                                                className="input pl-10"
-                                                placeholder="hotel@gmail.com"
-                                                autoFocus
-                                            />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="label">Password</label>
-                                        <input
-                                            type="password"
-                                            value={connectPassword}
-                                            onChange={(e) => setConnectPassword(e.target.value)}
-                                            className="input"
-                                            placeholder="Enter password"
-                                        />
-                                    </div>
-
-                                    {connectError && (
-                                        <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
-                                            {connectError}
-                                        </div>
-                                    )}
-
-                                    {syncProgress && (
-                                        <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg text-blue-400 text-sm">
-                                            <Loader2 size={16} className="animate-spin shrink-0" />
-                                            {syncProgress}
-                                        </div>
-                                    )}
-
-                                    <button
-                                        onClick={handleConnectExisting}
-                                        disabled={isSubmitting || !connectEmail || !connectPassword}
-                                        className="btn btn-primary w-full"
-                                    >
-                                        {isSubmitting ? (
-                                            <>
-                                                <Loader2 size={18} className="animate-spin" />
-                                                Connecting...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Link2 size={18} />
-                                                Connect
-                                            </>
-                                        )}
-                                    </button>
-
-                                    <p className="text-xs text-muted text-center">
-                                        Ask the hotel administrator for the cloud email and password.
-                                    </p>
-                                </div>
-                            ) : (
-                                <div className="text-center space-y-4">
-                                    <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto">
-                                        <Check size={24} className="text-emerald-400" />
-                                    </div>
-                                    <p className="text-heading font-medium text-lg">Connected Successfully!</p>
-                                    <p className="text-sm text-muted">
-                                        Your device is now linked to the hotel. You can sign in with your staff account.
-                                    </p>
-                                    <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3 text-sm text-emerald-400">
-                                        ☁️ Connected to: <code className="text-emerald-300">{connectEmail}</code>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="mt-6 flex gap-3">
-                                <button
-                                    onClick={() => {
-                                        setCurrentStep('welcome');
-                                        setConnectError('');
-                                        setSyncProgress('');
-                                    }}
-                                    className="btn btn-secondary flex-1 flex items-center justify-center gap-2"
-                                    disabled={isSubmitting}
-                                >
-                                    <ChevronLeft size={18} />
-                                    Back
-                                </button>
-                                {connectSuccess && (
-                                    <button
-                                        onClick={handleGoToLogin}
-                                        className="btn btn-primary flex-1 flex items-center justify-center gap-2"
-                                    >
-                                        Sign In
-                                        <ChevronRight size={18} />
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    )}
 
                     {/* Step: Complete */}
                     {currentStep === 'complete' && (
@@ -660,7 +428,6 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                 </div>
                             </div>
 
-                            {/* Cloud account info */}
                             <div className="bg-primary-500/10 border border-primary-500/30 rounded-lg p-3 mb-4 text-sm">
                                 <p className="text-primary-400 font-medium">☁️ Cloud Account</p>
                                 <div className="flex items-center gap-2 mt-1">
@@ -674,7 +441,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                     </button>
                                 </div>
                                 <p className="text-xs text-muted mt-2">
-                                    Use this email + password to connect other devices.
+                                    Your cloud sync credentials. Keep them safe.
                                 </p>
                             </div>
 
