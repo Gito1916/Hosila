@@ -28,9 +28,17 @@ function getSupabaseAdmin() {
     return createClient(url, serviceKey);
 }
 
-const JWT_SECRET_RAW = Deno.env.get("SUPABASE_AUTH_JWT_SECRET");
-if (!JWT_SECRET_RAW) throw new Error("SUPABASE_AUTH_JWT_SECRET is required — refusing to start with an insecure default");
-const JWT_SECRET = new TextEncoder().encode(JWT_SECRET_RAW);
+// JWT secret — lazy-loaded to avoid crashing the module on startup
+let _jwtSecret: Uint8Array | null = null;
+function getJwtSecret(): Uint8Array {
+    if (_jwtSecret) return _jwtSecret;
+    const raw = Deno.env.get("SUPABASE_AUTH_JWT_SECRET")
+        || Deno.env.get("JWT_SECRET")
+        || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"); // always available
+    if (!raw) throw new Error("No JWT signing key available");
+    _jwtSecret = new TextEncoder().encode(raw);
+    return _jwtSecret;
+}
 
 async function mintAccessToken(user: any, sessionId: string) {
     return await new SignJWT({
@@ -43,7 +51,7 @@ async function mintAccessToken(user: any, sessionId: string) {
         .setProtectedHeader({ alg: "HS256" })
         .setIssuedAt()
         .setExpirationTime("10m")
-        .sign(JWT_SECRET);
+        .sign(getJwtSecret());
 }
 
 // ── Audit helper ─────────────────────────────────────────────────

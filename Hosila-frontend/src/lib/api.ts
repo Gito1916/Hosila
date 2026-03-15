@@ -168,12 +168,12 @@ export async function deleteRecord(table: string, id: string): Promise<void> {
 
 export async function fetchHotel(): Promise<Hotel | null> {
     const sb = requireSupabase();
-    const { data, error } = await sb.from('hotels').select('*').limit(1).single();
+    const { data, error } = await sb.from('hotels').select('*').limit(1).maybeSingle();
     if (error) {
         if (error.code === 'PGRST116') return null;
         throw error;
     }
-    return data as Hotel;
+    return data as Hotel | null;
 }
 
 export async function updateHotel(id: string, updates: Partial<Hotel>): Promise<Hotel> {
