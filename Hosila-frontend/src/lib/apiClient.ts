@@ -94,13 +94,31 @@ export function warmUpBackend(): void {
 }
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
-    if (!supabase) throw new Error('Supabase client not initialized');
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) {
+    let accessToken: string | null = null;
+    try {
+        const stored = localStorage.getItem('hotelflow-auth');
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            accessToken = parsed.state?.accessToken;
+        }
+    } catch {
+        // ignore
+    }
+
+    // Fallback to Supabase built-in session (for admin users/cloud accounts)
+    if (!accessToken && supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+            accessToken = session.access_token;
+        }
+    }
+
+    if (!accessToken) {
         throw new Error('Not authenticated');
     }
+
     return {
-        'Authorization': `Bearer ${session.access_token}`,
+        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
     };
 }

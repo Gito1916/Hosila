@@ -8,8 +8,9 @@ import { ChangePasswordModal } from '@/components/settings/ChangePasswordModal';
 
 export function LoginPage() {
     const navigate = useNavigate();
-    const { login, isAuthenticated, isLoading, error } = useAuthStore();
+    const { login, isAuthenticated, isLoading, error, hotelCode } = useAuthStore();
 
+    const [inputHotelCode, setInputHotelCode] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -67,10 +68,11 @@ export function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!username.trim()) return;
+        if (!hotelCode && !inputHotelCode.trim()) return;
 
         setIsSubmitting(true);
 
-        const success = await login(username.trim(), password);
+        const success = await login(username.trim(), password, inputHotelCode.trim() || undefined);
 
         if (success) {
             // Check if user needs to change password
@@ -151,6 +153,29 @@ export function LoginPage() {
                             </div>
                         )}
 
+                        {/* Hotel Code (only if device is not paired) */}
+                        {!hotelCode && (
+                            <div>
+                                <label htmlFor="hotelCode" className="label">
+                                    Hotel Code
+                                </label>
+                                <input
+                                    id="hotelCode"
+                                    type="text"
+                                    value={inputHotelCode}
+                                    onChange={(e) => setInputHotelCode(e.target.value)}
+                                    className="input font-mono"
+                                    placeholder="Enter hotel pairing code"
+                                    required
+                                    autoComplete="off"
+                                    autoFocus
+                                />
+                                <p className="text-xs text-muted mt-1.5 leading-relaxed">
+                                    Required for the first sign-in on a new device.
+                                </p>
+                            </div>
+                        )}
+
                         {/* Username */}
                         <div>
                             <label htmlFor="username" className="label">
@@ -170,7 +195,7 @@ export function LoginPage() {
                                     placeholder="Enter your username"
                                     required
                                     autoComplete="username"
-                                    autoFocus
+                                    autoFocus={!!hotelCode}
                                 />
                             </div>
                         </div>

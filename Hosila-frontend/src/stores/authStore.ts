@@ -39,8 +39,13 @@ interface AuthState {
     offlinePasswordHash: string | null;  // bcrypt hash for offline login verification
     isOfflineSession: boolean;
 
+    // Staff auth tokens
+    accessToken: string | null;
+    refreshToken: string | null;
+    hotelCode: string | null;
+
     // Actions
-    login: (username: string, password: string) => Promise<boolean>;
+    login: (username: string, password: string, hotelCode?: string) => Promise<boolean>;
     logout: () => Promise<void>;
     checkSession: () => Promise<void>;
 
@@ -76,6 +81,11 @@ export const useAuthStore = create<AuthState>()(
             offlinePasswordHash: null,
             isOfflineSession: false,
 
+            // Staff auth tokens
+            accessToken: null,
+            refreshToken: null,
+            hotelCode: null,
+
             // Cloud state
             cloudAccount: null,
             isCloudLinked: false,
@@ -83,9 +93,9 @@ export const useAuthStore = create<AuthState>()(
             pendingConfirmation: false,
 
             // =================================================================
-            // Login — authenticates against Supabase `users` table
+            // Login — authenticates against Edge Function
             // =================================================================
-            login: async (username: string, password: string) => {
+            login: async (username: string, password: string, hotelCode?: string) => {
                 set({ isLoading: true, error: null, isOfflineSession: false });
 
                 // ─── OFFLINE LOGIN PATH ───────────────────────────
@@ -133,51 +143,29 @@ export const useAuthStore = create<AuthState>()(
                     return true;
                 }
 
-                // ─── ONLINE LOGIN PATH (original) ─────────────────
+                // ─── ONLINE LOGIN PATH (via Edge Function) ────────
                 try {
                     if (!supabase) {
                         set({ error: 'Cloud not configured', isLoading: false });
                         return false;
                     }
 
-                    // Get hotel_id for scoped user lookup
-                    const hotelId = await getHotelId();
-                    if (!hotelId) {
-                        set({ error: 'Hotel not configured', isLoading: false });
+                    const codeToUse = hotelCode || get().hotelCode;
+                    if (!codeToUse) {
+                        set({ error: 'Hotel code is required for first-time login', isLoading: false });
                         return false;
                     }
 
-                    // Fetch user via server-side RPC (never exposes password_hash)
-                    const { data: users, error } = await supabase
-                        .rpc('authenticate_user', {
-                            p_username: username,
-                            p_hotel_id: hotelId,
-                        });
+                    const { data, error: invokeErr } = await supabase.functions.invoke('staff-auth/login', {
+                        body: { username, password, hotel_code: codeToUse }
+                    });
 
-                    if (error || !users || users.length === 0) {
-                        set({ error: 'Invalid username or password', isLoading: false });
+                    if (invokeErr || data?.error) {
+                        set({ error: data?.error || 'Invalid username, password, or hotel code', isLoading: false });
                         return false;
                     }
 
-                    const user = users[0];
-
-                    // Verify password server-side
-                    const { data: isValid, error: verifyError } = await supabase
-                        .rpc('verify_user_password', {
-                            p_user_id: user.id,
-                            p_password: password,
-                        });
-
-                    if (verifyError || !isValid) {
-                        set({ error: 'Invalid username or password', isLoading: false });
-                        return false;
-                    }
-
-                    // Update last login
-                    await supabase
-                        .from('users')
-                        .update({ last_login: new Date().toISOString() })
-                        .eq('id', user.id);
+                    const { access_token, refresh_token, user } = data;
 
                     // Cache password hash locally for offline login
                     const offlineHash = hashSync(password, 10);
@@ -189,20 +177,20 @@ export const useAuthStore = create<AuthState>()(
                         isOfflineSession: false,
                         lastLoginTime: new Date().toISOString(),
                         offlinePasswordHash: offlineHash,
+                        accessToken: access_token,
+                        refreshToken: refresh_token,
+                        hotelCode: codeToUse,
                     });
 
                     // Fetch hotel name for display
                     try {
-                        const hotelId = await getHotelId();
-                        if (hotelId && supabase) {
-                            const { data: hotel } = await supabase
-                                .from('hotels')
-                                .select('name')
-                                .eq('id', hotelId)
-                                .single();
-                            if (hotel) {
-                                set({ activeHotelName: hotel.name });
-                            }
+                        const { data: hotel } = await supabase
+                            .from('hotels')
+                            .select('name')
+                            .eq('id', user.hotel_id)
+                            .single();
+                        if (hotel) {
+                            set({ activeHotelName: hotel.name });
                         }
                     } catch (e) {
                         console.warn('Could not fetch hotel name:', e);
@@ -214,9 +202,9 @@ export const useAuthStore = create<AuthState>()(
                     }
 
                     return true;
-                } catch (err) {
+                } catch (err: any) {
                     console.error('Login error:', err);
-                    set({ error: 'An error occurred during login', isLoading: false });
+                    set({ error: err.message || 'An error occurred during login', isLoading: false });
                     return false;
                 }
             },
@@ -259,6 +247,8 @@ export const useAuthStore = create<AuthState>()(
             // Logout — with safe offline queue handling
             // =================================================================
             logout: async () => {
+                const { refreshToken } = get();
+
                 // Attempt to flush pending offline writes before logout
                 try {
                     const { getPendingCount, flushQueue, clearQueue } = await import('@/lib/offlineQueue');
@@ -281,9 +271,12 @@ export const useAuthStore = create<AuthState>()(
                     console.warn('Failed to flush queues on logout:', e);
                 }
 
-                if (supabase) {
-                    supabase.auth.signOut().catch(console.error);
+                if (supabase && refreshToken && navigator.onLine) {
+                    supabase.functions.invoke('staff-auth/logout', {
+                        body: { refresh_token: refreshToken }
+                    }).catch(console.warn);
                 }
+
                 set({
                     user: null,
                     isAuthenticated: false,
@@ -294,6 +287,8 @@ export const useAuthStore = create<AuthState>()(
                     cloudAccount: null,
                     isCloudLinked: false,
                     cloudError: null,
+                    accessToken: null,
+                    refreshToken: null,
                 });
             },
 
@@ -301,31 +296,57 @@ export const useAuthStore = create<AuthState>()(
             // Session Check (on app load)
             // =================================================================
             checkSession: async () => {
-                const { user } = get();
+                const { isOfflineSession, refreshToken } = get();
 
-                if (user && supabase) {
+                // If offline session, handled by login expiration
+                if (isOfflineSession) {
+                    set({ isLoading: false });
+                    return;
+                }
+
+                if (!supabase || !navigator.onLine) {
+                    set({ isLoading: false });
+                    return;
+                }
+
+                if (refreshToken) {
                     try {
-                        // Verify user still exists and is active in Supabase
-                        const { data: dbUser, error } = await supabase
-                            .from('users')
-                            .select('id, hotel_id, username, name, role, is_active, must_change_password, last_login, created_at, updated_at')
-                            .eq('id', user.id)
-                            .single();
+                        const { data, error: invokeErr } = await supabase.functions.invoke('staff-auth/refresh', {
+                            body: { refresh_token: refreshToken }
+                        });
 
-                        if (error) {
-                            // Network error or Supabase unreachable — keep current session
-                            console.warn('Session check failed (network?):', error.message);
-                            set({ isLoading: false });
-                        } else if (!dbUser || !dbUser.is_active) {
-                            // User was explicitly deactivated or deleted
-                            set({ user: null, isAuthenticated: false, isLoading: false });
+                        if (!invokeErr && data && !data.error) {
+                            set({
+                                accessToken: data.access_token,
+                                refreshToken: data.refresh_token,
+                                user: data.user as User,
+                                isAuthenticated: true,
+                                lastLoginTime: new Date().toISOString(),
+                                isLoading: false
+                            });
+
+                            // Load hotel name
+                            try {
+                                const { data: hotel } = await supabase
+                                    .from('hotels')
+                                    .select('name')
+                                    .eq('id', data.user.hotel_id)
+                                    .single();
+                                if (hotel) set({ activeHotelName: hotel.name });
+                            } catch { }
+
                         } else {
-                            // Update stored user with latest data
-                            set({ user: dbUser as User, isLoading: false });
+                            // Invalid refresh token
+                            set({
+                                user: null,
+                                isAuthenticated: false,
+                                accessToken: null,
+                                refreshToken: null,
+                                isLoading: false
+                            });
                         }
                     } catch (err) {
-                        // Network failure — silently keep current session
-                        console.warn('Session check error (offline?):', err);
+                        console.warn('Refresh error (offline?):', err);
                         set({ isLoading: false });
                     }
                 } else {
@@ -654,6 +675,9 @@ export const useAuthStore = create<AuthState>()(
                 cloudAccount: state.cloudAccount,
                 isCloudLinked: state.isCloudLinked,
                 pendingConfirmation: state.pendingConfirmation,
+                accessToken: state.accessToken,
+                refreshToken: state.refreshToken,
+                hotelCode: state.hotelCode,
             }),
         }
     )

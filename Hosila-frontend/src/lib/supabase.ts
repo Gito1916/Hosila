@@ -10,12 +10,36 @@ if (!supabaseUrl || !supabaseAnonKey) {
     );
 }
 
+// Custom fetch hook to inject our Edge Function's access token into all Supabase requests
+const customFetch = (url: RequestInfo | URL, options?: RequestInit) => {
+    let accessToken: string | null = null;
+    try {
+        const stored = localStorage.getItem('hotelflow-auth');
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            accessToken = parsed.state?.accessToken;
+        }
+    } catch {
+        // ignore JSON syntax errors
+    }
+
+    if (accessToken) {
+        options = options || {};
+        options.headers = new Headers(options.headers || {});
+        (options.headers as Headers).set('Authorization', `Bearer ${accessToken}`);
+    }
+    return fetch(url, options);
+};
+
 // Create Supabase client (safe even when credentials are missing - operations will fail gracefully)
 export const supabase = supabaseUrl && supabaseAnonKey
     ? createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
             persistSession: true,
             autoRefreshToken: true,
+        },
+        global: {
+            fetch: customFetch
         },
         realtime: {
             params: {
