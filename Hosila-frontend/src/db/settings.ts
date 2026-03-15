@@ -60,7 +60,7 @@ export async function createUser(data: {
     const { data: password_hash, error: hashError } = await sb.rpc('hash_password', {
         p_password: data.password,
     });
-    if (hashError || !password_hash) throw new Error('Failed to hash password');
+    if (hashError || !password_hash) throw new Error(hashError?.message || 'Failed to hash password');
 
     const user = {
         id: uuidv4(),
@@ -100,7 +100,7 @@ export async function updateUserPassword(id: string, newPassword: string): Promi
     const { data: password_hash, error: hashError } = await sb.rpc('hash_password', {
         p_password: newPassword,
     });
-    if (hashError || !password_hash) throw new Error('Failed to hash password');
+    if (hashError || !password_hash) throw new Error(hashError?.message || 'Failed to hash password');
     const { error } = await sb.from('users').update({
         password_hash,
         updated_at: new Date().toISOString(),

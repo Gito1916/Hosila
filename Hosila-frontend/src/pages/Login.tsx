@@ -19,9 +19,10 @@ export function LoginPage() {
     const [sessionChecked, setSessionChecked] = useState(false);
     const [showChangePassword, setShowChangePassword] = useState(false);
 
-    // Determine if this is a fresh install (needs onboarding) or an existing hotel
+    // If the owner has a Supabase Auth session, auto-login them.
+    // Staff users (no Supabase session) always see the login form.
     useEffect(() => {
-        async function checkSessionAndRedirect() {
+        async function checkOwnerSession() {
             if (!supabase) {
                 setSessionChecked(true);
                 return;
@@ -34,29 +35,17 @@ export function LoginPage() {
                 const { autoLoginAsAdmin } = useAuthStore.getState();
                 const didAutoLogin = await autoLoginAsAdmin();
                 if (didAutoLogin) {
-                    // Invalidate queries so they refetch with the new auth session
                     const { queryClient } = await import('@/lib/queryClient');
                     await queryClient.invalidateQueries();
                     navigate('/', { replace: true });
                     return;
                 }
-                // If autoLogin fails (no admin user found), show login form
-                setSessionChecked(true);
-                return;
             }
 
-            // No Supabase Auth session — check if this device was already paired
-            const { hotelCode: cachedCode } = useAuthStore.getState();
-            if (cachedCode) {
-                // Paired device — show staff login form
-                setSessionChecked(true);
-                return;
-            }
-
-            // No session AND no cached hotel code — this is a fresh install
-            navigate('/onboarding', { replace: true });
+            // No owner session or auto-login failed — show the login form
+            setSessionChecked(true);
         }
-        checkSessionAndRedirect();
+        checkOwnerSession();
     }, [navigate]);
 
     // Get hotel info for branding (from Supabase)
@@ -267,9 +256,16 @@ export function LoginPage() {
                     </form>
                 </div>
 
-                {/* Status footer */}
+                {/* Footer */}
                 <p className="text-center text-muted text-xs mt-6">
-                    Powered by Supabase • Real-time cloud data
+                    Setting up a new hotel?{' '}
+                    <button
+                        type="button"
+                        onClick={() => navigate('/onboarding')}
+                        className="text-primary-400 hover:text-primary-300 underline"
+                    >
+                        Start here
+                    </button>
                 </p>
             </div>
 
