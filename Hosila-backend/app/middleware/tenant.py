@@ -67,6 +67,20 @@ async def get_tenant(
     """
     uid = user.user_id
 
+    # ── Staff-token fast path ─────────────────────────────────────
+    # Staff JWTs (from Edge Function) carry staff_hotel_id directly.
+    # No need to query hotels/org_members — the hotel_id is in the claim.
+    if user.is_staff and user.staff_hotel_id:
+        request.state.hotel_id = user.staff_hotel_id
+        return TenantContext(
+            hotel_id=user.staff_hotel_id,
+            user_id=uid,
+            hotel_name=None,  # not critical for API operations
+            org_id=None,
+            org_role=user.user_role,
+            accessible_hotel_ids=[user.staff_hotel_id],
+        )
+
     # ── 1. Resolve org membership (if any) ───────────────────────
     org_result = await db.execute(
         text("""

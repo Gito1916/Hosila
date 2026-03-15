@@ -48,10 +48,13 @@ async function mintAccessToken(user: any, sessionId: string) {
         session_id: sessionId,
         staff_hotel_id: user.hotel_id,
         user_role: user.role,
+        aud: "authenticated",
     })
         .setProtectedHeader({ alg: "HS256" })
         .setIssuedAt()
         .setExpirationTime("10m")
+        .setAudience("authenticated")
+        .setIssuer("supabase")
         .sign(getJwtSecret());
 }
 

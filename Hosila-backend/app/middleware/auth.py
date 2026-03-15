@@ -45,10 +45,26 @@ async def _get_jwks() -> dict:
 class AuthenticatedUser:
     """Represents the authenticated user extracted from the JWT."""
 
-    def __init__(self, user_id: str, email: str | None = None, role: str | None = None):
+    def __init__(
+        self,
+        user_id: str,
+        email: str | None = None,
+        role: str | None = None,
+        staff_hotel_id: str | None = None,
+        user_role: str | None = None,
+        session_id: str | None = None,
+    ):
         self.user_id = user_id
         self.email = email
         self.role = role
+        # Staff-specific claims (from Edge Function JWTs)
+        self.staff_hotel_id = staff_hotel_id
+        self.user_role = user_role
+        self.session_id = session_id
+
+    @property
+    def is_staff(self) -> bool:
+        return self.staff_hotel_id is not None
 
 
 async def get_current_user(
@@ -139,4 +155,8 @@ def _extract_user(payload: dict) -> AuthenticatedUser:
         user_id=user_id,
         email=payload.get("email"),
         role=payload.get("role"),
+        # Staff JWT claims (set by Edge Function)
+        staff_hotel_id=payload.get("staff_hotel_id"),
+        user_role=payload.get("user_role"),
+        session_id=payload.get("session_id"),
     )
