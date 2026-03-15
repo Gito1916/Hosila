@@ -70,6 +70,7 @@ export async function createUser(data: {
         name: data.name,
         role: data.role,
         is_active: true,
+        must_change_password: true,
         created_at: now,
         updated_at: now,
     };

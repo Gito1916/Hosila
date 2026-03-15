@@ -28,7 +28,9 @@ function getSupabaseAdmin() {
     return createClient(url, serviceKey);
 }
 
-const JWT_SECRET = new TextEncoder().encode(Deno.env.get("SUPABASE_AUTH_JWT_SECRET") || "super-secret");
+const JWT_SECRET_RAW = Deno.env.get("SUPABASE_AUTH_JWT_SECRET");
+if (!JWT_SECRET_RAW) throw new Error("SUPABASE_AUTH_JWT_SECRET is required — refusing to start with an insecure default");
+const JWT_SECRET = new TextEncoder().encode(JWT_SECRET_RAW);
 
 async function mintAccessToken(user: any, sessionId: string) {
     return await new SignJWT({
@@ -94,7 +96,7 @@ async function handleLogin(req: Request, supabase: ReturnType<typeof createClien
         .single();
 
     if (hotelErr || !hotel) {
-        return error("Invalid hotel code", 401);
+        return error("Invalid credentials", 401);
     }
 
     // 2. Find user
@@ -122,7 +124,7 @@ async function handleLogin(req: Request, supabase: ReturnType<typeof createClien
             ip_address: ip, user_agent: ua,
             metadata: { reason: "account_deactivated" },
         });
-        return error("Account is deactivated", 403);
+        return error("Invalid credentials", 401);
     }
 
     // 3. Check account lockout

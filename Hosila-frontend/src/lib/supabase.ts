@@ -10,25 +10,86 @@ if (!supabaseUrl || !supabaseAnonKey) {
     );
 }
 
-// Custom fetch hook to inject our Edge Function's access token into all Supabase requests
-const customFetch = (url: RequestInfo | URL, options?: RequestInit) => {
+// Custom fetch hook: injects staff access token, auto-refreshes on 401
+let isRefreshing = false;
+let refreshPromise: Promise<void> | null = null;
+
+const customFetch = async (url: RequestInfo | URL, options?: RequestInit): Promise<Response> => {
+    // Read current access token from store
     let accessToken: string | null = null;
+    let refreshToken: string | null = null;
     try {
         const stored = localStorage.getItem('hotelflow-auth');
         if (stored) {
             const parsed = JSON.parse(stored);
             accessToken = parsed.state?.accessToken;
+            refreshToken = parsed.state?.refreshToken;
         }
     } catch {
-        // ignore JSON syntax errors
+        // ignore
     }
 
+    // Attach staff JWT to outgoing requests
     if (accessToken) {
         options = options || {};
         options.headers = new Headers(options.headers || {});
         (options.headers as Headers).set('Authorization', `Bearer ${accessToken}`);
     }
-    return fetch(url, options);
+
+    const response = await fetch(url, options);
+
+    // If 401 and we have a refresh token, try to refresh and retry once
+    const urlStr = typeof url === 'string' ? url : url.toString();
+    const isEdgeFunctionCall = urlStr.includes('/functions/v1/staff-auth/');
+    if (response.status === 401 && refreshToken && !isEdgeFunctionCall) {
+        // Deduplicate concurrent refresh requests
+        if (!isRefreshing) {
+            isRefreshing = true;
+            refreshPromise = (async () => {
+                try {
+                    const refreshUrl = `${supabaseUrl}/functions/v1/staff-auth/refresh`;
+                    const refreshRes = await fetch(refreshUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ refresh_token: refreshToken }),
+                    });
+                    if (refreshRes.ok) {
+                        const data = await refreshRes.json();
+                        // Update localStorage directly (Zustand will pick it up)
+                        const stored = localStorage.getItem('hotelflow-auth');
+                        if (stored) {
+                            const parsed = JSON.parse(stored);
+                            parsed.state.accessToken = data.access_token;
+                            parsed.state.refreshToken = data.refresh_token;
+                            localStorage.setItem('hotelflow-auth', JSON.stringify(parsed));
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Token refresh failed:', e);
+                } finally {
+                    isRefreshing = false;
+                    refreshPromise = null;
+                }
+            })();
+        }
+
+        await refreshPromise;
+
+        // Retry with new token
+        const newStored = localStorage.getItem('hotelflow-auth');
+        if (newStored) {
+            const parsed = JSON.parse(newStored);
+            const newToken = parsed.state?.accessToken;
+            if (newToken && newToken !== accessToken) {
+                options = options || {};
+                options.headers = new Headers(options.headers || {});
+                (options.headers as Headers).set('Authorization', `Bearer ${newToken}`);
+                return fetch(url, options);
+            }
+        }
+    }
+
+    return response;
 };
 
 // Create Supabase client (safe even when credentials are missing - operations will fail gracefully)
