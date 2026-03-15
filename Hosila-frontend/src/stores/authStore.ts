@@ -160,8 +160,26 @@ export const useAuthStore = create<AuthState>()(
                         body: { username, password, hotel_code: codeToUse }
                     });
 
-                    if (invokeErr || data?.error) {
-                        set({ error: data?.error || 'Invalid username, password, or hotel code', isLoading: false });
+                    // supabase.functions.invoke returns error for non-2xx responses
+                    // The actual JSON body may be in data OR in invokeErr.context
+                    if (invokeErr) {
+                        let errMsg = 'Invalid username, password, or hotel code';
+                        try {
+                            // Try to get error message from the response body
+                            if (invokeErr.context?.body) {
+                                const reader = invokeErr.context.body.getReader();
+                                const { value } = await reader.read();
+                                const text = new TextDecoder().decode(value);
+                                const parsed = JSON.parse(text);
+                                if (parsed.error) errMsg = parsed.error;
+                            }
+                        } catch { }
+                        set({ error: errMsg, isLoading: false });
+                        return false;
+                    }
+
+                    if (data?.error) {
+                        set({ error: data.error, isLoading: false });
                         return false;
                     }
 
@@ -271,10 +289,15 @@ export const useAuthStore = create<AuthState>()(
                     console.warn('Failed to flush queues on logout:', e);
                 }
 
-                if (supabase && refreshToken && navigator.onLine) {
-                    supabase.functions.invoke('staff-auth/logout', {
-                        body: { refresh_token: refreshToken }
-                    }).catch(console.warn);
+                if (supabase && navigator.onLine) {
+                    // Revoke staff session
+                    if (refreshToken) {
+                        supabase.functions.invoke('staff-auth/logout', {
+                            body: { refresh_token: refreshToken }
+                        }).catch(console.warn);
+                    }
+                    // Also clear Supabase Auth session (for owner accounts)
+                    supabase.auth.signOut().catch(console.warn);
                 }
 
                 set({
