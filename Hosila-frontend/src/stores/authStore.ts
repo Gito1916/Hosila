@@ -309,6 +309,7 @@ export const useAuthStore = create<AuthState>()(
                     return;
                 }
 
+                // ─── PATH A: Staff session (has refresh token) ────────
                 if (refreshToken) {
                     try {
                         const { data, error: invokeErr } = await supabase.functions.invoke('staff-auth/refresh', {
@@ -336,7 +337,7 @@ export const useAuthStore = create<AuthState>()(
                             } catch { }
 
                         } else {
-                            // Invalid refresh token
+                            // Invalid refresh token — clear staff session
                             set({
                                 user: null,
                                 isAuthenticated: false,
@@ -350,7 +351,22 @@ export const useAuthStore = create<AuthState>()(
                         set({ isLoading: false });
                     }
                 } else {
-                    set({ isLoading: false });
+                    // ─── PATH B: Owner/Admin (Supabase Auth session) ──────
+                    // No staff token — check if there's a Supabase Auth session
+                    // and auto-login as admin (for hotel owners)
+                    try {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (session) {
+                            const didAutoLogin = await get().autoLoginAsAdmin();
+                            if (!didAutoLogin) {
+                                set({ isLoading: false });
+                            }
+                        } else {
+                            set({ isLoading: false });
+                        }
+                    } catch {
+                        set({ isLoading: false });
+                    }
                 }
 
                 // Also check cloud session

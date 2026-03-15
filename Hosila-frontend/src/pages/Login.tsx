@@ -19,19 +19,42 @@ export function LoginPage() {
     const [sessionChecked, setSessionChecked] = useState(false);
     const [showChangePassword, setShowChangePassword] = useState(false);
 
-    // Check for an active Supabase session.
+    // Determine if this is a fresh install (needs onboarding) or an existing hotel
     useEffect(() => {
         async function checkSessionAndRedirect() {
             if (!supabase) {
                 setSessionChecked(true);
                 return;
             }
+
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                navigate('/onboarding', { replace: true });
+
+            if (session) {
+                // Owner/admin has a Supabase Auth session — auto-login
+                const { autoLoginAsAdmin } = useAuthStore.getState();
+                const didAutoLogin = await autoLoginAsAdmin();
+                if (didAutoLogin) {
+                    // Invalidate queries so they refetch with the new auth session
+                    const { queryClient } = await import('@/lib/queryClient');
+                    await queryClient.invalidateQueries();
+                    navigate('/', { replace: true });
+                    return;
+                }
+                // If autoLogin fails (no admin user found), show login form
+                setSessionChecked(true);
                 return;
             }
-            setSessionChecked(true);
+
+            // No Supabase Auth session — check if this device was already paired
+            const { hotelCode: cachedCode } = useAuthStore.getState();
+            if (cachedCode) {
+                // Paired device — show staff login form
+                setSessionChecked(true);
+                return;
+            }
+
+            // No session AND no cached hotel code — this is a fresh install
+            navigate('/onboarding', { replace: true });
         }
         checkSessionAndRedirect();
     }, [navigate]);
