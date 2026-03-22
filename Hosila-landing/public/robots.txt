@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hosila.com/sitemap-index.xml
+Sitemap: https://hosila.com/sitemap.xml
