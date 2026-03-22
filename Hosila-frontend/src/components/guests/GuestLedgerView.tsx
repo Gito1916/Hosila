@@ -6,6 +6,7 @@ import { recordPayment, extendNightStay, extendShortRest } from '@/db/bookings';
 import { emailApi } from '@/lib/apiClient';
 import { issueAmenity, getUnresolvedReturnables } from '@/db/inventory';
 import { createServiceCharge } from '@/db/services';
+import { useIsRestricted } from '@/hooks/useSubscription';
 import { createInvoiceFromBooking, createReceipt, getInvoiceByBooking } from '@/db/billing';
 import { getGuestById } from '@/db/guests';
 import { CheckoutReconciliation } from './CheckoutReconciliation';
@@ -52,6 +53,7 @@ const manualServices = [
 export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) {
     const user = useAuthStore((state) => state.user);
     const navigate = useNavigate();
+    const isRestricted = useIsRestricted();
     const [folio, setFolio] = useState<FolioCalculations | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -530,27 +532,31 @@ export function GuestLedgerView({ guest, booking, room }: GuestLedgerViewProps) 
                                 <Plus size={18} className="mr-2 text-muted group-hover:text-primary-500" />
                                 Extend Stay
                             </button>
-                            <button
-                                onClick={() => setShowAddService(true)}
-                                className="btn btn-secondary justify-start text-left border-border hover:border-purple-500 hover:text-purple-400 group"
-                            >
-                                <ShoppingBag size={18} className="mr-2 text-muted group-hover:text-purple-500" />
-                                Add Service
-                            </button>
-                            <button
-                                onClick={() => setShowAmenities(true)}
-                                className="btn btn-secondary justify-start text-left border-border hover:border-amber-500 hover:text-amber-400 group"
-                            >
-                                <Sparkles size={18} className="mr-2 text-muted group-hover:text-amber-500" />
-                                Issue Amenities
-                            </button>
-                            <button
-                                onClick={() => navigate('/restaurant')}
-                                className="btn btn-secondary justify-start text-left border-border hover:border-orange-500 hover:text-orange-400 group"
-                            >
-                                <Utensils size={18} className="mr-2 text-muted group-hover:text-orange-500" />
-                                Order Meals
-                            </button>
+                            {!isRestricted && (
+                                <>
+                                    <button
+                                        onClick={() => setShowAddService(true)}
+                                        className="btn btn-secondary justify-start text-left border-border hover:border-purple-500 hover:text-purple-400 group"
+                                    >
+                                        <ShoppingBag size={18} className="mr-2 text-muted group-hover:text-purple-500" />
+                                        Add Service
+                                    </button>
+                                    <button
+                                        onClick={() => setShowAmenities(true)}
+                                        className="btn btn-secondary justify-start text-left border-border hover:border-amber-500 hover:text-amber-400 group"
+                                    >
+                                        <Sparkles size={18} className="mr-2 text-muted group-hover:text-amber-500" />
+                                        Issue Amenities
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/restaurant')}
+                                        className="btn btn-secondary justify-start text-left border-border hover:border-orange-500 hover:text-orange-400 group"
+                                    >
+                                        <Utensils size={18} className="mr-2 text-muted group-hover:text-orange-500" />
+                                        Order Meals
+                                    </button>
+                                </>
+                            )}
                             <hr className="border-border my-1" />
                             <button
                                 onClick={handleCheckOut}

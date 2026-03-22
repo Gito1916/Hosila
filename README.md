@@ -1,41 +1,60 @@
 # Hosila
 
-Property Management System for Nigerian hospitality — hotel operations, restaurant POS, financial reporting, and tax compliance.
+Property Management System for Nigerian hospitality: hotel operations,
+restaurant POS, financial reporting, tax compliance, and internal SaaS
+subscription management.
 
 ## Structure
 
-```
+```text
 Hosila/
-├── Hosila-frontend/   → React + Vite (deployed on Vercel)
-├── Hosila-backend/    → FastAPI (deployed on Render)
-│   └── supabase/      → Database migrations
-├── Hosila-landing/    → Astro marketing website (hosila.com)
+|-- Hosila-frontend/   React + Vite hotel product
+|-- Hosila-admin/      React + Vite internal admin app
+|-- Hosila-backend/    FastAPI + Supabase/Postgres
+|   `-- supabase/      Database migrations
+`-- Hosila-landing/    Astro marketing site
 ```
 
 ## Stack
 
 | Layer | Tech |
 |-------|------|
-| Frontend | React 18, TypeScript, Vite, TailwindCSS |
+| Frontend | React 18, TypeScript, Vite, Tailwind CSS |
+| Admin App | React 18, TypeScript, Vite, Tailwind CSS |
 | Backend | Python 3.14, FastAPI, SQLAlchemy (async) |
 | Database | Supabase (PostgreSQL 17) |
 | Auth | Supabase Auth (JWKS verification) |
 | Frontend Hosting | Vercel |
-| Backend Hosting | Render (free tier) |
+| Backend Hosting | Render |
 
-## Local Development
+## Local development
 
-### Frontend
+### Hotel frontend
+
 ```bash
 cd Hosila-frontend
 npm install
-npm run dev          # → http://localhost:5173
+npm run dev
 ```
 
+Runs on `http://localhost:5173`
+
+### Admin app
+
+```bash
+cd Hosila-admin
+npm install
+npm run dev
+```
+
+Runs on `http://localhost:5174`
+
 ### Backend
+
 ```bash
 cd Hosila-backend
 pip install -r requirements.txt
-cp .env.example .env  # Fill in your Supabase credentials
-uvicorn app.main:app --reload --port 8000  # → http://localhost:8000/docs
+uvicorn app.main:app --reload --port 8000
 ```
+
+Runs on `http://localhost:8000`

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useSubscription } from '@/hooks/useSubscription';
 import { SyncStatusIndicator } from './SyncStatusIndicator';
 import type { UserRole } from '@/types';
 import {
@@ -14,6 +15,7 @@ import {
     Settings,
     LogOut,
     X,
+    Lock,
 } from 'lucide-react';
 
 interface NavItem {
@@ -22,6 +24,7 @@ interface NavItem {
     icon: React.ReactNode;
     permission?: 'canViewFinances' | 'canManageSettings';
     allowedRoles?: UserRole[];
+    requiredFeature?: string;
 }
 
 interface SidebarProps {
@@ -34,8 +37,8 @@ const mainNavItems: NavItem[] = [
     { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { path: '/bookings', label: 'Bookings', icon: <BedDouble size={20} /> },
     { path: '/guests', label: 'Guests', icon: <Users size={20} /> },
-    { path: '/restaurant', label: 'Restaurant', icon: <UtensilsCrossed size={20} /> },
-    { path: '/inventory', label: 'Inventory', icon: <Package size={20} /> },
+    { path: '/restaurant', label: 'Restaurant', icon: <UtensilsCrossed size={20} />, requiredFeature: 'restaurant_pos' },
+    { path: '/inventory', label: 'Inventory', icon: <Package size={20} />, requiredFeature: 'inventory_tracking' },
     { path: '/finance', label: 'Finance', icon: <DollarSign size={20} />, permission: 'canViewFinances' },
 ];
 
@@ -48,6 +51,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     const user = useAuthStore((state) => state.user);
     const logout = useAuthStore((state) => state.logout);
     const permissions = usePermissions();
+    const { features, effectiveStatus } = useSubscription();
 
     // Close sidebar when navigating on mobile
     useEffect(() => {
@@ -60,13 +64,21 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         return true;
     };
 
+    const isFeatureLocked = (item: NavItem): boolean => {
+        if (!item.requiredFeature) return false;
+        if (effectiveStatus === 'inactive' || effectiveStatus === 'cancelled') return true;
+        return features[item.requiredFeature] !== true;
+    };
+
     const filteredMainNav = mainNavItems.filter(canSee);
     const showSettings = canSee(settingsItem);
 
-    const navLinkClasses = (isActive: boolean) =>
+    const navLinkClasses = (isActive: boolean, locked: boolean) =>
         `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive
             ? 'bg-surface-sidebar-active text-sidebar-active font-semibold'
-            : 'text-sidebar-text hover:bg-surface-sidebar-hover hover:text-sidebar-active'
+            : locked
+                ? 'text-sidebar-text/50 hover:bg-surface-sidebar-hover'
+                : 'text-sidebar-text hover:bg-surface-sidebar-hover hover:text-sidebar-active'
         }`;
 
     return (
@@ -103,11 +115,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <ul className="space-y-1">
                         {filteredMainNav.map((item) => {
                             const isActive = location.pathname === item.path;
+                            const locked = isFeatureLocked(item);
                             return (
                                 <li key={item.path}>
-                                    <Link to={item.path} className={navLinkClasses(isActive)}>
+                                    <Link to={item.path} className={navLinkClasses(isActive, locked)}>
                                         {item.icon}
-                                        <span className="font-medium">{item.label}</span>
+                                        <span className="font-medium flex-1">{item.label}</span>
+                                        {locked && (
+                                            <Lock size={14} className="text-muted opacity-60" />
+                                        )}
                                     </Link>
                                 </li>
                             );
@@ -125,7 +141,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         <div className="px-4 pb-2">
                             <Link
                                 to={settingsItem.path}
-                                className={navLinkClasses(location.pathname === settingsItem.path)}
+                                className={navLinkClasses(location.pathname === settingsItem.path, false)}
                             >
                                 {settingsItem.icon}
                                 <span className="font-medium">{settingsItem.label}</span>

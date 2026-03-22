@@ -27,7 +27,13 @@ class Settings(BaseSettings):
 
     # ── App ───────────────────────────────────────────────────
     environment: str = "development"
-    allowed_origins: str = "http://localhost:5173,http://localhost:3000,https://hosila.com"
+    allowed_origins: str = (
+        "http://localhost:5173,"
+        "http://localhost:5174,"
+        "http://localhost:3000,"
+        "https://hosila.com,"
+        "https://admin.hosila.com"
+    )
     api_version: str = "v1"
     debug: bool = False
 

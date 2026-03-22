@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.middleware.tenant import TenantContext, get_tenant
+from app.middleware.entitlements import require_feature
 from app.modules.email.service import email_service
 from app.shared.logger import get_logger
 
@@ -164,6 +165,7 @@ async def update_email_settings(
     data: EmailSettingsUpdate,
     tenant: TenantContext = Depends(get_tenant),
     db: AsyncSession = Depends(get_db),
+    _gate: TenantContext = Depends(require_feature("guest_email_automation")),
 ):
     """Create or update hotel email settings."""
     # Check if row exists
@@ -303,6 +305,7 @@ async def send_reservation_email(
     reservation_id: str,
     background_tasks: BackgroundTasks,
     tenant: TenantContext = Depends(get_tenant),
+    _gate: TenantContext = Depends(require_feature("guest_email_automation")),
 ):
     """Trigger reservation confirmation email (runs in background)."""
     background_tasks.add_task(
@@ -318,6 +321,7 @@ async def send_checkin_email(
     booking_id: str,
     background_tasks: BackgroundTasks,
     tenant: TenantContext = Depends(get_tenant),
+    _gate: TenantContext = Depends(require_feature("guest_email_automation")),
 ):
     """Trigger check-in welcome email (runs in background)."""
     background_tasks.add_task(
@@ -378,6 +382,7 @@ async def send_checkout_email(
     booking_id: str,
     background_tasks: BackgroundTasks,
     tenant: TenantContext = Depends(get_tenant),
+    _gate: TenantContext = Depends(require_feature("guest_email_automation")),
 ):
     """Trigger check-out receipt email (runs in background)."""
     background_tasks.add_task(

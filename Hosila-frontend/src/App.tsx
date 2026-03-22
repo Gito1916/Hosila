@@ -13,6 +13,8 @@ import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { NotificationToast } from '@/components/notifications/NotificationToast';
 import { UpdatePrompt } from '@/components/layout/UpdatePrompt';
 import { warmUpBackend, onBackendStatusChange } from '@/lib/apiClient';
+import { SubscriptionGate } from '@/components/subscription/SubscriptionGate';
+import { RestrictedBanner } from '@/components/subscription/RestrictedBanner';
 import { Loader2, WifiOff, Wifi, Server, AlertTriangle } from 'lucide-react';
 
 // Lazy load pages for code splitting (improved performance)
@@ -165,6 +167,7 @@ function AppInner() {
     return (
         <ErrorBoundary>
             <OfflineStatusBanner />
+            <RestrictedBanner />
             {backendStatus === 'waking' && (
                 <div className="bg-blue-600/90 text-heading text-center py-2 px-4 text-sm flex items-center justify-center gap-2 z-50">
                     <Server size={14} className="animate-pulse" />
@@ -199,7 +202,11 @@ function AppInner() {
                             <Route path="/reservations" element={<Navigate to="/bookings" replace />} />
 
                             <Route element={<MainLayout />}>
-                                <Route path="/guests" element={<GuestsPage />} />
+                                <Route path="/guests" element={
+                                    <SubscriptionGate blockOnRestricted>
+                                        <GuestsPage />
+                                    </SubscriptionGate>
+                                } />
                             </Route>
 
                             <Route element={<MainLayout />}>
@@ -207,15 +214,27 @@ function AppInner() {
                             </Route>
 
                             <Route element={<MainLayout />}>
-                                <Route path="/restaurant" element={<RestaurantPage />} />
+                                <Route path="/restaurant" element={
+                                    <SubscriptionGate feature="restaurant_pos">
+                                        <RestaurantPage />
+                                    </SubscriptionGate>
+                                } />
                             </Route>
 
                             <Route element={<MainLayout />}>
-                                <Route path="/inventory" element={<InventoryPage />} />
+                                <Route path="/inventory" element={
+                                    <SubscriptionGate feature="inventory_tracking">
+                                        <InventoryPage />
+                                    </SubscriptionGate>
+                                } />
                             </Route>
 
                             <Route element={<MainLayout />}>
-                                <Route path="/finance" element={<FinancePage />} />
+                                <Route path="/finance" element={
+                                    <SubscriptionGate blockOnRestricted>
+                                        <FinancePage />
+                                    </SubscriptionGate>
+                                } />
                             </Route>
 
                             <Route element={<MainLayout />}>

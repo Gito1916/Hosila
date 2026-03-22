@@ -11,6 +11,7 @@ import io
 
 from app.database import get_db
 from app.middleware.tenant import TenantContext, get_tenant
+from app.middleware.entitlements import require_feature
 from app.modules.reports import accommodation, restaurant, inventory, tax_remittance, export
 from app.modules.reports.report_period import resolve_export_mode
 from app.modules.reports.schemas import (
@@ -44,6 +45,7 @@ async def export_accommodation_report(
     format: str = Query("excel", pattern=r"^(excel|pdf)$"),
     tenant: TenantContext = Depends(get_tenant),
     db: AsyncSession = Depends(get_db),
+    _gate: TenantContext = Depends(require_feature("report_export")),
 ):
     report = await accommodation.generate_accommodation_report(db, tenant.hotel_id, start, end)
     hotel_name = tenant.hotel_name or "Hotel"
@@ -82,6 +84,7 @@ async def export_restaurant_report(
     end: date = Query(...),
     tenant: TenantContext = Depends(get_tenant),
     db: AsyncSession = Depends(get_db),
+    _gate: TenantContext = Depends(require_feature("report_export")),
 ):
     report = await restaurant.generate_restaurant_report(db, tenant.hotel_id, start, end)
     content = export.generate_restaurant_excel(report, tenant.hotel_name or "Hotel")
@@ -110,6 +113,7 @@ async def export_inventory_report(
     end: date = Query(...),
     tenant: TenantContext = Depends(get_tenant),
     db: AsyncSession = Depends(get_db),
+    _gate: TenantContext = Depends(require_feature("report_export")),
 ):
     report = await inventory.generate_inventory_report(db, tenant.hotel_id, start, end)
     content = export.generate_inventory_excel(report, tenant.hotel_name or "Hotel")
@@ -150,6 +154,7 @@ async def export_tax_remittance(
     format: str = Query("pdf", pattern=r"^(pdf|excel)$"),
     tenant: TenantContext = Depends(get_tenant),
     db: AsyncSession = Depends(get_db),
+    _gate: TenantContext = Depends(require_feature("report_export")),
 ):
     report = await tax_remittance.generate_tax_remittance_report(db, tenant.hotel_id, start, end)
     hotel_name = tenant.hotel_name or "Hotel"
@@ -179,6 +184,7 @@ async def export_accommodation_v2(
     mode: str = Query("auto", pattern=r"^(auto|daily_transactions|daily_summary|monthly_summary)$"),
     tenant: TenantContext = Depends(get_tenant),
     db: AsyncSession = Depends(get_db),
+    _gate: TenantContext = Depends(require_feature("report_export")),
 ):
     """
     Period-aware accommodation export.
@@ -224,6 +230,7 @@ async def export_restaurant_v2(
     mode: str = Query("auto", pattern=r"^(auto|daily_transactions|daily_summary|monthly_summary)$"),
     tenant: TenantContext = Depends(get_tenant),
     db: AsyncSession = Depends(get_db),
+    _gate: TenantContext = Depends(require_feature("report_export")),
 ):
     """
     Period-aware restaurant export.

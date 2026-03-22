@@ -787,6 +787,18 @@ Deno.serve(async (req: Request) => {
         if (req.method === "GET") {
             if (!hotelId) return error("Missing 'hotel_id' query parameter");
 
+            // Check website_hooking entitlement via SQL helper
+            const { data: allowed } = await supabase.rpc("has_feature", {
+                p_hotel_id: hotelId,
+                p_feature_key: "website_hooking",
+            });
+            if (!allowed) {
+                return error(
+                    "Website API requires an active subscription with the website integration feature. Please upgrade your plan.",
+                    403
+                );
+            }
+
             switch (action) {
                 case "hotel-info":
                     return handleHotelInfo(supabase, hotelId);
@@ -828,6 +840,18 @@ Deno.serve(async (req: Request) => {
             if (!keyResult) return error("Invalid or inactive API key", 403);
 
             const { hotelId: validatedHotelId, scopes } = keyResult;
+
+            // Check website_hooking entitlement via SQL helper
+            const { data: writeAllowed } = await supabase.rpc("has_feature", {
+                p_hotel_id: validatedHotelId,
+                p_feature_key: "website_hooking",
+            });
+            if (!writeAllowed) {
+                return error(
+                    "Website API requires an active subscription with the website integration feature. Please upgrade your plan.",
+                    403
+                );
+            }
 
             switch (action) {
                 case "create-reservation":

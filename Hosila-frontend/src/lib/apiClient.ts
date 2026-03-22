@@ -424,3 +424,33 @@ export const emailApi = {
             method: 'POST',
         }),
 };
+
+// ── Subscription Types ───────────────────────────────────────
+
+export interface SubscriptionContext {
+    hotel_id: string;
+    plan_code: string;
+    effective_status: string;
+    write_mode: 'full' | 'restricted' | 'blocked';
+    billing_interval: string;
+    currency: string;
+    unit_amount: number;
+    trial_starts_at: string | null;
+    trial_ends_at: string | null;
+    activated_at: string | null;
+    current_period_starts_at: string | null;
+    current_period_ends_at: string | null;
+    next_due_at: string | null;
+    feature_entitlements: Record<string, boolean | number | null>;
+    rooms_used: number;
+    rooms_limit: number | null;
+    active_bookings: number;
+}
+
+// Subscription
+export const subscriptionApi = {
+    /** Get current hotel's subscription state */
+    getCurrent: () =>
+        apiRequest<SubscriptionContext>('/api/v1/subscriptions/current'),
+};
+

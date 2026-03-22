@@ -22,6 +22,8 @@ from app.modules.billing.router import router as billing_router
 from app.modules.reports.router import router as reports_router
 from app.modules.analytics.router import router as analytics_router
 from app.modules.email.router import router as email_router
+from app.modules.subscriptions.router import router as subscriptions_router
+from app.modules.internal_admin.router import router as internal_admin_router
 
 
 @asynccontextmanager
@@ -88,6 +90,8 @@ app.include_router(billing_router, prefix="/api/v1")
 app.include_router(reports_router, prefix="/api/v1")
 app.include_router(analytics_router, prefix="/api/v1")
 app.include_router(email_router, prefix="/api/v1")
+app.include_router(subscriptions_router, prefix="/api/v1")
+app.include_router(internal_admin_router)
 
 
 @app.get("/")

@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --shell-top: #0d1117;
+  --shell-bottom: #141923;
+  --panel: rgba(255, 255, 255, 0.06);
+  --panel-strong: rgba(255, 255, 255, 0.12);
+  --text-soft: rgba(255, 255, 255, 0.7);
+}
+
+html {
+  background: #0d1117;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(15, 122, 90, 0.28), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(182, 145, 65, 0.18), transparent 22%),
+    linear-gradient(180deg, var(--shell-top), var(--shell-bottom));
+  color: white;
+  @apply font-sans antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@layer components {
+  .bg-shell {
+    background:
+      radial-gradient(circle at top left, rgba(15, 122, 90, 0.28), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(182, 145, 65, 0.18), transparent 22%),
+      linear-gradient(180deg, var(--shell-top), var(--shell-bottom));
+  }
+
+  .panel {
+    @apply rounded-[2rem] border px-6 py-6 shadow-panel;
+    background: var(--panel);
+    border-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+  }
+
+  .glass-card {
+    @apply rounded-[1.7rem] border px-5 py-5;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .hotel-card {
+    @apply rounded-[1.8rem] border p-5 transition duration-200 hover:-translate-y-0.5;
+    background: rgba(255, 255, 255, 0.045);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .hotel-card:hover {
+    border-color: rgba(110, 231, 183, 0.25);
+  }
+
+  .field {
+    @apply flex flex-col gap-2 text-sm;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .field span {
+    @apply text-xs uppercase tracking-[0.24em];
+    color: rgba(255, 255, 255, 0.48);
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    @apply w-full rounded-2xl border px-4 py-3 text-sm text-white outline-none transition;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    border-color: rgba(74, 222, 128, 0.45);
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.16);
+  }
+
+  .brand-button {
+    @apply inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white transition;
+    background: linear-gradient(135deg, #0f7a5a, #15a06c);
+  }
+
+  .brand-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 30px rgba(15, 122, 90, 0.28);
+  }
+
+  .brand-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .ghost-button {
+    @apply inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium transition;
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .ghost-button:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: white;
+  }
+
+  .eyebrow {
+    @apply flex items-center gap-2 text-xs uppercase tracking-[0.3em];
+    color: rgba(255, 255, 255, 0.42);
+  }
+
+  .metric {
+    @apply text-3xl font-semibold text-white;
+  }
+
+  .soft-pill {
+    @apply rounded-full border px-3 py-1.5 text-sm;
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .nav-pill {
+    @apply rounded-full px-4 py-2 text-sm transition;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .nav-pill:hover {
+    color: white;
+  }
+
+  .nav-pill-active {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+  }
+
+  .status-pill {
+    @apply rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em];
+  }
+
+  .status-active {
+    border-color: rgba(52, 211, 153, 0.28);
+    background: rgba(16, 185, 129, 0.12);
+    color: #9ef3c8;
+  }
+
+  .status-trialing {
+    border-color: rgba(244, 190, 79, 0.28);
+    background: rgba(182, 145, 65, 0.15);
+    color: #ffd889;
+  }
+
+  .status-inactive,
+  .status-cancelled {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.74);
+  }
+
+  .status-past-due {
+    border-color: rgba(255, 107, 107, 0.3);
+    background: rgba(182, 80, 50, 0.18);
+    color: #ffb2a0;
+  }
+}

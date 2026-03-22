@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format, startOfMonth, startOfWeek, endOfWeek, startOfYear } from 'date-fns';
 import { useReportDownload } from '@/hooks/useHosilaApi';
+import { useHasFeature } from '@/hooks/useSubscription';
 import { toast } from '@/lib/errorMessages';
 
 import {
@@ -11,6 +12,7 @@ import {
     Building2,
     Utensils,
     Package,
+    Lock,
 } from 'lucide-react';
 
 type DateRange = 'today' | 'week' | 'month' | 'year' | 'custom';
@@ -32,6 +34,7 @@ export function FinanceExport() {
     const [exportingFormat, setExportingFormat] = useState<ExportingFormat>(null);
 
     const downloadMutation = useReportDownload();
+    const canExport = useHasFeature('report_export');
 
     const getDateRangeValues = () => {
         const now = new Date();
@@ -154,34 +157,44 @@ export function FinanceExport() {
             {/* Export Format Selection */}
             <div>
                 <label className="label">Export Format</label>
-                <div className="grid grid-cols-2 gap-3">
-                    {selectedReport.formats.includes('pdf') && (
+                {!canExport ? (
+                    <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-center">
+                        <Lock size={20} className="mx-auto mb-2 text-amber-400" />
+                        <p className="text-sm text-amber-200 font-medium">Report Export requires the Pro plan</p>
+                        <a href="/settings" className="text-xs text-amber-400 hover:underline mt-1 inline-block">
+                            View Plans →
+                        </a>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 gap-3">
+                        {selectedReport.formats.includes('pdf') && (
+                            <button
+                                onClick={() => handleExport('pdf')}
+                                disabled={exportingFormat !== null}
+                                className="btn btn-secondary flex items-center justify-center gap-2"
+                            >
+                                {exportingFormat === 'pdf' ? (
+                                    <Loader2 size={18} className="animate-spin" />
+                                ) : (
+                                    <FileText size={18} />
+                                )}
+                                PDF Report
+                            </button>
+                        )}
                         <button
-                            onClick={() => handleExport('pdf')}
+                            onClick={() => handleExport('excel')}
                             disabled={exportingFormat !== null}
-                            className="btn btn-secondary flex items-center justify-center gap-2"
+                            className={`btn ${selectedReport.formats.includes('pdf') ? 'btn-primary' : 'btn-primary col-span-2'} flex items-center justify-center gap-2`}
                         >
-                            {exportingFormat === 'pdf' ? (
+                            {exportingFormat === 'excel' ? (
                                 <Loader2 size={18} className="animate-spin" />
                             ) : (
-                                <FileText size={18} />
+                                <FileSpreadsheet size={18} />
                             )}
-                            PDF Report
+                            Excel Report
                         </button>
-                    )}
-                    <button
-                        onClick={() => handleExport('excel')}
-                        disabled={exportingFormat !== null}
-                        className={`btn ${selectedReport.formats.includes('pdf') ? 'btn-primary' : 'btn-primary col-span-2'} flex items-center justify-center gap-2`}
-                    >
-                        {exportingFormat === 'excel' ? (
-                            <Loader2 size={18} className="animate-spin" />
-                        ) : (
-                            <FileSpreadsheet size={18} />
-                        )}
-                        Excel Report
-                    </button>
-                </div>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -120,6 +120,22 @@ async def get_tenant(
 
     accessible_ids = [str(h.id) for h in hotels]
 
+    # ── 2b. Multi-property enforcement ────────────────────────────
+    # If user can see multiple hotels, verify at least one has
+    # multi_property entitlement. Otherwise restrict to primary hotel.
+    if len(accessible_ids) > 1:
+        mp_result = await db.execute(
+            text("""
+                SELECT 1 FROM hotel_subscriptions
+                WHERE hotel_id = ANY(:ids::uuid[])
+                  AND (feature_entitlements->>'multi_property')::boolean = true
+                LIMIT 1
+            """),
+            {"ids": accessible_ids},
+        )
+        if not mp_result.scalar():
+            accessible_ids = [accessible_ids[0]]
+
     # ── 3. Determine active hotel_id ─────────────────────────────
     # Check for X-Hotel-Id header (hotel switching)
     requested_hotel_id = request.headers.get("X-Hotel-Id")
