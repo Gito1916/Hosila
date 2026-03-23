@@ -1,61 +1,91 @@
 ---
 import Button from './Button.astro';
+
 const pathname = Astro.url.pathname;
+
+const links = [
+  { href: '/', label: 'Home', active: pathname === '/' },
+  { href: '/pricing', label: 'Pricing', active: pathname.startsWith('/pricing') },
+  { href: '/blog', label: 'Blog', active: pathname.startsWith('/blog') },
+  { href: '/contact', label: 'Contact Us', active: pathname.startsWith('/contact') },
+];
 ---
-<header class="sticky top-0 z-50 w-full bg-surface-base/90 backdrop-blur-md border-b border-border-subtle">
-  <div class="container-custom mx-auto h-20 flex items-center justify-between">
-    <!-- Logo -->
-    <a href="/" class="flex items-center gap-2 transition-transform hover:scale-105">
-      <img src="/logo.svg" alt="Hosila Logo" class="h-8 w-8" />
-      <span class="font-bold text-2xl text-textColor-heading tracking-tight">Hosila</span>
+
+<header class="sticky top-0 z-50 border-b border-white/10 bg-[#11131a]/85 backdrop-blur">
+  <div class="container-custom flex items-center justify-between gap-4 py-4">
+    <a href="/" class="flex items-center gap-3 text-white">
+      <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-500/20 text-brand-800">
+        <img src="/logo.svg" alt="Hosila logo" class="h-6 w-6" />
+      </div>
+      <div>
+        <p class="text-xs uppercase tracking-[0.34em] text-white/42">Hosila</p>
+        <p class="text-sm font-semibold text-white">Hotel operations command center</p>
+      </div>
     </a>
 
-    <!-- Desktop Nav -->
-    <nav class="hidden lg:flex items-center gap-8">
-      <a href="/" class={`text-sm font-medium transition-colors ${pathname === '/' ? 'text-brand-600' : 'text-textColor-body hover:text-brand-600 focus:text-brand-600 outline-none'}`}>Home</a>
-      <a href="/pricing" class={`text-sm font-medium transition-colors ${pathname.startsWith('/pricing') ? 'text-brand-600' : 'text-textColor-body hover:text-brand-600 focus:text-brand-600 outline-none'}`}>Pricing</a>
-      <a href="/blog" class={`text-sm font-medium transition-colors ${pathname.startsWith('/blog') ? 'text-brand-600' : 'text-textColor-body hover:text-brand-600 focus:text-brand-600 outline-none'}`}>Blog</a>
-      <a href="/contact" class={`text-sm font-medium transition-colors ${pathname.startsWith('/contact') ? 'text-brand-600' : 'text-textColor-body hover:text-brand-600 focus:text-brand-600 outline-none'}`}>Contact Us</a>
+    <nav class="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 p-1 lg:flex">
+      {links.map((link) => (
+        <a href={link.href} class:list={['nav-pill', link.active && 'nav-pill-active']}>
+          {link.label}
+        </a>
+      ))}
     </nav>
 
-    <!-- Actions -->
-    <div class="hidden lg:flex items-center gap-4">
+    <div class="hidden items-center gap-3 lg:flex">
       <Button variant="ghost" href="https://app.hosila.com/login">Log in</Button>
       <Button variant="primary" href="https://app.hosila.com">Get Started</Button>
     </div>
 
-    <!-- Mobile Menu Toggle -->
-    <button id="mobile-menu-toggle" class="lg:hidden p-2 text-textColor-heading hover:text-brand-600 transition-colors">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="4" x2="20" y1="12" y2="12"></line>
+    <button
+      id="mobile-menu-toggle"
+      class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white/80 lg:hidden"
+      type="button"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+      aria-label="Open navigation menu"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="4" x2="20" y1="6" y2="6"></line>
+        <line x1="4" x2="20" y1="12" y2="12"></line>
         <line x1="4" x2="20" y1="18" y2="18"></line>
       </svg>
     </button>
   </div>
-  </div>
 
-  <!-- Mobile Menu Panel -->
-  <div id="mobile-menu" class="hidden absolute top-20 left-0 w-full bg-surface-base border-b border-border-subtle p-6 flex-col gap-4 shadow-xl">
-    <nav class="flex flex-col gap-4">
-      <a href="/" class="text-textColor-body font-medium">Home</a>
-      <a href="/pricing" class="text-textColor-body font-medium">Pricing</a>
-      <a href="/blog" class="text-textColor-body font-medium">Blog</a>
-      <a href="/contact" class="text-textColor-body font-medium">Contact Us</a>
-    </nav>
-    <div class="flex flex-col gap-4 pt-4 mt-2 border-t border-border-subtle">
-      <Button variant="ghost" href="https://app.hosila.com/login" class="w-full justify-center">Log in</Button>
-      <Button variant="primary" href="https://app.hosila.com" class="w-full justify-center">Get Started</Button>
+  <div id="mobile-menu" class="hidden border-t border-white/10 bg-[#11131a]/96 lg:hidden">
+    <div class="container-custom flex flex-col gap-4 py-5">
+      <nav class="flex flex-col gap-2">
+        {links.map((link) => (
+          <a
+            href={link.href}
+            class:list={[
+              'rounded-[1.25rem] border px-4 py-3 text-sm font-medium',
+              link.active
+                ? 'border-brand-600/40 bg-brand-500/14 text-white'
+                : 'border-white/8 bg-white/4 text-white/72 hover:bg-white/7 hover:text-white',
+            ]}
+          >
+            {link.label}
+          </a>
+        ))}
+      </nav>
+      <div class="flex flex-col gap-3 pt-2">
+        <Button variant="ghost" href="https://app.hosila.com/login" class="w-full">Log in</Button>
+        <Button variant="primary" href="https://app.hosila.com" class="w-full">Get Started</Button>
+      </div>
     </div>
   </div>
 </header>
+
 <script>
   const toggle = document.getElementById('mobile-menu-toggle');
   const menu = document.getElementById('mobile-menu');
+
   if (toggle && menu) {
     toggle.addEventListener('click', () => {
+      const nextExpanded = toggle.getAttribute('aria-expanded') !== 'true';
+      toggle.setAttribute('aria-expanded', String(nextExpanded));
       menu.classList.toggle('hidden');
-      menu.classList.toggle('flex');
     });
   }
 </script>

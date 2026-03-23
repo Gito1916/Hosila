@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const frequentlyAskedQuestions = [
     {
@@ -33,16 +33,16 @@ export default function FAQ() {
                 return (
                     <div
                         key={index}
-                        className="border border-border-strong rounded-2xl overflow-hidden bg-surface-base transition-colors hover:border-brand-300"
+                        className="glass-card overflow-hidden transition-colors hover:border-brand-700/40"
                     >
                         <button
                             onClick={() => setOpenIndex(isOpen ? null : index)}
-                            className="w-full flex items-center justify-between p-6 text-left"
+                            className="flex w-full items-center justify-between gap-6 p-6 text-left md:p-7"
                         >
-                            <h3 className="mb-0">
+                            <h3 className="mb-0 text-xl md:text-2xl">
                                 {faq.question}
                             </h3>
-                            <div className="text-brand-500 flex-shrink-0">
+                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-brand-800">
                                 {isOpen ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                                 ) : (
@@ -54,7 +54,7 @@ export default function FAQ() {
                             className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                                 }`}
                         >
-                            <p className="px-6 pb-6 mb-0">
+                            <p className="px-6 pb-6 mb-0 text-white/68 md:px-7 md:pb-7">
                                 {faq.answer}
                             </p>
                         </div>

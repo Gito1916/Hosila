@@ -17,7 +17,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://hosila.c
 ---
 
 <!doctype html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth bg-shell">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -46,7 +46,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://hosila.c
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={new URL(image, Astro.url)} />
   </head>
-  <body class="min-h-screen flex flex-col">
+  <body class="bg-shell min-h-screen flex flex-col text-white">
     <slot />
   </body>
 </html>

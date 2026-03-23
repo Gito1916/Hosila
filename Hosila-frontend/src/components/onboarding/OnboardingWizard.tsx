@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, ChevronRight, ChevronLeft, Check, Loader2, Copy, Settings, Mail, ShieldAlert, UserPlus } from 'lucide-react';
+import { Building2, ChevronRight, ChevronLeft, Check, Loader2, Copy, Settings, Mail, ShieldAlert, UserPlus, KeyRound } from 'lucide-react';
 import { updateHotel } from '@/db/settings';
 import { seedDatabase } from '@/utils/seedData';
 import { supabase } from '@/lib/supabase';
@@ -31,6 +31,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
     const [hotelError, setHotelError] = useState('');
 
     const [copied, setCopied] = useState(false);
+    const [hotelCode, setHotelCode] = useState('');
 
     const { autoLoginAsAdmin } = useAuthStore();
 
@@ -108,6 +109,21 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                 email: hotelEmail,
             });
 
+            // Fetch the auto-generated hotel code
+            try {
+                const hId = await getHotelId();
+                const { data: hotel } = await requireSupabase()
+                    .from('hotels')
+                    .select('hotel_code')
+                    .eq('id', hId)
+                    .single();
+                if (hotel?.hotel_code) {
+                    setHotelCode(hotel.hotel_code);
+                }
+            } catch {
+                // Non-critical — code can be found later in Settings
+            }
+
             setCurrentStep('complete');
         } catch (err: any) {
             console.error('Error saving hotel:', err);
@@ -159,14 +175,16 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
         }
     };
 
-    const handleCopyEmail = async () => {
+    const handleCopyCode = async () => {
+        const textToCopy = hotelCode;
+        if (!textToCopy) return;
         try {
-            await navigator.clipboard.writeText(accountEmail);
+            await navigator.clipboard.writeText(textToCopy);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch {
             const textArea = document.createElement('textarea');
-            textArea.value = accountEmail;
+            textArea.value = textToCopy;
             textArea.style.position = 'fixed';
             textArea.style.opacity = '0';
             document.body.appendChild(textArea);
@@ -428,22 +446,30 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
                                 </div>
                             </div>
 
-                            <div className="bg-primary-500/10 border border-primary-500/30 rounded-lg p-3 mb-4 text-sm">
-                                <p className="text-primary-400 font-medium">☁️ Cloud Account</p>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <code className="text-primary-300 text-xs flex-1">{accountEmail}</code>
-                                    <button
-                                        onClick={handleCopyEmail}
-                                        className="btn btn-secondary text-xs px-2 py-1"
-                                    >
-                                        <Copy size={14} />
-                                        {copied ? 'Copied!' : 'Copy'}
-                                    </button>
+                            {hotelCode && (
+                                <div className="bg-primary-500/10 border border-primary-500/30 rounded-lg p-3 mb-4 text-sm">
+                                    <p className="text-primary-400 font-medium flex items-center gap-2">
+                                        <KeyRound size={16} />
+                                        Your Hotel Code
+                                    </p>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <code className="text-primary-300 text-lg font-bold tracking-widest flex-1">{hotelCode}</code>
+                                        <button
+                                            onClick={handleCopyCode}
+                                            className="btn btn-secondary text-xs px-2 py-1"
+                                        >
+                                            <Copy size={14} />
+                                            {copied ? 'Copied!' : 'Copy'}
+                                        </button>
+                                    </div>
+                                    <div className="flex items-start gap-2 mt-3 bg-red-500/10 border border-red-500/30 rounded-md p-2">
+                                        <ShieldAlert size={16} className="text-red-400 shrink-0 mt-0.5" />
+                                        <p className="text-red-400 text-xs">
+                                            <strong>Keep this code secret.</strong> Staff will use it to log in to your hotel. Do not share it publicly.
+                                        </p>
+                                    </div>
                                 </div>
-                                <p className="text-xs text-muted mt-2">
-                                    Your cloud sync credentials. Keep them safe.
-                                </p>
-                            </div>
+                            )}
 
                             <div className="bg-surface-raised/50 rounded-lg p-4 mb-6">
                                 <h3 className="text-heading font-medium mb-3 flex items-center gap-2">

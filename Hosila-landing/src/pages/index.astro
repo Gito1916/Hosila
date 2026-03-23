@@ -5,401 +5,586 @@ import Footer from '../components/Footer.astro';
 import Button from '../components/Button.astro';
 import FAQ from '../components/react/FAQ.tsx';
 import FadeIn from '../components/react/FadeIn.tsx';
+
+const operations = [
+  {
+    number: '01',
+    title: 'Time saved daily',
+    description:
+      'Stop losing hours to manual tasks and disconnected systems. Hosila automates your tedious daily workflows.',
+    href: '#process',
+    cta: 'See the flow',
+  },
+  {
+    number: '02',
+    title: "Data that's clean",
+    description:
+      'One platform means one source of truth across your operation. No more reconciled spreadsheets at 2 AM.',
+    href: '#inventory',
+    cta: 'See inventory',
+  },
+  {
+    number: '03',
+    title: 'Control that works',
+    description:
+      "See what's happening in your rooms, stock, and kitchen right now from any device, anywhere.",
+    href: '#story',
+    cta: 'See the story',
+  },
+];
+
+const productCards = [
+  {
+    id: 'rooms',
+    label: 'Rooms',
+    title: 'Occupancy at a glance',
+    description: 'Monitor check-ins, check-outs, and room statuses effortlessly.',
+    image: '/images/feature_rooms.webp',
+  },
+  {
+    id: 'inventory',
+    label: 'Inventory',
+    title: 'Stock control that actually works',
+    description: 'Monitor supplies across your hotel. Know what you have and what you need.',
+    image: '/images/feature_inventory.webp',
+  },
+  {
+    id: 'restaurant',
+    label: 'Restaurant',
+    title: 'POS built for hospitality',
+    description: 'Ring up orders, track sales, and manage dining without friction.',
+    image: '/images/feature_restaurant.webp',
+  },
+];
+
+const restaurantHighlights = [
+  'Fast order processing',
+  'Real-time sales tracking',
+  'Integrated kitchen display',
+];
+
+const processSteps = [
+  {
+    step: '01',
+    label: 'Rooms',
+    title: 'Guest arrives',
+    description: 'Check them in and manage their stay with ease from the front desk.',
+    image: '/images/feature_rooms.webp',
+  },
+  {
+    step: '02',
+    label: 'Inventory',
+    title: 'Stock gets used',
+    description: 'System automatically tracks what leaves and tells you what remains.',
+    image: '/images/feature_inventory.webp',
+  },
+  {
+    step: '03',
+    label: 'Restaurant',
+    title: 'Orders flow fast',
+    description: 'Everything connects back to the guest ledger. Nothing is lost.',
+    image: '/images/feature_restaurant.webp',
+  },
+];
+
+const testimonials = [
+  {
+    quote:
+      'Hosila cut our daily closing time in half. No more spreadsheets, no more guessing. The automated night audit runs perfectly.',
+    name: 'Imoh Bassey',
+    role: 'General Manager, Neggus Hotel',
+    image: '/images/hero_main.webp',
+  },
+  {
+    quote:
+      "Our restaurant finally has visibility into what's selling and what's sitting. The numbers make sense now. A lifesaver!",
+    name: 'Elena Rodriguez',
+    role: 'F&B Director, Azure Suites',
+    image: '/images/feature_restaurant.webp',
+  },
+  {
+    quote:
+      'One system for everything means one source of truth. That changes how we run the whole operation across multiple properties.',
+    name: 'James Mitchell',
+    role: 'Owner, Coastal Hotel Group',
+    image: '/images/feature_inventory.webp',
+  },
+];
 ---
 
-<Layout title="Hotel Management Software" description="Hosila is the ultimate Hotel Management Software for Nigerian hospitality. Automate guest check-ins, manage room inventory, and run your restaurant POS in one system.">
+<Layout
+  title="Hotel Management Software"
+  description="Hosila is the ultimate Hotel Management Software for Nigerian hospitality. Automate guest check-ins, manage room inventory, and run your restaurant POS in one system."
+>
   <Navbar />
-  
-  <main class="flex-grow w-[95%] max-w-[1440px] mx-auto border-x border-border-subtle bg-surface-base relative overflow-hidden shadow-sm">
-    <!-- Hero Section -->
-    <section class="relative pt-20 pb-32 lg:pt-36 lg:pb-48 w-full flex items-center min-h-[85vh] border-b border-border">
-      <!-- Background Animation Layer -->
-      <div class="absolute inset-y-0 right-0 w-full lg:w-3/4 pointer-events-none z-0 overflow-hidden opacity-80 dark:opacity-30">
-        <!-- Removed gradient mask for clearer animation view -->
-        <img 
-          src="/images/stripe_bg.webp" 
-          alt="Abstract flowing tech background" 
-          class="absolute inset-0 w-full h-full object-cover object-right animate-slow-pan"
-        />
-      </div>
 
-      <div class="container-custom relative z-10 w-full">
-        <div class="max-w-2xl lg:max-w-3xl">
-          <FadeIn client:visible direction="none">
-            <h1>
-              Operational flow infrastructure for Hotels. Guest Check-ins, Manage Inventory, OTA bookings, Financial Analysis and Tax remittance. from your first guest to your billionth.
-            </h1>
-          </FadeIn>
-          
-          <FadeIn client:visible delay={0.2} direction="none">
-            <div class="flex flex-wrap gap-4 pt-4">
-              <Button variant="primary" href="https://app.hosila.com" class="px-8 py-3 text-lg rounded-full">Get started <span class="ml-1 font-bold">›</span></Button>
-              <Button variant="ghost" href="/contact" class="px-8 py-3 text-lg rounded-full font-semibold flex items-center gap-2">Contact sales <span class="ml-1 font-bold">›</span></Button>
-            </div>
-          </FadeIn>
-        </div>
-      </div>
-    </section>
-
-    <!-- Value Propositions Section -->
-    <section class="py-24 bg-surface-inset">
-      <FadeIn client:visible>
-      <div class="container-custom grid lg:grid-cols-2 gap-16 items-center">
-        <div class="space-y-12">
-          <!-- Feature 1 -->
-          <div class="flex gap-6">
-            <div class="mt-1 flex-shrink-0">
-              <svg class="w-8 h-8 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            </div>
-            <div>
-              <h3>Time saved daily</h3>
-              <p>Stop losing hours to manual tasks and disconnected systems. Hosila automates your tedious daily workflows.</p>
-              <a href="#" class="text-brand-500 font-semibold hover:text-brand-600 inline-flex items-center gap-1 group">
-                Explore <span class="group-hover:translate-x-1 transition-transform">→</span>
-              </a>
-            </div>
-          </div>
-          <!-- Feature 2 -->
-          <div class="flex gap-6">
-            <div class="mt-1 flex-shrink-0">
-              <svg class="w-8 h-8 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>
-            </div>
-            <div>
-              <h3>Data that's clean</h3>
-              <p>One platform means one source of truth across your operation. No more reconciled spreadsheets at 2 AM.</p>
-              <a href="#" class="text-brand-500 font-semibold hover:text-brand-600 inline-flex items-center gap-1 group">
-                Explore <span class="group-hover:translate-x-1 transition-transform">→</span>
-              </a>
-            </div>
-          </div>
-          <!-- Feature 3 -->
-          <div class="flex gap-6">
-            <div class="mt-1 flex-shrink-0">
-              <svg class="w-8 h-8 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-            </div>
-            <div>
-              <h3>Control that works</h3>
-              <p>See what's happening in your rooms, stock, and kitchen right now from any device, anywhere.</p>
-              <a href="#" class="text-brand-500 font-semibold hover:text-brand-600 inline-flex items-center gap-1 group">
-                Explore <span class="group-hover:translate-x-1 transition-transform">→</span>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div class="w-full h-full min-h-[600px] relative">
-          <img src="/images/feature_inventory.webp" class="absolute inset-0 w-full h-full object-cover rounded-3xl shadow-2xl" alt="Hotel staff member using a tablet to manage inventory" />
-        </div>
-      </div>
-      </FadeIn>
-    </section>
-
-    <!-- Feature Grid -->
-    <section class="py-24 bg-surface-base">
-      <FadeIn client:visible>
+  <main class="flex-grow overflow-x-hidden pb-6">
+    <section class="pt-8 pb-10 md:pt-10 md:pb-12">
       <div class="container-custom">
-        <div class="text-center max-w-3xl mx-auto mb-16">
-          <span class="text-brand-500 font-semibold uppercase tracking-wider text-sm">Rooms</span>
-          <h2>Room management made simple</h2>
-          <p>Track occupancy, manage bookings, and handle guest requests from a single view.</p>
-        </div>
-        
-        <div class="grid md:grid-cols-3 gap-8">
-          <!-- Card 1 -->
-          <div class="group relative h-[450px] rounded-2xl overflow-hidden shadow-lg cursor-pointer">
-            <img src="/images/feature_rooms.webp" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Spacious modern hotel room interior with a large bed" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
-            <div class="absolute bottom-0 left-0 p-8 w-full text-white">
-              <span class="text-brand-400 font-semibold text-sm uppercase tracking-wider">Rooms</span>
-              <h3 class="text-white">Occupancy at a glance</h3>
-              <p class="text-gray-300">Monitor check-ins, check-outs, and room statuses effortlessly.</p>
-              <a href="#" class="inline-flex items-center gap-2 font-medium group-hover:text-brand-400 transition-colors">
-                Explore <span>→</span>
-              </a>
+        <FadeIn client:visible direction="none">
+          <div class="panel relative overflow-hidden px-6 py-8 md:px-10 md:py-10 lg:px-12 lg:py-12">
+            <div class="absolute inset-0 pointer-events-none">
+              <div class="absolute -left-20 top-0 h-64 w-64 rounded-full bg-brand-500/15 blur-3xl"></div>
+              <div class="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-gold-500/15 blur-3xl"></div>
+            </div>
+
+            <div class="relative grid gap-10 lg:grid-cols-[1.1fr_0.95fr] lg:items-center">
+              <div class="max-w-3xl">
+                <p class="eyebrow">Hosila Landing</p>
+                <h1 class="mt-5">
+                  Operational flow infrastructure for hotels.
+                </h1>
+                <p class="mt-6 max-w-2xl text-lg text-white/68 md:text-xl">
+                  Guest check-ins, room inventory, OTA bookings, financial analysis, and tax remittance from your first guest to your billionth.
+                </p>
+
+                <div class="mt-8 flex flex-wrap gap-4">
+                  <Button variant="primary" href="https://app.hosila.com">
+                    Get started
+                    <span aria-hidden="true">-></span>
+                  </Button>
+                  <Button variant="ghost" href="/contact">
+                    Contact sales
+                    <span aria-hidden="true">-></span>
+                  </Button>
+                </div>
+
+                <div class="mt-8 flex flex-wrap gap-3">
+                  <span class="soft-pill">Guest check-ins</span>
+                  <span class="soft-pill">Inventory control</span>
+                  <span class="soft-pill">OTA bookings</span>
+                  <span class="soft-pill">Restaurant POS</span>
+                  <span class="soft-pill">Tax remittance</span>
+                </div>
+              </div>
+
+              <div class="relative min-h-[440px]">
+                <div class="absolute inset-0 overflow-hidden rounded-[2rem] border border-white/10 bg-[#0f141c] surface-ring">
+                  <img
+                    src="/images/stripe_bg.webp"
+                    alt="Abstract flowing tech background"
+                    class="absolute inset-0 h-full w-full object-cover object-right opacity-60 animate-slow-pan"
+                  />
+                  <div class="absolute inset-0 bg-[linear-gradient(155deg,rgba(17,24,34,0.08),rgba(13,17,23,0.82))]"></div>
+                </div>
+
+                <div class="relative flex h-full flex-col justify-between gap-4 p-4 md:p-6">
+                  <div class="glass-card ml-auto max-w-sm p-5 md:p-6">
+                    <p class="eyebrow">Guest flow</p>
+                    <div class="mt-4 text-2xl font-semibold text-white md:text-3xl">
+                      Check-ins, check-outs, and room status in one calm view.
+                    </div>
+                  </div>
+
+                  <div class="grid gap-4 md:grid-cols-[0.85fr_1fr]">
+                    <div class="glass-card p-5">
+                      <p class="eyebrow">Stock clarity</p>
+                      <p class="mt-4 mb-0 text-white/68">
+                        Inventory and restaurant movement stay connected, so shortages show up before service slips.
+                      </p>
+                    </div>
+
+                    <div class="glass-card overflow-hidden p-0">
+                      <img
+                        src="/images/hero_main.webp"
+                        alt="Hotel front desk staff assisting guests and managing operations"
+                        class="h-56 w-full object-cover"
+                      />
+                      <div class="p-5">
+                        <p class="eyebrow">Finance</p>
+                        <p class="mt-3 mb-0 text-white/68">
+                          Transaction flow, analysis, and tax remittance sit in the same operating layer.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <!-- Card 2 -->
-          <div class="group relative h-[450px] rounded-2xl overflow-hidden shadow-lg cursor-pointer">
-            <img src="/images/feature_inventory.webp" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Organized hotel storeroom shelves with stacked supplies" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
-            <div class="absolute bottom-0 left-0 p-8 w-full text-white">
-              <span class="text-brand-400 font-semibold text-sm uppercase tracking-wider">Inventory</span>
-              <h3 class="text-white">Stock control that actually works</h3>
-              <p class="text-gray-300">Monitor supplies across your hotel. Know what you have and what you need.</p>
-              <a href="#" class="inline-flex items-center gap-2 font-medium group-hover:text-brand-400 transition-colors">
-                Explore <span>→</span>
-              </a>
-            </div>
-          </div>
-          <!-- Card 3 -->
-          <div class="group relative h-[450px] rounded-2xl overflow-hidden shadow-lg cursor-pointer">
-            <img src="/images/feature_restaurant.webp" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Bustling hotel restaurant dining area" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
-            <div class="absolute bottom-0 left-0 p-8 w-full text-white">
-              <span class="text-brand-400 font-semibold text-sm uppercase tracking-wider">Restaurant</span>
-              <h3 class="text-white">POS built for hospitality</h3>
-              <p class="text-gray-300">Ring up orders, track sales, and manage dining without friction.</p>
-              <a href="#" class="inline-flex items-center gap-2 font-medium group-hover:text-brand-400 transition-colors">
-                Explore <span>→</span>
-              </a>
-            </div>
-          </div>
-        </div>
+        </FadeIn>
       </div>
-      </FadeIn>
     </section>
 
-    <!-- Deep Dives: Inventory -->
-    <section class="py-24 bg-surface-base">
-      <FadeIn client:visible>
-      <div class="container-custom grid lg:grid-cols-2 gap-16 items-center">
-        <div>
-          <span class="text-brand-500 font-semibold uppercase tracking-wider text-sm">Inventory</span>
-          <h2>Keep supplies organized and tracked</h2>
-          <p>
-            Monitor what moves through your hotel. See stock levels in real time and catch shortages before they become problems. Completely integrated with your restaurant and rooms.
-          </p>
-          <div class="flex gap-4 items-center">
-            <Button variant="ghost">Explore</Button>
-            <Button variant="text" class="text-textColor-heading hover:text-brand-600">Learn <span>→</span></Button>
-          </div>
-        </div>
-        <div class="relative min-h-[550px] w-full">
-          <img src="/images/feature_inventory.webp" class="absolute bottom-0 right-0 w-[85%] h-[400px] rounded-3xl object-cover shadow-2xl" alt="Organized hotel storeroom shelves with stacked supplies" />
-          <img src="/images/hero_main.webp" class="absolute top-10 left-0 w-[60%] h-[300px] rounded-3xl object-cover shadow-xl border-8 border-white" alt="Hotel staff member using a tablet to manage inventory" />
-        </div>
-      </div>
-      </FadeIn>
-    </section>
-
-    <!-- Deep Dives: Restaurant -->
-    <section class="py-24 bg-surface-inset rounded-tb-[4rem]">
-      <FadeIn client:visible>
-      <div class="container-custom grid lg:grid-cols-2 gap-16 items-center">
-        <!-- Reordered on mobile -->
-        <div class="order-2 lg:order-1 relative w-full h-[600px]">
-          <img src="/images/feature_restaurant.webp" class="absolute inset-0 w-full h-full object-cover rounded-3xl shadow-2xl" alt="Bustling hotel restaurant dining area" />
-        </div>
-        <div class="order-1 lg:order-2 lg:pl-12">
-          <span class="text-brand-500 font-semibold uppercase tracking-wider text-sm">Restaurant</span>
-          <h2>Restaurant operations without the chaos</h2>
-          <p>
-            Process orders quickly and track every transaction. Your dining operation runs smooth, your numbers stay clean.
-          </p>
-          
-          <ul class="space-y-6 mb-12">
-            <li class="flex items-center gap-4 text-textColor-heading font-medium text-lg">
-              <span class="p-2 bg-brand-100 text-brand-600 rounded-lg">
-                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-              </span>
-              Fast order processing
-            </li>
-            <li class="flex items-center gap-4 text-textColor-heading font-medium text-lg">
-              <span class="p-2 bg-brand-100 text-brand-600 rounded-lg">
-                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              </span>
-              Real-time sales tracking
-            </li>
-            <li class="flex items-center gap-4 text-textColor-heading font-medium text-lg">
-              <span class="p-2 bg-brand-100 text-brand-600 rounded-lg">
-                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-              </span>
-              Integrated kitchen display
-            </li>
-          </ul>
-
-          <div class="flex gap-4 items-center">
-            <Button variant="ghost">Explore</Button>
-            <Button variant="text" class="text-textColor-heading hover:text-brand-600">Learn <span>→</span></Button>
-          </div>
-        </div>
-      </div>
-      </FadeIn>
-    </section>
-
-    <!-- Process & Story -->
-    <section class="py-24 bg-surface-base">
-      <FadeIn client:visible>
+    <section class="py-10 md:py-12">
       <div class="container-custom">
-        <div class="text-center max-w-2xl mx-auto mb-16">
-          <span class="text-brand-500 font-semibold uppercase tracking-wider text-sm">Process</span>
-          <h2>How it works</h2>
-          <p>Three systems that move together seamlessly.</p>
-        </div>
+        <FadeIn client:visible>
+          <div class="grid gap-6 lg:grid-cols-[1fr_1.02fr]">
+            <div class="panel p-6 md:p-8 lg:p-10">
+              <p class="eyebrow">Operational Advantage</p>
+              <h2 class="mt-5 max-w-2xl">Time saved daily, clean data, and control that actually works.</h2>
+              <p class="mt-5 max-w-xl text-white/68">
+                Hosila gives hotel teams one system for daily execution instead of disconnected tools that create rework.
+              </p>
 
-        <div class="grid lg:grid-cols-3 gap-8 mb-32">
-          <!-- Step 1 -->
-          <div class="border border-border rounded-2xl p-6 bg-surface-card hover:border-brand-300 transition-colors">
-            <img src="/images/feature_rooms.webp" class="w-full h-48 object-cover rounded-xl mb-6" alt="Spacious modern hotel room interior with a large bed" />
-            <span class="text-brand-500 text-sm font-bold tracking-wider uppercase">Rooms</span>
-            <h3>Guest arrives</h3>
-            <p>Check them in and manage their stay with ease from the front desk.</p>
-            <a href="#" class="text-brand-500 font-medium inline-flex items-center gap-1">Next <span>→</span></a>
-          </div>
-          <!-- Step 2 -->
-          <div class="border border-border rounded-2xl p-6 bg-surface-card hover:border-brand-300 transition-colors">
-            <img src="/images/feature_inventory.webp" class="w-full h-48 object-cover rounded-xl mb-6" alt="Organized hotel storeroom shelves with stacked supplies" />
-            <span class="text-brand-500 text-sm font-bold tracking-wider uppercase">Inventory</span>
-            <h3>Stock gets used</h3>
-            <p>System automatically tracks what leaves and tells you what remains.</p>
-            <a href="#" class="text-brand-500 font-medium inline-flex items-center gap-1">Next <span>→</span></a>
-          </div>
-          <!-- Step 3 -->
-          <div class="border border-border rounded-2xl p-6 bg-surface-card hover:border-brand-300 transition-colors">
-            <img src="/images/feature_restaurant.webp" class="w-full h-48 object-cover rounded-xl mb-6" alt="Bustling hotel restaurant dining area" />
-            <span class="text-brand-500 text-sm font-bold tracking-wider uppercase">Restaurant</span>
-            <h3>Orders flow fast</h3>
-            <p>Everything connects back to the guest ledger. Nothing is lost.</p>
-            <a href="#" class="text-brand-500 font-medium inline-flex items-center gap-1">Done <span>→</span></a>
-          </div>
-        </div>
+              <div class="mt-8 space-y-4">
+                {operations.map((operation) => (
+                  <div class="glass-card p-5 md:p-6">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                      <div class="max-w-lg">
+                        <div class="eyebrow">{operation.number}</div>
+                        <h3 class="mt-3">{operation.title}</h3>
+                        <p class="mt-3 mb-0 text-white/66">{operation.description}</p>
+                      </div>
+                      <a
+                        href={operation.href}
+                        class="inline-flex items-center gap-2 text-sm font-semibold text-brand-800 hover:text-white"
+                      >
+                        {operation.cta}
+                        <span aria-hidden="true">-></span>
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-        <!-- Story Split -->
-        <div class="grid lg:grid-cols-2 gap-16 items-center">
-          <div>
-            <span class="text-brand-500 font-semibold uppercase tracking-wider text-sm">Story</span>
-            <h2>Built by people who run hotels</h2>
-            <p>
-              Hosila came from watching hoteliers waste time switching between systems. We built one platform that handles rooms, inventory, and restaurants the way they actually work.
-            </p>
-            <div class="flex gap-4 items-center">
-              <Button variant="ghost">Contact</Button>
-              <Button variant="text" class="text-textColor-heading hover:text-brand-600">Learn <span>→</span></Button>
+            <div class="panel overflow-hidden p-3 md:p-4">
+              <div class="relative h-full min-h-[540px] overflow-hidden rounded-[1.7rem]">
+                <img
+                  src="/images/feature_inventory.webp"
+                  alt="Hotel staff member using a tablet to manage inventory"
+                  class="absolute inset-0 h-full w-full object-cover"
+                />
+                <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,14,20,0.08),rgba(10,14,20,0.82))]"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+                  <div class="glass-card max-w-xl p-5 md:p-6">
+                    <p class="eyebrow">One source of truth</p>
+                    <h3 class="mt-3">Rooms, stock, restaurant, and finance stay in the same operating picture.</h3>
+                    <p class="mt-3 mb-0 text-white/68">
+                      That is how teams move faster during service and how owners stop waiting for end-of-day guesswork.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="relative min-h-[500px] w-full mt-10 lg:mt-0">
-            <img src="/images/hero_main.webp" class="absolute bottom-0 right-0 w-3/4 h-auto rounded-3xl object-cover shadow-2xl" alt="Hotel front desk staff assisting guests and managing operations" />
-            <img src="/images/feature_rooms.webp" class="absolute top-10 left-0 w-2/5 h-auto rounded-3xl object-cover shadow-lg border-8 border-white" alt="Spacious modern hotel room interior with a large bed" />
-          </div>
-        </div>
+        </FadeIn>
       </div>
-      </FadeIn>
     </section>
 
-    <!-- Testimonials -->
-    <section class="py-24 bg-brand-500 text-white rounded-t-[0rem] relative overflow-hidden">
-      <FadeIn client:visible>
-      <!-- Decor -->
-      <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-brand-400 rounded-full blur-3xl opacity-50"></div>
-      
-      <div class="container-custom relative z-10 text-center max-w-3xl mx-auto mb-16">
-        <h2>Real stories</h2>
-        <p class="text-brand-50">Look at how hoteliers trust Hosila to run their essential operations.</p>
-      </div>
-      
-      <div class="container-custom grid md:grid-cols-3 gap-8 pb-12">
-        <!-- Review 1 -->
-        <div class="p-8 rounded-2xl border border-brand-400/30 bg-white/10 backdrop-blur-md">
-          <div class="flex gap-1 mb-6 text-yellow-300">
-            {"★★★★★"}
-          </div>
-          <p class="text-white">&quot;Hosila cut our daily closing time in half. No more spreadsheets, no more guessing. The automated night audit runs perfectly.&quot;</p>
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-white rounded-full overflow-hidden flex-shrink-0">
-              <img src="/images/hero_main.webp" alt="Imoh Bassey" class="w-full h-full object-cover grayscale" />
-            </div>
-            <div>
-              <h4 class="font-medium text-white">Imoh Bassey</h4>
-              <p class="text-brand-100">General Manager, Neggus Hotel</p>
-            </div>
-          </div>
-        </div>
-        <!-- Review 2 -->
-        <div class="p-8 rounded-2xl border border-brand-400/30 bg-white/10 backdrop-blur-md">
-          <div class="flex gap-1 mb-6 text-yellow-300">
-            {"★★★★★"}
-          </div>
-          <p class="text-white">&quot;Our restaurant finally has visibility into what's selling and what's sitting. The numbers make sense now. A lifesaver!&quot;</p>
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-white rounded-full overflow-hidden flex-shrink-0">
-              <img src="/images/feature_restaurant.webp" alt="Elena Rodriguez" class="w-full h-full object-cover grayscale" />
-            </div>
-            <div>
-              <h4 class="font-medium text-white">Elena Rodriguez</h4>
-              <p class="text-brand-100">F&B Director, Azure Suites</p>
-            </div>
-          </div>
-        </div>
-        <!-- Review 3 -->
-        <div class="p-8 rounded-2xl border border-brand-400/30 bg-white/10 backdrop-blur-md">
-          <div class="flex gap-1 mb-6 text-yellow-300">
-            {"★★★★★"}
-          </div>
-          <p class="text-white">&quot;One system for everything means one source of truth. That changes how we run the whole operation across multiple properties.&quot;</p>
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-white rounded-full overflow-hidden flex-shrink-0">
-              <img src="/images/feature_inventory.webp" alt="James Mitchell" class="w-full h-full object-cover grayscale" />
-            </div>
-            <div>
-              <h4 class="font-medium text-white">James Mitchell</h4>
-              <p class="text-brand-100">Owner, Coastal Hotel Group</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      </FadeIn>
-    </section>
-
-    <!-- FAQ & CTA Sections -->
-    <section class="py-24 bg-surface-base">
-      <FadeIn client:visible>
-      <div class="container-custom mb-32">
-        <div class="grid lg:grid-cols-[1fr_2fr] gap-16 lg:gap-24">
-          <div class="lg:sticky lg:top-32 h-fit">
-            <h2>Questions</h2>
-            <p>Everything you need to know about getting started with Hosila securely and seamlessly.</p>
-            <Button variant="ghost" href="/contact">Contact Us</Button>
-          </div>
-          <div>
-            <!-- React Component requires client:load directly to hydrate client-side JS -->
-            <FAQ client:load />
-          </div>
-        </div>
-      </div>
-
-      <!-- Built-in CTA Section -->
+    <section class="py-10 md:py-12">
       <div class="container-custom">
-        <div class="rounded-[2.5rem] bg-surface-card border border-border overflow-hidden shadow-2xl flex flex-col md:flex-row">
-          <div class="p-12 lg:p-20 md:w-1/2 flex flex-col justify-center">
-            <h2>Ready to run better</h2>
-            <p>See how Hosila transforms the way you manage your entire hotel operation. From booking to checkout.</p>
-            <div class="flex flex-wrap gap-4">
-              <Button variant="primary" href="https://app.hosila.com">Get Started</Button>
-              <Button variant="ghost" href="/contact">Schedule demo</Button>
+        <FadeIn client:visible>
+          <div class="panel p-6 md:p-8 lg:p-10">
+            <div class="mx-auto max-w-3xl text-center">
+              <p class="eyebrow justify-center">Product Surfaces</p>
+              <h2 class="mt-5">Room management, stock control, and restaurant flow in one shared shell.</h2>
+              <p class="mt-5 text-white/66">
+                Every core operating area stays connected, so the guest journey and the back office tell the same story.
+              </p>
+            </div>
+
+            <div class="mt-10 grid gap-6 md:grid-cols-3">
+              {productCards.map((card) => (
+                <article
+                  id={card.id}
+                  class="group relative min-h-[420px] overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/4"
+                >
+                  <img
+                    src={card.image}
+                    alt={card.title}
+                    class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,12,18,0.06),rgba(9,12,18,0.9))]"></div>
+                  <div class="absolute inset-0 flex flex-col justify-end p-6">
+                    <span class="soft-pill w-fit">{card.label}</span>
+                    <h3 class="mt-4">{card.title}</h3>
+                    <p class="mt-3 mb-0 text-white/70">{card.description}</p>
+                    <a href="/contact" class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-800 hover:text-white">
+                      Explore
+                      <span aria-hidden="true">-></span>
+                    </a>
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
-          <div class="md:w-1/2 min-h-[400px]">
-            <img src="/images/feature_rooms.webp" class="w-full h-full object-cover" alt="Spacious modern hotel room interior with a large bed" />
+        </FadeIn>
+      </div>
+    </section>
+
+    <section id="inventory" class="py-10 md:py-12">
+      <div class="container-custom">
+        <FadeIn client:visible>
+          <div class="panel p-6 md:p-8 lg:p-10">
+            <div class="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+              <div>
+                <p class="eyebrow">Inventory</p>
+                <h2 class="mt-5">Keep supplies organized and tracked.</h2>
+                <p class="mt-5 max-w-xl text-white/68">
+                  Monitor what moves through your hotel. See stock levels in real time and catch shortages before they become problems. Completely integrated with your restaurant and rooms.
+                </p>
+                <div class="mt-8 flex flex-wrap gap-4">
+                  <Button variant="ghost" href="/contact">Explore</Button>
+                  <Button variant="text" href="/pricing">
+                    Learn
+                    <span aria-hidden="true">-></span>
+                  </Button>
+                </div>
+              </div>
+
+              <div class="relative min-h-[500px]">
+                <div class="absolute inset-y-10 right-0 w-[84%] overflow-hidden rounded-[1.8rem] border border-white/10 shadow-panel">
+                  <img
+                    src="/images/feature_inventory.webp"
+                    alt="Organized hotel storeroom shelves with stacked supplies"
+                    class="h-full w-full object-cover"
+                  />
+                </div>
+                <div class="absolute left-0 top-0 w-[58%] overflow-hidden rounded-[1.8rem] border border-white/10 shadow-panel">
+                  <img
+                    src="/images/hero_main.webp"
+                    alt="Hotel staff member using a tablet to manage inventory"
+                    class="h-[280px] w-full object-cover"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </FadeIn>
       </div>
-      </FadeIn>
     </section>
 
-    <!-- Newsletter -->
-    <section class="py-24 bg-surface-inset border-t border-border-strong">
-      <FadeIn client:visible>
-      <div class="container-custom max-w-3xl text-center">
-        <h2>Stay in the loop</h2>
-        <p>Get updates on new features and hotel management insights delivered directly to your inbox every month.</p>
-        
-        <form id="newsletter-form" class="flex flex-col sm:flex-row max-w-xl mx-auto gap-4">
-          <input 
-            type="email" 
-            placeholder="Enter your email" 
-            class="flex-grow px-6 py-4 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white shadow-sm font-medium"
-            required
-          />
-          <Button variant="primary" class="py-4 whitespace-nowrap px-8">Subscribe</Button>
-        </form>
-        <p>We respect your inbox. Unsubscribe anytime.</p>
+    <section id="restaurant" class="py-10 md:py-12">
+      <div class="container-custom">
+        <FadeIn client:visible>
+          <div class="panel p-6 md:p-8 lg:p-10">
+            <div class="grid gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
+              <div class="order-2 lg:order-1">
+                <div class="overflow-hidden rounded-[1.8rem] border border-white/10 shadow-panel">
+                  <img
+                    src="/images/feature_restaurant.webp"
+                    alt="Bustling hotel restaurant dining area"
+                    class="h-[520px] w-full object-cover"
+                  />
+                </div>
+              </div>
+
+              <div class="order-1 lg:order-2 lg:pl-4">
+                <p class="eyebrow">Restaurant</p>
+                <h2 class="mt-5">Restaurant operations without the chaos.</h2>
+                <p class="mt-5 text-white/68">
+                  Process orders quickly and track every transaction. Your dining operation runs smooth, your numbers stay clean.
+                </p>
+
+                <ul class="mt-8 space-y-4">
+                  {restaurantHighlights.map((item) => (
+                    <li class="glass-card flex items-center gap-4 px-5 py-4">
+                      <span class="flex h-11 w-11 items-center justify-center rounded-2xl border border-brand-700/30 bg-brand-500/12 text-brand-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M20 6 9 17l-5-5"></path>
+                        </svg>
+                      </span>
+                      <span class="text-lg font-medium text-white">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div class="mt-8 flex flex-wrap gap-4">
+                  <Button variant="ghost" href="/contact">Explore</Button>
+                  <Button variant="text" href="/pricing">
+                    Learn
+                    <span aria-hidden="true">-></span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
       </div>
-      </FadeIn>
     </section>
 
+    <section id="process" class="py-10 md:py-12">
+      <div class="container-custom">
+        <FadeIn client:visible>
+          <div class="panel p-6 md:p-8 lg:p-10">
+            <div class="mx-auto max-w-2xl text-center">
+              <p class="eyebrow justify-center">Process</p>
+              <h2 class="mt-5">How it works.</h2>
+              <p class="mt-5 text-white/66">Three systems that move together seamlessly.</p>
+            </div>
+
+            <div class="mt-10 grid gap-6 lg:grid-cols-3">
+              {processSteps.map((step) => (
+                <article class="glass-card overflow-hidden p-4 md:p-5">
+                  <img
+                    src={step.image}
+                    alt={step.title}
+                    class="h-52 w-full rounded-[1.4rem] object-cover"
+                  />
+                  <div class="mt-5">
+                    <div class="eyebrow">{step.step} {step.label}</div>
+                    <h3 class="mt-3">{step.title}</h3>
+                    <p class="mt-3 mb-0 text-white/66">{step.description}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+
+    <section id="story" class="py-10 md:py-12">
+      <div class="container-custom">
+        <FadeIn client:visible>
+          <div class="panel p-6 md:p-8 lg:p-10">
+            <div class="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+              <div>
+                <p class="eyebrow">Story</p>
+                <h2 class="mt-5">Built by people who run hotels.</h2>
+                <p class="mt-5 max-w-xl text-white/68">
+                  Hosila came from watching hoteliers waste time switching between systems. We built one platform that handles rooms, inventory, and restaurants the way they actually work.
+                </p>
+                <div class="mt-8 flex flex-wrap gap-4">
+                  <Button variant="ghost" href="/contact">Contact</Button>
+                  <Button variant="text" href="/blog">
+                    Learn
+                    <span aria-hidden="true">-></span>
+                  </Button>
+                </div>
+              </div>
+
+              <div class="relative min-h-[500px]">
+                <div class="absolute bottom-0 right-0 w-[76%] overflow-hidden rounded-[1.8rem] border border-white/10 shadow-panel">
+                  <img
+                    src="/images/hero_main.webp"
+                    alt="Hotel front desk staff assisting guests and managing operations"
+                    class="w-full object-cover"
+                  />
+                </div>
+                <div class="absolute left-0 top-10 w-[42%] overflow-hidden rounded-[1.8rem] border border-white/10 shadow-panel">
+                  <img
+                    src="/images/feature_rooms.webp"
+                    alt="Spacious modern hotel room interior with a large bed"
+                    class="w-full object-cover"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+
+    <section class="py-10 md:py-12">
+      <div class="container-custom">
+        <FadeIn client:visible>
+          <div class="panel relative overflow-hidden px-6 py-8 md:px-8 md:py-10 lg:px-10">
+            <div class="absolute right-0 top-0 h-72 w-72 translate-x-16 -translate-y-16 rounded-full bg-brand-500/14 blur-3xl"></div>
+            <div class="relative">
+              <div class="mx-auto max-w-3xl text-center">
+                <p class="eyebrow justify-center">Real stories</p>
+                <h2 class="mt-5">Look at how hoteliers trust Hosila to run essential operations.</h2>
+              </div>
+
+              <div class="mt-10 grid gap-6 md:grid-cols-3">
+                {testimonials.map((item) => (
+                  <article class="glass-card p-6 md:p-7">
+                    <div class="text-sm tracking-[0.32em] text-gold-400">&starf;&starf;&starf;&starf;&starf;</div>
+                    <p class="mt-5 mb-0 text-white/72">"{item.quote}"</p>
+                    <div class="mt-6 flex items-center gap-4">
+                      <div class="h-12 w-12 overflow-hidden rounded-full border border-white/12">
+                        <img src={item.image} alt={item.name} class="h-full w-full object-cover grayscale" />
+                      </div>
+                      <div>
+                        <div class="font-medium text-white">{item.name}</div>
+                        <div class="text-sm text-white/50">{item.role}</div>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+
+    <section id="faq" class="py-10 md:py-12">
+      <div class="container-custom">
+        <FadeIn client:visible>
+          <div class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+            <div class="panel p-6 md:p-8 lg:sticky lg:top-28 lg:h-fit">
+              <p class="eyebrow">Questions</p>
+              <h2 class="mt-5">Everything you need to know to get started securely and seamlessly.</h2>
+              <p class="mt-5 text-white/66">
+                We help teams move from disconnected hotel operations into one connected system without slowing the front desk down.
+              </p>
+              <div class="mt-8">
+                <Button variant="ghost" href="/contact">Contact Us</Button>
+              </div>
+            </div>
+
+            <div class="panel p-4 md:p-5">
+              <FAQ client:load />
+            </div>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+
+    <section class="py-10 md:py-12">
+      <div class="container-custom">
+        <FadeIn client:visible>
+          <div class="panel overflow-hidden">
+            <div class="grid gap-0 md:grid-cols-[1fr_0.95fr]">
+              <div class="p-6 md:p-10 lg:p-12">
+                <p class="eyebrow">Ready to run better</p>
+                <h2 class="mt-5">See how Hosila transforms the way you manage your hotel operation.</h2>
+                <p class="mt-5 max-w-xl text-white/66">
+                  From booking to checkout, every core workflow lives in one connected operating surface.
+                </p>
+                <div class="mt-8 flex flex-wrap gap-4">
+                  <Button variant="primary" href="https://app.hosila.com">Get Started</Button>
+                  <Button variant="ghost" href="/contact">Schedule demo</Button>
+                </div>
+              </div>
+              <div class="min-h-[360px] md:min-h-full">
+                <img
+                  src="/images/feature_rooms.webp"
+                  alt="Spacious modern hotel room interior with a large bed"
+                  class="h-full w-full object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
+
+    <section class="py-10 md:py-12">
+      <div class="container-custom">
+        <FadeIn client:visible>
+          <div class="panel px-6 py-8 md:px-8 md:py-10">
+            <div class="mx-auto max-w-3xl text-center">
+              <p class="eyebrow justify-center">Stay in the loop</p>
+              <h2 class="mt-5">Get updates on new features and hotel management insights every month.</h2>
+              <p class="mt-5 text-white/66">
+                Product updates, operating ideas, and hospitality lessons delivered directly to your inbox.
+              </p>
+            </div>
+
+            <form id="newsletter-form" class="mx-auto mt-8 flex max-w-2xl flex-col gap-4 sm:flex-row">
+              <label class="field flex-1">
+                <span>Email</span>
+                <input type="email" placeholder="Enter your email" required />
+              </label>
+              <div class="flex items-end">
+                <Button variant="primary" class="w-full sm:w-auto">Subscribe</Button>
+              </div>
+            </form>
+            <p class="mt-4 text-center text-sm text-white/45">We respect your inbox. Unsubscribe anytime.</p>
+          </div>
+        </FadeIn>
+      </div>
+    </section>
   </main>
-  
+
   <Footer />
 </Layout>
+
 <script>
   document.getElementById('newsletter-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -409,12 +594,20 @@ import FadeIn from '../components/react/FadeIn.tsx';
 
 <style is:global>
   @keyframes slowPan {
-    0% { transform: scale(1.1) translate(0, 0); }
-    50% { transform: scale(1.2) translate(-5%, 3%); }
-    100% { transform: scale(1.1) translate(0, 0); }
+    0% {
+      transform: scale(1.08) translate(0, 0);
+    }
+
+    50% {
+      transform: scale(1.18) translate(-4%, 3%);
+    }
+
+    100% {
+      transform: scale(1.08) translate(0, 0);
+    }
   }
+
   .animate-slow-pan {
     animation: slowPan 12s ease-in-out infinite;
   }
 </style>
-
