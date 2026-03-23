@@ -195,10 +195,10 @@ async def list_hotels(
         text(
             """
             SELECT
-                h.id AS hotel_id,
+                CAST(h.id AS text) AS hotel_id,
                 h.name AS hotel_name,
                 h.hotel_code,
-                o.id AS org_id,
+                CAST(o.id AS text) AS org_id,
                 o.name AS org_name,
                 hs.plan_code,
                 COALESCE(hs.status, 'inactive') AS status,
