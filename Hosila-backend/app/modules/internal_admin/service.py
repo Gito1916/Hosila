@@ -167,18 +167,18 @@ async def list_hotels(
             LEFT JOIN organisations o ON o.id = h.org_id
             LEFT JOIN hotel_subscriptions hs ON hs.hotel_id = h.id
             WHERE (
-                :like_query IS NULL
+                CAST(:like_query AS text) IS NULL
                 OR h.name ILIKE :like_query
                 OR CAST(h.id AS text) ILIKE :like_query
                 OR COALESCE(h.hotel_code, '') ILIKE :like_query
                 OR COALESCE(o.name, '') ILIKE :like_query
             )
               AND (
-                :status IS NULL
+                CAST(:status AS text) IS NULL
                 OR COALESCE(hs.status, 'inactive') = :status
             )
               AND (
-                :plan_code IS NULL
+                CAST(:plan_code AS text) IS NULL
                 OR COALESCE(hs.plan_code, 'starter') = :plan_code
             )
             """
@@ -211,18 +211,18 @@ async def list_hotels(
             LEFT JOIN organisations o ON o.id = h.org_id
             LEFT JOIN hotel_subscriptions hs ON hs.hotel_id = h.id
             WHERE (
-                :like_query IS NULL
+                CAST(:like_query AS text) IS NULL
                 OR h.name ILIKE :like_query
                 OR CAST(h.id AS text) ILIKE :like_query
                 OR COALESCE(h.hotel_code, '') ILIKE :like_query
                 OR COALESCE(o.name, '') ILIKE :like_query
             )
               AND (
-                :status IS NULL
+                CAST(:status AS text) IS NULL
                 OR COALESCE(hs.status, 'inactive') = :status
             )
               AND (
-                :plan_code IS NULL
+                CAST(:plan_code AS text) IS NULL
                 OR COALESCE(hs.plan_code, 'starter') = :plan_code
             )
             ORDER BY COALESCE(hs.updated_at, h.created_at) DESC, h.name ASC
