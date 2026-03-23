@@ -324,8 +324,8 @@ async def ensure_subscription_row(db: AsyncSession, hotel_id: str) -> dict[str, 
                 'monthly',
                 'NGN',
                 0,
-                :feature_entitlements::jsonb,
-                '{}'::jsonb
+                CAST(:feature_entitlements AS jsonb),
+                CAST('{}' AS jsonb)
             )
             ON CONFLICT (hotel_id) DO NOTHING
             RETURNING id
@@ -555,7 +555,7 @@ async def insert_ledger_entry(
                 :due_at,
                 :effective_at,
                 :notes,
-                :metadata::jsonb,
+                CAST(:metadata AS jsonb),
                 :created_by
             )
             """
@@ -610,8 +610,8 @@ async def insert_platform_audit(
                 :action,
                 :entity_type,
                 :entity_id,
-                :request_payload::jsonb,
-                :result_payload::jsonb
+                CAST(:request_payload AS jsonb),
+                CAST(:result_payload AS jsonb)
             )
             """
         ),
@@ -642,27 +642,34 @@ async def get_hotel_detail(db: AsyncSession, hotel_id: str) -> HotelDetailRespon
     recent_audit = await list_audit_entries(db, hotel_id, limit=25)
 
     # Compute real-time enforcement state via SQL helpers
-    eff_status_result = await db.execute(
-        text("SELECT effective_subscription_status(:hid::uuid)"),
-        {"hid": hotel_id},
-    )
-    eff_status = eff_status_result.scalar() or "inactive"
+    # These functions may not be deployed yet, so fall back gracefully
+    try:
+        eff_status_result = await db.execute(
+            text("SELECT effective_subscription_status(CAST(:hid AS uuid))"),
+            {"hid": hotel_id},
+        )
+        eff_status = eff_status_result.scalar() or "inactive"
+    except Exception:
+        eff_status = subscription.get("status", "inactive")
 
-    write_mode_result = await db.execute(
-        text("SELECT subscription_write_mode(:hid::uuid)"),
-        {"hid": hotel_id},
-    )
-    write_mode = write_mode_result.scalar() or "blocked"
+    try:
+        write_mode_result = await db.execute(
+            text("SELECT subscription_write_mode(CAST(:hid AS uuid))"),
+            {"hid": hotel_id},
+        )
+        write_mode = write_mode_result.scalar() or "blocked"
+    except Exception:
+        write_mode = "normal" if eff_status in ("active", "trialing") else "blocked"
 
     # Usage metrics
     rooms_used_result = await db.execute(
-        text("SELECT count(*) FROM rooms WHERE hotel_id = :hid::uuid"),
+        text("SELECT count(*) FROM rooms WHERE hotel_id = CAST(:hid AS uuid)"),
         {"hid": hotel_id},
     )
     rooms_used = rooms_used_result.scalar() or 0
 
     active_bookings_result = await db.execute(
-        text("SELECT count(*) FROM bookings WHERE hotel_id = :hid::uuid AND status = 'active'"),
+        text("SELECT count(*) FROM bookings WHERE hotel_id = CAST(:hid AS uuid) AND status = 'active'"),
         {"hid": hotel_id},
     )
     active_bookings = active_bookings_result.scalar() or 0
@@ -753,7 +760,7 @@ async def start_trial(
                 current_period_starts_at = :starts_at,
                 current_period_ends_at = :trial_ends_at,
                 next_due_at = :trial_ends_at,
-                feature_entitlements = :feature_entitlements::jsonb,
+                feature_entitlements = CAST(:feature_entitlements AS jsonb),
                 notes = :notes
             WHERE id = :subscription_id
             """
@@ -842,7 +849,7 @@ async def activate_plan(
                 next_due_at = :period_ends_at,
                 last_payment_at = :paid_at,
                 last_payment_amount = :amount_paid,
-                feature_entitlements = :feature_entitlements::jsonb,
+                feature_entitlements = CAST(:feature_entitlements AS jsonb),
                 notes = :notes
             WHERE id = :subscription_id
             """
@@ -955,7 +962,7 @@ async def renew_plan(
                 next_due_at = :period_ends_at,
                 last_payment_at = :paid_at,
                 last_payment_amount = :amount_paid,
-                feature_entitlements = :feature_entitlements::jsonb,
+                feature_entitlements = CAST(:feature_entitlements AS jsonb),
                 notes = :notes
             WHERE id = :subscription_id
             """
@@ -1123,7 +1130,7 @@ async def add_override(
                 :subscription_id,
                 :feature_key,
                 :override_mode,
-                :value::jsonb,
+                CAST(:value AS jsonb),
                 :reason,
                 :starts_at,
                 :ends_at,
