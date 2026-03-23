@@ -650,6 +650,7 @@ async def get_hotel_detail(db: AsyncSession, hotel_id: str) -> HotelDetailRespon
         )
         eff_status = eff_status_result.scalar() or "inactive"
     except Exception:
+        await db.rollback()
         eff_status = subscription.get("status", "inactive")
 
     try:
@@ -659,6 +660,7 @@ async def get_hotel_detail(db: AsyncSession, hotel_id: str) -> HotelDetailRespon
         )
         write_mode = write_mode_result.scalar() or "blocked"
     except Exception:
+        await db.rollback()
         write_mode = "normal" if eff_status in ("active", "trialing") else "blocked"
 
     # Usage metrics
