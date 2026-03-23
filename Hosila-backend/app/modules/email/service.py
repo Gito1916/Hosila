@@ -271,7 +271,7 @@ class EmailService:
                     (hotel_id, guest_id, booking_id, reservation_id, email_type,
                      recipient_email, subject, status, provider_response, error_message)
                     VALUES (:hotel_id, :guest_id, :booking_id, :reservation_id, :email_type,
-                            :recipient_email, :subject, :status, :provider_response::jsonb, :error_message)
+                            :recipient_email, :subject, :status, CAST(:provider_response AS jsonb), :error_message)
                 """),
                 {
                     "hotel_id": hotel_id,

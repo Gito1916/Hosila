@@ -127,7 +127,7 @@ async def get_tenant(
         mp_result = await db.execute(
             text("""
                 SELECT 1 FROM hotel_subscriptions
-                WHERE hotel_id = ANY(:ids::uuid[])
+                WHERE hotel_id = ANY(CAST(:ids AS uuid[]))
                   AND (feature_entitlements->>'multi_property')::boolean = true
                 LIMIT 1
             """),

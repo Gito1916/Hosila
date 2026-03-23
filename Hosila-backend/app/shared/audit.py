@@ -32,7 +32,7 @@ async def write_audit_log(
     await db.execute(
         text("""
             INSERT INTO audit_logs (hotel_id, user_id, action, entity_type, entity_id, details)
-            VALUES (:hotel_id, :user_id, :action, :entity_type, :entity_id, :details::jsonb)
+            VALUES (:hotel_id, :user_id, :action, :entity_type, :entity_id, CAST(:details AS jsonb))
         """),
         {
             "hotel_id": hotel_id,

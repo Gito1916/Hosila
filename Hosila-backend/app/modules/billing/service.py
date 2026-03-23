@@ -198,7 +198,7 @@ async def generate_invoice(
                                   guest_name, guest_phone, items,
                                   subtotal, tax, total, status)
             VALUES (:id, :hotel_id, :booking_id, :invoice_number,
-                    :guest_name, :guest_phone, :items::jsonb,
+                    :guest_name, :guest_phone, CAST(:items AS jsonb),
                     :subtotal, :tax, :total, :status)
         """),
         {

@@ -113,7 +113,7 @@ async def store_idempotency(
     await db.execute(
         text("""
             UPDATE idempotency_keys
-            SET response_data = :response_data::jsonb
+            SET response_data = CAST(:response_data AS jsonb)
             WHERE hotel_id = :hotel_id AND key = :key
         """),
         {

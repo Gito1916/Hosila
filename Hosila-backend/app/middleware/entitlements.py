@@ -29,7 +29,7 @@ def require_feature(feature_key: str):
         db: AsyncSession = Depends(get_db),
     ) -> TenantContext:
         result = await db.execute(
-            text("SELECT has_feature(:hid::uuid, :key)"),
+            text("SELECT has_feature(CAST(:hid AS uuid), :key)"),
             {"hid": tenant.hotel_id, "key": feature_key},
         )
         allowed = result.scalar()
@@ -61,7 +61,7 @@ def require_writable(*, allow_restricted: bool = False):
         db: AsyncSession = Depends(get_db),
     ) -> TenantContext:
         result = await db.execute(
-            text("SELECT subscription_write_mode(:hid::uuid)"),
+            text("SELECT subscription_write_mode(CAST(:hid AS uuid))"),
             {"hid": tenant.hotel_id},
         )
         mode = result.scalar() or "blocked"
@@ -107,7 +107,7 @@ async def get_subscription_context(
                 (SELECT COUNT(*) FROM bookings b WHERE b.hotel_id = hs.hotel_id AND b.status = 'active')
                     AS active_bookings
             FROM hotel_subscriptions hs
-            WHERE hs.hotel_id = :hid::uuid
+            WHERE hs.hotel_id = CAST(:hid AS uuid)
         """),
         {"hid": tenant.hotel_id},
     )

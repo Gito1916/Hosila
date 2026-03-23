@@ -178,7 +178,7 @@ async def get_accommodation_daily_summary(
         text("""
             WITH date_spine AS (
                 SELECT d::date AS day
-                FROM generate_series(:start_date::date, :end_date::date, '1 day') AS d
+                FROM generate_series(CAST(:start_date AS date), CAST(:end_date AS date), '1 day') AS d
             ),
             daily_rooms AS (
                 SELECT ds.day,
