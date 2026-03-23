@@ -75,8 +75,8 @@ function UpgradePrompt({ feature }: { feature: string }) {
                 maxWidth: '480px',
                 padding: '3rem 2rem',
                 borderRadius: '16px',
-                background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
-                color: '#e0e7ff',
+                background: 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%)',
+                color: '#fecaca',
                 boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
             }}>
                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
@@ -93,7 +93,7 @@ function UpgradePrompt({ feature }: { feature: string }) {
                         display: 'inline-block',
                         padding: '0.75rem 2rem',
                         borderRadius: '8px',
-                        background: '#6366f1',
+                        background: '#dc2626',
                         color: '#fff',
                         textDecoration: 'none',
                         fontWeight: 600,
@@ -121,8 +121,8 @@ function RestrictedPrompt() {
                 maxWidth: '480px',
                 padding: '3rem 2rem',
                 borderRadius: '16px',
-                background: 'linear-gradient(135deg, #78350f 0%, #92400e 100%)',
-                color: '#fef3c7',
+                background: 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%)',
+                color: '#fecaca',
                 boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
             }}>
                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
@@ -139,8 +139,8 @@ function RestrictedPrompt() {
                         display: 'inline-block',
                         padding: '0.75rem 2rem',
                         borderRadius: '8px',
-                        background: '#f59e0b',
-                        color: '#1c1917',
+                        background: '#dc2626',
+                        color: '#fff',
                         textDecoration: 'none',
                         fontWeight: 600,
                     }}
